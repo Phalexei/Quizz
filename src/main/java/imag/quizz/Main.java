@@ -1,4 +1,4 @@
-package com.github.phalexei.cloudquizz;
+package imag.quizz;
 
 /**
  *
