@@ -1,4 +1,6 @@
 package imag.quizz.client.ui;
+import imag.quizz.common.network.SocketHandler;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -21,7 +23,7 @@ public class Window {
 	private final JTextPane questionTextPane;
 	private final JTextArea logsTextArea;
 
-	public Window() {
+	public Window(final SocketHandler handler) {
 		this.topLeftButton = new JButton("Oui");
 		this.topRightButton = new JButton("Non");
 		this.bottomLeftButton = new JButton("Peut-être");
@@ -34,7 +36,8 @@ public class Window {
 
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				System.out.println("" + random.nextInt());
+				System.out.println("PING");
+				handler.write("PING\n");
 			}
 		};
 		this.topLeftButton.addActionListener(a);

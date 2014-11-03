@@ -18,6 +18,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
 		try {
 			while ((mes = this.reader.readLine()) != null) {
 				// TODO Handle packet 'mes'
+				System.out.println("PONG");
 			}
 		} catch (final SocketTimeoutException ignored) {
 			// readLine() Timeout
