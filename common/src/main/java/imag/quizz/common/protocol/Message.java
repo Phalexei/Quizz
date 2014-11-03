@@ -1,4 +1,4 @@
-package imag.quizz.common.network;
+package imag.quizz.common.protocol;
 
 /**
  *
