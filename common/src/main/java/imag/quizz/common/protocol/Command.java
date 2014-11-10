@@ -99,8 +99,8 @@ public enum Command {
      * [CS] Sent by Clients to create a new game. Can contain a user name,
      * in which case a new game will start against that opponent if it
      * exists, or be empty to select a random opponent.
-     * If the provided user name doesn't exist, the Client receives a {@link
-     * #NOK}.
+     * If the provided user name doesn't exist or if there is no opponent,
+     * the Client receives a {@link #NOK}.
      */
     NEW,
 
@@ -154,7 +154,8 @@ public enum Command {
     WAIT,
 
     /**
-     * [B][CS] User give up the game. Contains game ID.
+     * [B][CS] User give up the game. Contains user login and game ID,
+     * separated by {@link Code#LEVEL_1_SEPARATOR}.
      */
     DROP,
 
@@ -162,5 +163,5 @@ public enum Command {
      * [SC] Game has ended, Server sends user score and opponent score (in
      * this order) to Client separated by {@link Code#LEVEL_1_SEPARATOR}s.
      */
-    END,;
+    END,
 }
