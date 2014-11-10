@@ -70,13 +70,15 @@ public enum Command {
 
     /**
      * [B][CS] Client registration message.
-     * Contains login and password's hash, separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * Contains login and password's hash, separated by
+     * {@link Code#LEVEL_1_SEPARATOR}s.
      */
     REGISTER,
 
     /**
      * [B][CS] Client login message.
-     * Contains login and password's hash, separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * Contains login and password's hash, separated by
+     * {@link Code#LEVEL_1_SEPARATOR}s.
      */
     LOGIN,
 
@@ -86,11 +88,29 @@ public enum Command {
      * Sent by Clients to request the list of games. Empty.
      * <p>
      * Sent by Servers to transmit the list of games.
-     * Contains the list of games as a set of {@link Code#LEVEL_2_SEPARATOR} separated games.
+     * Contains the list of games as a set of {@link Code#LEVEL_2_SEPARATOR}
+     * separated games.
      * A game is composed of an ID, the opponent name and the current score,
      * separated by {@link Code#LEVEL_1_SEPARATOR}s.
      */
     GAMES,
+
+    /**
+     * [CS] Sent by Clients to create a new game. Can contain a user name,
+     * in which case a new game will start against that opponent if it
+     * exists, or be empty to select a random opponent.
+     * If the provided user name doesn't exist, the Client receives a {@link
+     * #NOK}.
+     */
+    NEW,
+
+    /**
+     * [SS] Sent by a Server to the Leader then to other Servers by the
+     * Leader.
+     * Contains all data about a newly created game as defined in the {@link
+     * #INIT} documentation.
+     */
+    GAME,
 
     /**
      * [CS] Client chooses a game. Contains game ID.
@@ -98,7 +118,8 @@ public enum Command {
     PLAY,
 
     /**
-     * [SC] Server proposes 4 themes to Client, separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * [SC] Server proposes 4 themes to Client, separated by {@link
+     * Code#LEVEL_1_SEPARATOR}s.
      */
     THEMES,
 
@@ -110,13 +131,15 @@ public enum Command {
 
     /**
      * [SC] Server asks the Client a question.
-     * Contains the question and 4 answers, separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * Contains the question and 4 answers, separated by {@link
+     * Code#LEVEL_1_SEPARATOR}s.
      */
     QUESTION,
 
     /**
      * [B][CS] Client choose an answer. Contains the number
-     * (1, 2, 3 or 4) of the answer position in the {@link #QUESTION} message.
+     * (1, 2, 3 or 4) of the answer position in the {@link #QUESTION}
+     * message.
      */
     ANSWER,
 
@@ -139,6 +162,5 @@ public enum Command {
      * [SC] Game has ended, Server sends user score and opponent score (in
      * this order) to Client separated by {@link Code#LEVEL_1_SEPARATOR}s.
      */
-    END,
-    ;
+    END,;
 }
