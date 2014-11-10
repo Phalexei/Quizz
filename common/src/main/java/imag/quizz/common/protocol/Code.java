@@ -50,28 +50,58 @@ public enum Code {
      * <p>
      * Sent by Servers to transmit the list of games.
      * Contains the list of games as a set of tab separated games.
-     * A game is composed of the opponent name and the current score, separated by a space.
+     * A game is composed of an ID, the opponent name and the current score,
+     * separated by spaces.
      */
     GAMES,
 
     /**
-     * [CS] Client chooses a Game. Contains Game ID.
+     * [CS] Client chooses a game. Contains game ID.
      */
     PLAY,
 
     /**
-     * [SC] Server proposes multiple themes to Client.
+     * [SC] Server proposes 4 themes to Client, separated by tabs.
      */
     THEMES,
 
     /**
-     * [CS] Client answers to {@link #THEMES} message.
+     * [CS] Client answers to {@link #THEMES} message. Contains the number
+     * (1, 2, 3 or 4) of the theme position in the {@link #THEMES} message.
      */
     THEME,
 
     /**
      * [SC] Server asks the Client a question.
-     * Contains the question and 4 answers.
+     * Contains the question and 4 answers, separated by tabs.
      */
     QUESTION,
+
+    /**
+     * [CS] Client choose an answer. Contains the number
+     * (1, 2, 3 or 4) of the answer position in the {@link #QUESTION} message.
+     */
+    ANSWER,
+
+    /**
+     * [CS] The user didn't choose an answer in time.
+     */
+    NOANSWER,
+
+    /**
+     * [SC] Server says Client has to wait for opponent.
+     */
+    WAIT,
+
+    /**
+     * [CS] User give up the game. Contains game ID.
+     */
+    DROP,
+
+    /**
+     * [SC] Game has ended, Server sends user score and opponent score (in
+     * this order) to Client.
+     */
+    END,
+    ;
 }
