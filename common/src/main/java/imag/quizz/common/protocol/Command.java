@@ -154,7 +154,8 @@ public enum Command {
     WAIT,
 
     /**
-     * [B][CS] User give up the game. Contains game ID.
+     * [B][CS] User give up the game. Contains user login and game ID,
+     * separated by {@link Code#LEVEL_1_SEPARATOR}.
      */
     DROP,
 
