@@ -12,40 +12,40 @@ import java.io.PrintStream;
  */
 public class Main {
 
-	/**
-	 *
-	 */
-	public static void main(String[] args) {
-		System.out.println("Hello Client!");
+    /**
+     *
+     */
+    public static void main(String[] args) {
+        System.out.println("Hello Client!");
 
-		final SocketHandler handler = new SocketHandler("127.0.0.1", 26001);
-		try {
-			handler.connect();
-		} catch (IOException e) {
-			e.printStackTrace();  // TODO Implement method
-		}
+        final SocketHandler handler = new SocketHandler("127.0.0.1", 26001);
+        try {
+            handler.connect();
+        } catch (IOException e) {
+            e.printStackTrace();  // TODO Implement method
+        }
 
-		// Create main window
-		final Window window = new Window(handler);
+        // Create main window
+        final Window window = new Window(handler);
 
-		// Map output to main window
-		System.setOut(new PrintStream(new OutputStream() {
+        // Map output to main window
+        System.setOut(new PrintStream(new OutputStream() {
 
-			private final PrintStream originalPrintStream = System.out;
+            private final PrintStream originalPrintStream = System.out;
 
-			@Override
-			public void write(int b) throws IOException {
-				originalPrintStream.write(b);
-				window.log("" + (char) b);
-			}
+            @Override
+            public void write(int b) throws IOException {
+                originalPrintStream.write(b);
+                window.log("" + (char) b);
+            }
 
-			@Override
-			public void write(byte[] b) throws IOException {
-				super.write(b);
-				window.log("\n");
-			}
-		}));
+            @Override
+            public void write(byte[] b) throws IOException {
+                super.write(b);
+                window.log("\n");
+            }
+        }));
 
-		System.out.println("Ready");
-	}
+        System.out.println("Ready");
+    }
 }
