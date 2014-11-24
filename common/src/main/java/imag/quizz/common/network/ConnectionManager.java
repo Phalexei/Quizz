@@ -25,7 +25,7 @@ public class ConnectionManager extends Thread {
     @Override
     public void run() {
         try {
-            final ServerSocket server =  new ServerSocket(port);
+            final ServerSocket server = new ServerSocket(port);
 
             Socket client;
 

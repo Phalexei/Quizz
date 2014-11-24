@@ -1,8 +1,6 @@
 package imag.quizz.common.protocol.message;
 
 import imag.quizz.common.protocol.Command;
-import imag.quizz.common.protocol.Separator;
-import org.apache.commons.lang3.Validate;
 
 public class NokMessage extends Message {
 
