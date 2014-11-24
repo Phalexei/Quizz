@@ -16,7 +16,7 @@ public class PingMessage extends Message {
     /* package*/ PingMessage(final String messageString) {
         super(Command.PING);
         final String[] split = messageString.split(Separator.LEVEL_1S);
-        Validate.isTrue(this.command.name().equals(split[0]), "Invalid PING message: '" + messageString + '\'');
+        this.checkCommandName(split[0]);
         this.data = split[1];
     }
 

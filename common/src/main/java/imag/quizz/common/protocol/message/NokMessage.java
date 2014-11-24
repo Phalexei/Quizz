@@ -16,7 +16,7 @@ public class NokMessage extends Message {
     /* package*/ NokMessage(final String messageString) {
         super(Command.NOK);
         final String[] split = messageString.split(Separator.LEVEL_1S);
-        Validate.isTrue(this.command.name().equals(split[0]), "Invalid NOK message: '" + messageString + '\'');
+        this.checkCommandName(split[0]);
         this.errorMessage = split[1];
     }
 

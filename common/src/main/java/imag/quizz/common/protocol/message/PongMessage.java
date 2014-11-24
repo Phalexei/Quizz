@@ -16,7 +16,7 @@ public class PongMessage extends Message {
     /* package*/ PongMessage(final String messageString) {
         super(Command.PONG);
         final String[] split = messageString.split(Separator.LEVEL_1S);
-        Validate.isTrue(this.command.name().equals(split[0]), "Invalid PONG message: '" + messageString + '\'');
+        this.checkCommandName(split[0]);
         this.data = split[1];
     }
 

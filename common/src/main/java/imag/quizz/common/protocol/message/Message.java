@@ -30,9 +30,9 @@ public abstract class Message {
             case INIT:
                 break;
             case REGISTER:
-                break;
+                return new RegisterMessage(messageString);
             case LOGIN:
-                break;
+                return new LoginMessage(messageString);
             case GAMES:
                 break;
             case NEW:
@@ -71,6 +71,10 @@ public abstract class Message {
 
     public final Command getCommand() {
         return this.command;
+    }
+
+    protected void checkCommandName(final String commandName) {
+        Validate.isTrue(this.command.name().equals(commandName), "Invalid " + this.command.name() + " message");
     }
 
     protected abstract String getParametersString();
