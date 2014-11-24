@@ -29,19 +29,19 @@ public abstract class Message {
             case NOK:
                 return new NokMessage(messageSplit);
             case INIT:
-                break;
+                break; // TODO Hard
             case REGISTER:
                 return new RegisterMessage(messageSplit);
             case LOGIN:
                 return new LoginMessage(messageSplit);
             case GAMES:
-                break;
+                break; // TODO Hard
             case NEW:
                 return new NewMessage(messageSplit);
             case GAME:
-                break;
+                break; // TODO Hard
             case PLAY:
-                break;
+                return new PlayMessage(messageSplit);
             case THEMES:
                 break;
             case THEME:
