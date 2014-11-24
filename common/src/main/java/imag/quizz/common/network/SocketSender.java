@@ -23,7 +23,6 @@ public class SocketSender extends AbstractRepeatingThread {
             while ((mes = this.buffer.poll()) != null) {
                 this.writer.write(mes);
                 this.writer.flush();
-                sleep(1_000);
             }
         } catch (final IOException e) {
             e.printStackTrace();
