@@ -24,9 +24,9 @@ public abstract class Message {
             case PONG:
                 return new PongMessage(messageString);
             case OK:
-                break;
+                return new OkMessage();
             case NOK:
-                break;
+                return new NokMessage(messageString);
             case INIT:
                 break;
             case REGISTER:
@@ -76,6 +76,7 @@ public abstract class Message {
     protected abstract String getParametersString();
 
     public final String toString() {
-        return this.command.name() + Separator.LEVEL_1 + this.getParametersString();
+        final String parameters = this.getParametersString();
+        return this.command.name() + (parameters == null ? "" : Separator.LEVEL_1 + parameters);
     }
 }
