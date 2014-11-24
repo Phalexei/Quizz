@@ -39,15 +39,15 @@ public enum Command {
      * [SS] Used by the leader to initialize a new Server with existing games
      * and users.
      * This message is composed of 2*2 parts separated by 3
-     * {@link Code#LEVEL_4_SEPARATOR}s.
+     * {@link Separator#LEVEL_4}s.
      * <p>
      * The first part is the Games part. It's composed of different games
-     * separated by {@link Code#LEVEL_3_SEPARATOR}s.
+     * separated by {@link Separator#LEVEL_3}s.
      * A game is composed of the 2 user names and the 2 sets of themes IDs
      * with their associated sets of questions IDs, separated by
-     * {@link Code#LEVEL_2_SEPARATOR}s.
+     * {@link Separator#LEVEL_2}s.
      * Each set of question IDs is separated by
-     * {@link Code#LEVEL_1_SEPARATOR}s.
+     * {@link Separator#LEVEL_1}s.
      *
      * Example Games part with separators used:
      * <ul>
@@ -62,8 +62,8 @@ public enum Command {
      * </ul></ul>
      * <p>
      * The second part is the Users part. It's composed of different users
-     * separated by {@link Code#LEVEL_2_SEPARATOR}s, each user being his
-     * login and password hash separated by a {@link Code#LEVEL_1_SEPARATOR}.
+     * separated by {@link Separator#LEVEL_2}s, each user being his
+     * login and password hash separated by a {@link Separator#LEVEL_1}.
      *
      */
     INIT,
@@ -71,14 +71,14 @@ public enum Command {
     /**
      * [B][CS] Client registration message.
      * Contains login and password's hash, separated by
-     * {@link Code#LEVEL_1_SEPARATOR}s.
+     * {@link Separator#LEVEL_1}s.
      */
     REGISTER,
 
     /**
      * [B][CS] Client login message.
      * Contains login and password's hash, separated by
-     * {@link Code#LEVEL_1_SEPARATOR}s.
+     * {@link Separator#LEVEL_1}s.
      */
     LOGIN,
 
@@ -88,10 +88,10 @@ public enum Command {
      * Sent by Clients to request the list of games. Empty.
      * <p>
      * Sent by Servers to transmit the list of games.
-     * Contains the list of games as a set of {@link Code#LEVEL_2_SEPARATOR}
+     * Contains the list of games as a set of {@link Separator#LEVEL_2}
      * separated games.
      * A game is composed of an ID, the opponent name and the current score,
-     * separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * separated by {@link Separator#LEVEL_1}s.
      */
     GAMES,
 
@@ -119,7 +119,7 @@ public enum Command {
 
     /**
      * [SC] Server proposes 4 themes to Client, separated by {@link
-     * Code#LEVEL_1_SEPARATOR}s.
+     * Separator#LEVEL_1}s.
      */
     THEMES,
 
@@ -132,7 +132,7 @@ public enum Command {
     /**
      * [SC] Server asks the Client a question.
      * Contains the question and 4 answers, separated by {@link
-     * Code#LEVEL_1_SEPARATOR}s.
+     * Separator#LEVEL_1}s.
      */
     QUESTION,
 
@@ -155,13 +155,13 @@ public enum Command {
 
     /**
      * [B][CS] User give up the game. Contains user login and game ID,
-     * separated by {@link Code#LEVEL_1_SEPARATOR}.
+     * separated by {@link Separator#LEVEL_1}.
      */
     DROP,
 
     /**
      * [SC] Game has ended, Server sends user score and opponent score (in
-     * this order) to Client separated by {@link Code#LEVEL_1_SEPARATOR}s.
+     * this order) to Client separated by {@link Separator#LEVEL_1}s.
      */
     END,
 }
