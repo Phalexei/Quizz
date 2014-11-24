@@ -15,12 +15,11 @@ public abstract class AccountingMessage extends Message {
         this.hashedPassword = Hash.md5(password);
     }
 
-    /* package*/ AccountingMessage(final Command command, final String messageString) {
+    /* package*/ AccountingMessage(final Command command, final String[] messageSplit) {
         super(command);
-        final String[] split = messageString.split(Separator.LEVEL_1S);
-        this.checkCommandName(split[0]);
-        this.login = split[1];
-        this.hashedPassword = split[2];
+        this.checkCommandName(messageSplit[0]);
+        this.login = messageSplit[1];
+        this.hashedPassword = messageSplit[2];
     }
 
     public String getLogin() {

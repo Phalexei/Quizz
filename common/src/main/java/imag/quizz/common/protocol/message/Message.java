@@ -11,7 +11,8 @@ public abstract class Message {
 
     public static Message fromString(final String messageString) {
         Validate.notEmpty(messageString, "messageString should not be null nor empty");
-        final String commandString = messageString.split(Separator.LEVEL_1S)[0];
+        final String[] messageSplit = messageString.split(Separator.LEVEL_1S);
+        final String commandString = messageSplit[0];
         final Command command;
         try {
             command = Command.valueOf(commandString);
@@ -20,23 +21,23 @@ public abstract class Message {
         }
         switch (command) {
             case PING:
-                return new PingMessage(messageString);
+                return new PingMessage(messageSplit);
             case PONG:
-                return new PongMessage(messageString);
+                return new PongMessage(messageSplit);
             case OK:
-                return new OkMessage();
+                return new OkMessage(messageSplit);
             case NOK:
-                return new NokMessage(messageString);
+                return new NokMessage(messageSplit);
             case INIT:
                 break;
             case REGISTER:
-                return new RegisterMessage(messageString);
+                return new RegisterMessage(messageSplit);
             case LOGIN:
-                return new LoginMessage(messageString);
+                return new LoginMessage(messageSplit);
             case GAMES:
                 break;
             case NEW:
-                break;
+                return new NewMessage(messageSplit);
             case GAME:
                 break;
             case PLAY:

@@ -8,7 +8,7 @@ public class LoginMessage extends AccountingMessage {
         super(Command.LOGIN, login, password);
     }
 
-    /* package */ LoginMessage(final String messageString) {
-        super(Command.LOGIN, messageString);
+    /* package */ LoginMessage(final String[] messageSplit) {
+        super(Command.LOGIN, messageSplit);
     }
 }

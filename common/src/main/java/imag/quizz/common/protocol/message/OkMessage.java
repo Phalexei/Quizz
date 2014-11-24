@@ -8,6 +8,11 @@ public class OkMessage extends Message {
         super(Command.OK);
     }
 
+    /* package*/ OkMessage(final String[] messageSplit) {
+        super(Command.NOK);
+        this.checkCommandName(messageSplit[0]);
+    }
+
     @Override
     protected String getParametersString() {
         return null;

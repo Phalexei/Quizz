@@ -8,7 +8,7 @@ public class RegisterMessage extends AccountingMessage {
         super(Command.REGISTER, login, password);
     }
 
-    /* package */ RegisterMessage(final String messageString) {
-        super(Command.REGISTER, messageString);
+    /* package */ RegisterMessage(final String[] messageSplit) {
+        super(Command.REGISTER, messageSplit);
     }
 }

@@ -13,11 +13,10 @@ public class NokMessage extends Message {
         this.errorMessage = Long.toString(System.nanoTime());
     }
 
-    /* package*/ NokMessage(final String messageString) {
+    /* package*/ NokMessage(final String[] messageSplit) {
         super(Command.NOK);
-        final String[] split = messageString.split(Separator.LEVEL_1S);
-        this.checkCommandName(split[0]);
-        this.errorMessage = split[1];
+        this.checkCommandName(messageSplit[0]);
+        this.errorMessage = messageSplit[1];
     }
 
     public String getErrorMessage() {
