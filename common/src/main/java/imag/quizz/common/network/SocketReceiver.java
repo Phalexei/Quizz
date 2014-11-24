@@ -7,10 +7,12 @@ import java.net.SocketTimeoutException;
 public class SocketReceiver extends AbstractRepeatingThread {
 
     private final BufferedReader reader;
+    private final MessageHandler handler;
 
-    /* package */ SocketReceiver(final BufferedReader reader) {
+    /* package */ SocketReceiver(final BufferedReader reader, final MessageHandler handler) {
         super("S-Receiver", 10);
         this.reader = reader;
+        this.handler = handler;
     }
 
     @Override
@@ -18,8 +20,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
         String mes;
         try {
             while ((mes = this.reader.readLine()) != null) {
-                // TODO Handle packet 'mes'
-                System.out.println("PONG");
+                handler.addMessage(mes);
             }
         } catch (final SocketTimeoutException ignored) {
             // readLine() Timeout
