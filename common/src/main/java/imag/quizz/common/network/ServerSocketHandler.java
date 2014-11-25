@@ -17,7 +17,7 @@ public class ServerSocketHandler {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"));
             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), "UTF-8"));
 
-            this.socketSender = new SocketSender(writer);
+            this.socketSender = new SocketSender(writer, handler);
             this.socketReceiver = new SocketReceiver(reader, handler);
 
             this.socketSender.start();

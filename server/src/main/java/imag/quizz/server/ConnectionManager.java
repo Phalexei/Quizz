@@ -1,4 +1,8 @@
-package imag.quizz.common.network;
+package imag.quizz.server;
+
+import imag.quizz.common.network.MessageHandler;
+import imag.quizz.common.network.ServerSocketHandler;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -31,11 +35,22 @@ public class ConnectionManager extends Thread {
 
             while (!stop) {
                 client = server.accept();
-                System.out.println("New client on Port : " + client.getPort());
+                if (Main.DEBUG) {
+                    System.out.println("New client on Port : " + client.getPort());
+                }
                 clients.put(client.getPort(), new ServerSocketHandler(client, handler));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * This method checks if a player is connected to this server
+     * @param playerID : the numeric ID of the player
+     * @return true if player is connected to this server
+     */
+    public boolean isConnected(int playerID) {
+        throw new NotImplementedException("TODO");
     }
 }

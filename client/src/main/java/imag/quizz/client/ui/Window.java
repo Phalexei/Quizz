@@ -1,6 +1,7 @@
 package imag.quizz.client.ui;
 
 import imag.quizz.common.network.SocketHandler;
+import imag.quizz.common.protocol.message.PingMessage;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -38,7 +39,7 @@ public class Window {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 System.out.println("PING");
-                handler.write("PING\n");
+                handler.write(new PingMessage().toString() + "\n");
             }
         };
         this.topLeftButton.addActionListener(a);

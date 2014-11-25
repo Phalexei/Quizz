@@ -10,10 +10,11 @@ public class SocketSender extends AbstractRepeatingThread {
     private final BufferedWriter writer;
     private final Deque<String> buffer;
 
-    /* package */ SocketSender(final BufferedWriter writer) {
+    /* package */ SocketSender(final BufferedWriter writer, final MessageHandler handler) {
         super(" S-Sender ", 50);
         this.writer = writer;
         this.buffer = new ConcurrentLinkedDeque<>();
+        handler.registerSocketSender(this);
     }
 
     @Override

@@ -2,6 +2,7 @@ package imag.quizz.client;
 
 import imag.quizz.client.ui.Window;
 import imag.quizz.common.Config;
+import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 
 import java.io.IOException;
@@ -26,9 +27,10 @@ public class Main {
             System.out.println("- " + entry.getKey() + " => " + entry.getValue());
         }
 
-        System.exit(42);
+        //System.exit(42);
 
-        final SocketHandler handler = new SocketHandler("127.0.0.1", 26001);
+        final MessageHandler msgHandler = new ClientMessageHandler();
+        final SocketHandler handler = new SocketHandler("127.0.0.1", 26001, msgHandler);
         try {
             handler.connect();
         } catch (IOException e) {

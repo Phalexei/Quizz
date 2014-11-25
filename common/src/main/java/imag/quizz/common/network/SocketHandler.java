@@ -11,10 +11,12 @@ public class SocketHandler {
     private Socket socket;
     private SocketSender socketSender;
     private SocketReceiver socketReceiver;
+    private MessageHandler handler;
 
-    public SocketHandler(final String url, final int port) {
+    public SocketHandler(final String url, final int port, MessageHandler handler) {
         this.url = url;
         this.port = port;
+        this.handler = handler;
     }
 
     public void connect() throws IOException {
@@ -26,8 +28,8 @@ public class SocketHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), "UTF-8"));
         final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream(), "UTF-8"));
 
-        this.socketSender = new SocketSender(writer);
-        this.socketReceiver = new SocketReceiver(reader, /*TODO LOL : */null);
+        this.socketSender = new SocketSender(writer, handler);
+        this.socketReceiver = new SocketReceiver(reader, handler);
 
         this.socketSender.start();
         this.socketReceiver.start();
