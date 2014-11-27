@@ -23,7 +23,7 @@ public abstract class MessageHandler extends Thread {
      * {@link #handleMessage(imag.quizz.common.protocol.message.Message)}
      * @param message : the message to add to the queue
      */
-    public void addMessage(final String message) {
+    public final void addMessage(final String message) {
         messagePool.offer(message);
         System.out.println("Message queued : " + message);
     }
@@ -34,11 +34,11 @@ public abstract class MessageHandler extends Thread {
 
     /**
      * Sends a message to the socket attached to this handler.
-     * @param message : : the message to be send
+     * @param message : : the message to be sent
      */
     public final void send(Message message) {
         if (socketSender != null) {
-            socketSender.write(message.toString());
+            socketSender.write(message.toString() + "\n");
         }
     }
 
@@ -55,7 +55,7 @@ public abstract class MessageHandler extends Thread {
                 try {
                     sleep(50);
                 } catch (InterruptedException e) {
-                    break;
+                    this.interrupt();
                 }
             }
         }

@@ -30,6 +30,7 @@ public class Main {
         //System.exit(42);
 
         final MessageHandler msgHandler = new ClientMessageHandler();
+        msgHandler.start();
         final SocketHandler handler = new SocketHandler("127.0.0.1", 26001, msgHandler);
         try {
             handler.connect();
