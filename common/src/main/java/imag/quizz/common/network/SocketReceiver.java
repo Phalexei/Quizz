@@ -2,6 +2,7 @@ package imag.quizz.common.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 public class SocketReceiver extends AbstractRepeatingThread {
@@ -24,6 +25,8 @@ public class SocketReceiver extends AbstractRepeatingThread {
             }
         } catch (final SocketTimeoutException ignored) {
             // readLine() Timeout
+        } catch (final SocketException e) {
+            this.interrupt();
         } catch (final IOException e) {
             e.printStackTrace();
         }
