@@ -14,14 +14,14 @@ import java.util.Random;
 
 public class Window {
 
-    private static final int WINDOW_WIDTH = 1440;
-    private static final int WINDOW_HEIGHT = 900;
+    private static final int WINDOW_WIDTH   = 1440;
+    private static final int WINDOW_HEIGHT  = 900;
     private static final int LOG_KEEP_LINES = 1000;
 
-    private final JButton topLeftButton;
-    private final JButton topRightButton;
-    private final JButton bottomLeftButton;
-    private final JButton bottomRightButton;
+    private final JButton   topLeftButton;
+    private final JButton   topRightButton;
+    private final JButton   bottomLeftButton;
+    private final JButton   bottomRightButton;
     private final JTextPane questionTextPane;
     private final JTextArea logsTextArea;
 
@@ -84,6 +84,8 @@ public class Window {
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        new Log4JAppender(this);
     }
 
     public void setQuestion(final String question) {

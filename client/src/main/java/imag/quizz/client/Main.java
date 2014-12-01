@@ -4,61 +4,51 @@ import imag.quizz.client.ui.Window;
 import imag.quizz.common.Config;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
+import imag.quizz.common.tool.Log;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Map.Entry;
 
 /**
  *
  */
-public class Main {
+public final class Main {
 
     /**
      *
      */
-    public static void main(String[] args) {
-        System.out.println("Hello Client!");
+    public static void main(final String[] args) {
+        new Main();
+    }
 
-        final Config config = new Config();
-        System.out.println("Servers in config: ");
-        for (final Entry<Integer, String> entry : config.getServers().entrySet()) {
-            System.out.println("- " + entry.getKey() + " => " + entry.getValue());
+    private Config config;
+
+    private Main() {
+        Log.info("Starting...");
+
+        try {
+            this.config = new Config();
+        } catch (final IOException e) {
+            Log.fatal("Failed to parse configuration", e);
+            System.exit(1);
         }
-
-        //System.exit(42);
 
         final MessageHandler msgHandler = new ClientMessageHandler();
         msgHandler.start();
         final SocketHandler handler = new SocketHandler("127.0.0.1", 26001, msgHandler);
         try {
             handler.connect();
-        } catch (IOException e) {
-            e.printStackTrace();  // TODO Implement method
+        } catch (final IOException e) {
+            Log.fatal("Failed to connect to server", e);
+            System.exit(2);
         }
 
         // Create main window
         final Window window = new Window(handler);
 
-        // Map output to main window
-        System.setOut(new PrintStream(new OutputStream() {
+        Log.info("Ready");
+    }
 
-            private final PrintStream originalPrintStream = System.out;
-
-            @Override
-            public void write(int b) throws IOException {
-                originalPrintStream.write(b);
-                window.log("" + (char) b);
-            }
-
-            @Override
-            public void write(byte[] b) throws IOException {
-                super.write(b);
-                window.log("\n");
-            }
-        }));
-
-        System.out.println("Ready");
+    public Config getConfig() {
+        return this.config;
     }
 }

@@ -30,7 +30,6 @@ public class Config {
             final Path configFilePath = Paths.get(Config.configUrl.toURI());
             final String configString = new String(Files.readAllBytes(configFilePath), StandardCharsets.UTF_8);
             this.parseJsonConfig(configString);
-
         } catch (final IOException | URISyntaxException | IllegalArgumentException e1) {
             throw new IOException("Error while reading configuration file", e1);
         }

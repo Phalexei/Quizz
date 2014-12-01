@@ -62,9 +62,7 @@ public class ConnectionManager extends Thread {
                 }
 
                 if (!isServer) {
-                    if (Main.DEBUG) {
                         System.out.println("New client on Port : " + inSocket.getPort());
-                    }
                     clients.put(inSocket.getPort(), new ServerSocketHandler(inSocket, handler));
                 }
             }
