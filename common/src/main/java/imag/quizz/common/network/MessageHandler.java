@@ -2,6 +2,7 @@ package imag.quizz.common.network;
 
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
+import imag.quizz.common.tool.Pair;
 import org.apache.log4j.Level;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,29 +13,21 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Implementing classes should only override
  * {@link #handleMessage(int, imag.quizz.common.protocol.message.Message)}
  */
-public abstract class MessageHandler extends Thread {
+public abstract class MessageHandler extends AbstractRepeatingThread {
 
-    class IntAndString {
-        private final int    theInt;
-        private final String theString;
+    /**
+     * Received messages ready to be handled.
+     */
+    private final ConcurrentLinkedQueue<Pair<Integer, String>> messagePool = new ConcurrentLinkedQueue<>();
 
-        public IntAndString(int theInt, String theString) {
-            this.theInt = theInt;
-            this.theString = theString;
-        }
+    /**
+     * Map of opened sockets.
+     */
+    private ConcurrentHashMap<Integer, SocketHandler> handlers = new ConcurrentHashMap<>();
 
-        public int getTheInt() {
-            return theInt;
-        }
-
-        public String getTheString() {
-            return theString;
-        }
+    protected MessageHandler(final String name) {
+        super(name, 50);
     }
-
-    private final ConcurrentLinkedQueue<IntAndString> messagePool = new ConcurrentLinkedQueue<>();
-
-    private ConcurrentHashMap<Integer, SocketSender> senders = new ConcurrentHashMap<>();
 
     /**
      * Adds a message to the queue. It will be handled in
@@ -43,7 +36,7 @@ public abstract class MessageHandler extends Thread {
      * @param message the message to add to the queue
      */
     public final void addMessage(final int port, final String message) {
-        messagePool.offer(new IntAndString(port, message));
+        messagePool.offer(new Pair<>(port, message));
         if (Log.isEnabledFor(Level.DEBUG)) {
             Log.debug("Message queued : " + message);
         }
@@ -53,10 +46,10 @@ public abstract class MessageHandler extends Thread {
      * Registers the {@link imag.quizz.common.network.SocketSender} as the correct
      * sender on the specified port.
      * @param port the port on which to bind the sender
-     * @param socketSender the sender to bind on the port
+     * @param socketHandler the handler to bind on the port
      */
-    public final void registerSocketSender(final int port, final SocketSender socketSender) {
-        this.senders.put(port, socketSender);
+    public final void registerSocketHandler(final int port, final SocketHandler socketHandler) {
+        this.handlers.put(port, socketHandler);
     }
 
     /**
@@ -65,35 +58,25 @@ public abstract class MessageHandler extends Thread {
      * @param message the message to be sent
      */
     public final void send(final int port, final Message message) {
-        final SocketSender socketSender = this.senders.get(port);
-        if (socketSender != null) {
-            socketSender.write(message.toString() + "\n");
-        }
+        this.handlers.get(port).write(message.toString() + '\n');
     }
 
     @Override
-    public final void run() {
+    public final void work() {
         String messageString;
-        IntAndString portAndMessage;
-        while (!this.isInterrupted()) {
+        Pair<Integer, String> portAndMessage;
+        while (!messagePool.isEmpty()) {
             portAndMessage = messagePool.poll();
             if (portAndMessage != null) {
-                messageString = portAndMessage.getTheString();
+                messageString = portAndMessage.getB();
                 if (Log.isEnabledFor(Level.DEBUG)) {
                     Log.debug("Message handled : " + messageString);
                 }
                 try {
                     final Message message = Message.fromString(messageString);
-                    handleMessage(portAndMessage.getTheInt(), message);
+                    handleMessage(portAndMessage.getA(), message);
                 } catch (final IllegalArgumentException e) {
                     Log.error("Received invalid message, ignoring it", e);
-                }
-            } else {
-                try {
-                    sleep(50);
-                } catch (final InterruptedException e) {
-                    Log.warn("MessageHandler interrupted!", e);
-                    this.interrupt();
                 }
             }
         }

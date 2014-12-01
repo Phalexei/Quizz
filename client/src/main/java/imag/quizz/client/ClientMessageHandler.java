@@ -4,8 +4,13 @@ import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.protocol.message.Message;
 
 public class ClientMessageHandler extends MessageHandler {
+
+    protected ClientMessageHandler() {
+        super("ClientMessageHandler");
+    }
+
     @Override
-    public void handleMessage(int theInt, Message message) {
+    public void handleMessage(final int theInt, final Message message) {
         switch (message.getCommand()) {
             //TODO: fill in each case
             case PING:
@@ -47,6 +52,8 @@ public class ClientMessageHandler extends MessageHandler {
                 break;
             case END:
                 break;
+            default:
+                // TODO KEK
         }
     }
 }

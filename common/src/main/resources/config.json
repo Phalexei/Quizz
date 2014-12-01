@@ -3,27 +3,32 @@
     {
       "id": "1",
       "host": "127.0.0.1",
-      "port": "26001"
+      "serverPort": "26010",
+      "clientPort": "26011"
     },
     {
       "id": "2",
       "host": "127.0.0.1",
-      "port": "26002"
+      "serverPort": "26020",
+      "clientPort": "26021"
     },
     {
       "id": "3",
       "host": "127.0.0.1",
-      "port": "26003"
+      "serverPort": "26030",
+      "clientPort": "26031"
     },
     {
       "id": "4",
       "host": "127.0.0.1",
-      "port": "26004"
+      "serverPort": "26040",
+      "clientPort": "26041"
     },
     {
       "id": "5",
       "host": "127.0.0.1",
-      "port": "26005"
+      "serverPort": "26050",
+      "clientPort": "26051"
     }
   ]
 }

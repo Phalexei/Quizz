@@ -20,9 +20,39 @@ import java.util.Map.Entry;
 
 public class Config {
 
+    public final class ServerInfo {
+        private final int    id;
+        private final String host;
+        private final int    serverPort;
+        private final int    clientPort;
+
+        public ServerInfo(final int id, final String host, final int serverPort, final int clientPort) {
+            this.id = id;
+            this.host = host;
+            this.serverPort = serverPort;
+            this.clientPort = clientPort;
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+        public String getHost() {
+            return this.host;
+        }
+
+        public int getServerPort() {
+            return this.serverPort;
+        }
+
+        public int getClientPort() {
+            return this.clientPort;
+        }
+    }
+
     private static final URL configUrl = Config.class.getResource("/config.json");
 
-    private final Map<Integer, String> servers;
+    private final Map<Integer, ServerInfo> servers;
 
     public Config() throws IOException {
         this.servers = new HashMap<>();
@@ -35,8 +65,9 @@ public class Config {
         }
         if (Log.isEnabledFor(Level.DEBUG)) {
             Log.debug("Configuration file parsed. " + this.servers.size() + " servers found:");
-            for (final Entry<Integer, String> e : this.servers.entrySet()) {
-                Log.debug("Server n°" + e.getKey() + " : " + e.getValue());
+            for (final Entry<Integer, ServerInfo> e : this.servers.entrySet()) {
+                final ServerInfo info = e.getValue();
+                Log.debug("Server n°" + e.getKey() + " : " + info.getHost() + " - " + info.getServerPort() + "/" + info.getClientPort());
             }
         }
     }
@@ -49,15 +80,16 @@ public class Config {
                 final JSONObject serverObject = (JSONObject) aServersArray;
                 final int serverId = Integer.parseInt((String) serverObject.get("id"));
                 final String serverHost = (String) serverObject.get("host");
-                final int serverPort = Integer.parseInt((String) serverObject.get("port"));
-                this.servers.put(serverId, serverHost + ':' + serverPort);
+                final int serverPort = Integer.parseInt((String) serverObject.get("serverPort"));
+                final int clientPort = Integer.parseInt((String) serverObject.get("clientPort"));
+                this.servers.put(serverId, new ServerInfo(serverId, serverHost, serverPort, clientPort));
             }
         } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException e) {
             throw new IllegalArgumentException("Malformed configuration file", e);
         }
     }
 
-    public Map<Integer, String> getServers() {
+    public Map<Integer, ServerInfo> getServers() {
         return this.servers;
     }
 }

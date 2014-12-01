@@ -1,42 +1,69 @@
 package imag.quizz.server;
 
 import imag.quizz.common.Config;
+import imag.quizz.common.Config.ServerInfo;
 import imag.quizz.common.network.MessageHandler;
+import imag.quizz.common.tool.Log;
+import imag.quizz.server.network.ServerConnectionManager;
 
 import java.io.IOException;
 
 /**
- *
+ * Quizz Server entry point.
  */
-public class Main {
-
-    public static final int SERVER_PORT = 26000;
+public final class Main {
 
     /**
-     *
+     * Quizz Server entry point.
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
+        new Main(args);
+    }
 
-        if (args.length < 1) {
-            throw new IllegalArgumentException("Usage : specify server number in argument");
+    private int    ownId;
+    private Config config;
+
+    private Main(final String[] args) {
+        this.parseArgs(args);
+
+        try {
+            this.config = new Config();
+        } catch (final IOException e) {
+            Log.fatal("Failed to parse configuration", e);
+            System.exit(1);
         }
-
-        int serverId = Integer.valueOf(args[0]);
 
         final MessageHandler handler = new ServerMessageHandler();
         handler.start();
 
-        Config config = null;
-        try {
-            config = new Config();
-        } catch (IOException e) {
-            e.printStackTrace();
+        final ServerInfo info = this.config.getServers().get(this.ownId);
+        if (info == null) {
+            Log.fatal("Configuration misses current server (" + this.ownId + ")details");
+            System.exit(2);
         }
 
-        int port = Integer.parseInt(config.getServers().get(serverId).split(":")[1]);
+        new ServerConnectionManager(handler, this.config, this.ownId);
+    }
 
-        final ServerConnectionManager coMgr = new ServerConnectionManager(port, handler, config, serverId);
-
-        while (true) {}
+    private void parseArgs(final String[] args) {
+        try {
+            for (int i = 0; i < args.length; i++) {
+                final String lowerCasedArg = args[i].toLowerCase();
+                switch (lowerCasedArg) {
+                    case "--ownid":
+                    case "-id":
+                        this.ownId = Integer.parseInt(args[++i]);
+                        break;
+                    default:
+                        Log.fatal("Usage: TODO");
+                        System.exit(3);
+                        break;
+                }
+            }
+        } catch (final ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            Log.fatal("Usage: TODO" /* TODO */);
+            Log.debug("Error was:", e);
+            System.exit(4);
+        }
     }
 }

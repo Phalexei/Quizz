@@ -67,7 +67,6 @@
                                     <exclude>org.hamcrest:**</exclude>
                                 </excludes>
                             </artifactSet>
-                            <minimizeJar>true</minimizeJar>
                         </configuration>
                     </execution>
                 </executions>

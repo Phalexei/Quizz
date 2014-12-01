@@ -1,16 +1,12 @@
 package imag.quizz.client.ui;
 
-import imag.quizz.common.network.SocketHandler;
-import imag.quizz.common.protocol.message.PingMessage;
+import imag.quizz.client.game.Manager;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Random;
 
 public class Window {
 
@@ -25,27 +21,17 @@ public class Window {
     private final JTextPane questionTextPane;
     private final JTextArea logsTextArea;
 
-    public Window(final SocketHandler handler) {
+    public Window(final Manager manager) {
         this.topLeftButton = new JButton("Oui");
         this.topRightButton = new JButton("Non");
         this.bottomLeftButton = new JButton("Peut-être");
         this.bottomRightButton = new JButton("42");
 
-        // TODO
-        final ActionListener a = new ActionListener() {
-
-            private final Random random = new Random();
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                System.out.println("PING");
-                handler.write(new PingMessage().toString() + "\n");
-            }
-        };
-        this.topLeftButton.addActionListener(a);
-        this.topRightButton.addActionListener(a);
-        this.bottomLeftButton.addActionListener(a);
-        this.bottomRightButton.addActionListener(a);
+        final InputHandler inputHandler = new InputHandler(manager);
+        this.topLeftButton.addActionListener(inputHandler);
+        this.topRightButton.addActionListener(inputHandler);
+        this.bottomLeftButton.addActionListener(inputHandler);
+        this.bottomRightButton.addActionListener(inputHandler);
 
         final JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new GridLayout(2, 2));
@@ -85,6 +71,7 @@ public class Window {
         frame.setResizable(false);
         frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
+        manager.setWindow(this);
         new Log4JAppender(this);
     }
 
@@ -109,6 +96,20 @@ public class Window {
             default:
                 throw new IllegalArgumentException("Invalid number: " + num);
         }
+    }
+
+    public void lockButtons() {
+        this.topLeftButton.setEnabled(false);
+        this.topRightButton.setEnabled(false);
+        this.bottomLeftButton.setEnabled(false);
+        this.bottomRightButton.setEnabled(false);
+    }
+
+    public void unlockButtons() {
+        this.topLeftButton.setEnabled(true);
+        this.topRightButton.setEnabled(true);
+        this.bottomLeftButton.setEnabled(true);
+        this.bottomRightButton.setEnabled(true);
     }
 
     public void log(final String line) {

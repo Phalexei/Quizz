@@ -12,15 +12,14 @@ public class SocketSender extends AbstractRepeatingThread {
     private final BufferedWriter writer;
     private final Deque<String>  buffer;
 
-    /* package */ SocketSender(final BufferedWriter writer, final MessageHandler handler, int port) {
+    /* package */ SocketSender(final BufferedWriter writer) {
         super(" S-Sender ", 50);
         this.writer = writer;
         this.buffer = new ConcurrentLinkedDeque<>();
-        handler.registerSocketSender(port, this);
     }
 
     @Override
-    public void work() throws InterruptedException {
+    protected void work() throws InterruptedException {
         String mes;
         try {
             while ((mes = this.buffer.poll()) != null) {
@@ -32,23 +31,11 @@ public class SocketSender extends AbstractRepeatingThread {
         }
     }
 
-    public void write(final String message) {
+    /* package */ void write(final String message) {
         this.buffer.offer(message);
-    }
-
-    public void writeFirst(final String message) {
-        this.buffer.offerFirst(message);
     }
 
     /* package */ boolean hasAnythingToWrite() {
         return !this.buffer.isEmpty();
-    }
-
-    /* package */ void kill() {
-        try {
-            this.writer.close();
-        } catch (final IOException e) {
-            Log.warn("Failed to close socket writer (is it already closed?)", e);
-        }
     }
 }

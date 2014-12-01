@@ -21,7 +21,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
     }
 
     @Override
-    public void work() {
+    protected void work() {
         String mes;
         try {
             while ((mes = this.reader.readLine()) != null) {
@@ -35,14 +35,6 @@ public class SocketReceiver extends AbstractRepeatingThread {
             // TODO stop handling what we're connected to (Server/Client) and do appropriate things
         } catch (final IOException e) {
             Log.error("Failed to read from socket", e);
-        }
-    }
-
-    /* package */ void kill() {
-        try {
-            this.reader.close();
-        } catch (final IOException e) {
-            Log.warn("Failed to close socket reader (is it already closed?)", e);
         }
     }
 }

@@ -4,12 +4,20 @@ import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.protocol.message.PingMessage;
 import imag.quizz.common.protocol.message.PongMessage;
+import imag.quizz.common.tool.Log;
+import org.apache.log4j.Level;
 
 public class ServerMessageHandler extends MessageHandler {
 
+    public ServerMessageHandler() {
+        super("ServerMessageHandler");
+    }
+
     @Override
-    public void handleMessage(int port, Message message) {
-        System.out.println("Server handling message : " + message.toString() + " from port : " + port);
+    public void handleMessage(final int port, final Message message) {
+        if (Log.isEnabledFor(Level.DEBUG)) {
+            Log.debug("Server handling message : " + message.toString() + " from port : " + port);
+        }
 
         switch (message.getCommand()) {
             //TODO: fill in each case
@@ -52,6 +60,8 @@ public class ServerMessageHandler extends MessageHandler {
                 break;
             case END:
                 break;
+            default:
+                // TODO
         }
     }
 }

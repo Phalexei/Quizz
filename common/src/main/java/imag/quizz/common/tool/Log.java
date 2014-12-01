@@ -58,7 +58,7 @@ public class Log {
 
     private static void logToCustomAppenders(final Priority level, final String message, final Throwable t) {
         for (final Entry<Appender, Priority> e : Log.customAppenders.entrySet()) {
-            if (e.getValue().isGreaterOrEqual(level)) {
+            if (level.isGreaterOrEqual(e.getValue())) {
                 final String stacktrace;
                 if (t != null) {
                     stacktrace = ExceptionUtils.getStackTrace(t);

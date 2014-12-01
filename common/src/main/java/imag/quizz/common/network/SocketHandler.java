@@ -1,26 +1,20 @@
 package imag.quizz.common.network;
 
+import imag.quizz.common.tool.Log;
+
 import java.io.*;
 import java.net.Socket;
 
 public class SocketHandler {
 
-    private final String url;
-    private final int    port;
+    private final Socket         socket;
+    private final SocketSender   socketSender;
+    private final SocketReceiver socketReceiver;
+    private final MessageHandler handler;
 
-    private Socket         socket;
-    private SocketSender   socketSender;
-    private SocketReceiver socketReceiver;
-    private MessageHandler handler;
-
-    public SocketHandler(final String url, final int port, final MessageHandler handler) {
-        this.url = url;
-        this.port = port;
+    public SocketHandler(final Socket socket, final MessageHandler handler) throws IOException {
         this.handler = handler;
-    }
-
-    public void connect() throws IOException {
-        this.socket = new Socket(this.url, this.port);
+        this.socket = socket;
 
         // Prevent infinite condition on reader.readLine() in SocketReceiver
         this.socket.setSoTimeout(50);
@@ -28,8 +22,11 @@ public class SocketHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), "UTF-8"));
         final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream(), "UTF-8"));
 
-        this.socketSender = new SocketSender(writer, handler, this.socket.getPort());
-        this.socketReceiver = new SocketReceiver(reader, handler, this.socket.getPort());
+        final int port = this.socket.getPort();
+
+        this.socketSender = new SocketSender(writer);
+        handler.registerSocketHandler(port, this);
+        this.socketReceiver = new SocketReceiver(reader, handler, port);
 
         this.socketSender.start();
         this.socketReceiver.start();
@@ -43,9 +40,8 @@ public class SocketHandler {
         this.socketSender.write(message);
     }
 
-    public void askStop() {
-        this.socketSender.askStop();
-        this.socketReceiver.askStop();
+    public boolean isReady() {
+        return !this.socket.isClosed();
     }
 
     public boolean isStopped() {
@@ -53,22 +49,24 @@ public class SocketHandler {
     }
 
     public void kill() {
+        this.socketReceiver.askStop();
+        this.socketSender.askStop();
         try {
             this.socketReceiver.join();
         } catch (final InterruptedException e) {
-            e.printStackTrace();
+            Log.warn("SocketHandler interrupted!", e);
         }
 
         try {
             this.socketSender.join();
         } catch (final InterruptedException e) {
-            e.printStackTrace();
+            Log.warn("SocketHandler interrupted!", e);
         }
 
         try {
             this.socket.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.warn("Failed to close socket (is it already closed?)", e);
         }
     }
 }
