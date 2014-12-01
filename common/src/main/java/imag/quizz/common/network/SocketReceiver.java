@@ -1,7 +1,10 @@
 package imag.quizz.common.network;
 
+import imag.quizz.common.tool.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 public class SocketReceiver extends AbstractRepeatingThread {
@@ -20,15 +23,16 @@ public class SocketReceiver extends AbstractRepeatingThread {
         String mes;
         try {
             while ((mes = this.reader.readLine()) != null) {
-                handler.addMessage(mes);
+                this.handler.addMessage(mes);
             }
         } catch (final SocketTimeoutException ignored) {
             // readLine() Timeout)
-        } /*catch (final SocketException e) {
-            //TODO: handle correctly
+        } catch (final SocketException e) {
+            Log.error("Socket broken, interrupting", e);
             this.interrupt();
-        } */catch (final IOException e) {
-            e.printStackTrace();
+            // TODO stop handling what we're connected to (Server/Client) and do appropriate things
+        } catch (final IOException e) {
+            Log.error("Failed to read from socket", e);
         }
     }
 
@@ -36,7 +40,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
         try {
             this.reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.warn("Failed to close socket reader (is it already closed?)", e);
         }
     }
 }

@@ -1,5 +1,7 @@
 package imag.quizz.common;
 
+import imag.quizz.common.tool.Log;
+import org.apache.log4j.Level;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Config {
 
@@ -21,18 +24,21 @@ public class Config {
 
     private final Map<Integer, String> servers;
 
-    public Config() {
+    public Config() throws IOException {
         this.servers = new HashMap<>();
         try {
             final Path configFilePath = Paths.get(Config.configUrl.toURI());
             final String configString = new String(Files.readAllBytes(configFilePath), StandardCharsets.UTF_8);
             this.parseJsonConfig(configString);
-        } catch (final IOException | URISyntaxException e1) {
-            // TODO Error reading file
-            e1.printStackTrace();
-        } catch (final IllegalArgumentException e2) {
-            // TODO Malfomed file
-            e2.printStackTrace();
+
+        } catch (final IOException | URISyntaxException | IllegalArgumentException e1) {
+            throw new IOException("Error while reading configuration file", e1);
+        }
+        if (Log.isEnabledFor(Level.DEBUG)) {
+            Log.debug("Configuration file parsed. " + this.servers.size() + " servers found:");
+            for (final Entry<Integer, String> e : this.servers.entrySet()) {
+                Log.debug("Server n°" + e.getKey() + " : " + e.getValue());
+            }
         }
     }
 

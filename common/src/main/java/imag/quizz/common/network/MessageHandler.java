@@ -1,6 +1,8 @@
 package imag.quizz.common.network;
 
 import imag.quizz.common.protocol.message.Message;
+import imag.quizz.common.tool.Log;
+import org.apache.log4j.Level;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public abstract class MessageHandler extends Thread {
 
-    private final ConcurrentLinkedQueue<String> messagePool = new ConcurrentLinkedQueue <>();
+    private final ConcurrentLinkedQueue<String> messagePool = new ConcurrentLinkedQueue<>();
 
     private SocketSender socketSender;
 
@@ -25,11 +27,13 @@ public abstract class MessageHandler extends Thread {
      * @param message : the message to add to the queue
      */
     public final void addMessage(final String message) {
-        messagePool.offer(message);
-        System.out.println("Message queued : " + message);
+        this.messagePool.offer(message);
+        if (Log.isEnabledFor(Level.DEBUG)) {
+            Log.debug("Message queued : " + message);
+        }
     }
 
-    public final void registerSocketSender(SocketSender socketSender) {
+    public final void registerSocketSender(final SocketSender socketSender) {
         this.socketSender = socketSender;
     }
 
@@ -37,25 +41,32 @@ public abstract class MessageHandler extends Thread {
      * Sends a message to the socket attached to this handler.
      * @param message : : the message to be sent
      */
-    public final void send(Message message) {
-        if (socketSender != null) {
-            socketSender.write(message.toString() + "\n");
+    public final void send(final Message message) {
+        if (this.socketSender != null) {
+            this.socketSender.write(message.toString() + "\n");
         }
     }
 
     @Override
     public final void run() {
-        String s;
+        String messageString;
         while (!this.isInterrupted()) {
-            s = messagePool.poll();
-            if (s != null && s.length() > 0) {
-                System.out.println("Message handled : " + s);
-                Message message = Message.fromString(s);
-                handleMessage(message);
+            messageString = this.messagePool.poll();
+            if (messageString != null && messageString.length() > 0) {
+                if (Log.isEnabledFor(Level.DEBUG)) {
+                    Log.debug("Message queued : " + messageString);
+                }
+                try {
+                    final Message message = Message.fromString(messageString);
+                    handleMessage(message);
+                } catch (final IllegalArgumentException e) {
+                    Log.error("Received invalid message, ignoring it", e);
+                }
             } else {
                 try {
                     sleep(50);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
+                    Log.warn("MessageHandler interrupted!", e);
                     this.interrupt();
                 }
             }

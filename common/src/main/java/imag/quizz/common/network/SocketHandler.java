@@ -6,14 +6,14 @@ import java.net.Socket;
 public class SocketHandler {
 
     private final String url;
-    private final int port;
+    private final int    port;
 
-    private Socket socket;
-    private SocketSender socketSender;
+    private Socket         socket;
+    private SocketSender   socketSender;
     private SocketReceiver socketReceiver;
     private MessageHandler handler;
 
-    public SocketHandler(final String url, final int port, MessageHandler handler) {
+    public SocketHandler(final String url, final int port, final MessageHandler handler) {
         this.url = url;
         this.port = port;
         this.handler = handler;
@@ -71,5 +71,4 @@ public class SocketHandler {
             e.printStackTrace();
         }
     }
-
 }

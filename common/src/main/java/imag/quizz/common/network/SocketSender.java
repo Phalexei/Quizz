@@ -1,5 +1,7 @@
 package imag.quizz.common.network;
 
+import imag.quizz.common.tool.Log;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Deque;
@@ -8,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class SocketSender extends AbstractRepeatingThread {
 
     private final BufferedWriter writer;
-    private final Deque<String> buffer;
+    private final Deque<String>  buffer;
 
     /* package */ SocketSender(final BufferedWriter writer, final MessageHandler handler) {
         super(" S-Sender ", 50);
@@ -26,7 +28,7 @@ public class SocketSender extends AbstractRepeatingThread {
             }
             this.writer.flush();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.error("Failed to write to socket", e);
         }
     }
 
@@ -46,7 +48,7 @@ public class SocketSender extends AbstractRepeatingThread {
         try {
             this.writer.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.warn("Failed to close socket writer (is it already closed?)", e);
         }
     }
 }

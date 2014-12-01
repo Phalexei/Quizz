@@ -1,5 +1,7 @@
 package imag.quizz.common.network;
 
+import imag.quizz.common.tool.Log;
+
 /**
  * Represents a Thread that will usually do some work every X milliseconds.
  * <p/>
@@ -39,6 +41,7 @@ public abstract class AbstractRepeatingThread extends Thread {
                 Thread.sleep(this.loopTime);
             }
         } catch (final InterruptedException e) {
+            Log.warn("AbstractRepeatingThread interrupted!", e);
             this.interrupt();
         }
     }

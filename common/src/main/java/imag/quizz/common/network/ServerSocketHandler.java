@@ -4,13 +4,14 @@ import java.io.*;
 import java.net.Socket;
 
 /**
- * Represents a client
+ *
  */
 public class ServerSocketHandler {
-    private SocketSender socketSender;
-    private SocketReceiver socketReceiver;
 
-    public ServerSocketHandler(Socket client, MessageHandler handler) {
+    private final SocketSender   socketSender;
+    private final SocketReceiver socketReceiver;
+
+    public ServerSocketHandler(final Socket client, final MessageHandler handler) throws IOException {
         try {
             client.setSoTimeout(50);
 
@@ -22,14 +23,12 @@ public class ServerSocketHandler {
 
             this.socketSender.start();
             this.socketReceiver.start();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (final IOException e) {
+            throw new IOException("Failed to handle server socket", e);
         }
     }
 
     public void write(final String message) {
         this.socketSender.write(message);
-
     }
 }
