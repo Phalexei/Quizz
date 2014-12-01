@@ -4,6 +4,8 @@ package imag.quizz.server;
  *
  */
 public class Main {
+
+    public static final int SERVER_PORT = 26000;
     /**
      *
      */

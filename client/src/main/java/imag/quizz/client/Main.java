@@ -34,7 +34,7 @@ public final class Main {
 
         final MessageHandler msgHandler = new ClientMessageHandler();
         msgHandler.start();
-        final SocketHandler handler = new SocketHandler("127.0.0.1", 26001, msgHandler);
+        final SocketHandler handler = new SocketHandler("127.0.0.1", 26000, msgHandler);
         try {
             handler.connect();
         } catch (final IOException e) {

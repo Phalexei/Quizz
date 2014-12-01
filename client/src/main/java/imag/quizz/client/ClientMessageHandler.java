@@ -5,7 +5,7 @@ import imag.quizz.common.protocol.message.Message;
 
 public class ClientMessageHandler extends MessageHandler {
     @Override
-    public void handleMessage(Message message) {
+    public void handleMessage(int theInt, Message message) {
         switch (message.getCommand()) {
             //TODO: fill in each case
             case PING:

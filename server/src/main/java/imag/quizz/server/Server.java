@@ -26,7 +26,6 @@ public class Server {
         //TODO: sanitize
         int port = Integer.parseInt(config.getServers().get(serverId).split(":")[1]);
 
-        final ConnectionManager coMgr = new ConnectionManager(port, handler, config, serverId);
-        coMgr.start();
+        final ServerConnectionManager coMgr = new ServerConnectionManager(port, handler, config, serverId);
     }
 }

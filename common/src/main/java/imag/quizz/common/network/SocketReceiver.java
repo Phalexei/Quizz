@@ -11,11 +11,13 @@ public class SocketReceiver extends AbstractRepeatingThread {
 
     private final BufferedReader reader;
     private final MessageHandler handler;
+    private final int port;
 
-    /* package */ SocketReceiver(final BufferedReader reader, final MessageHandler handler) {
+    /* package */ SocketReceiver(final BufferedReader reader, final MessageHandler handler, int port) {
         super("S-Receiver", 10);
         this.reader = reader;
         this.handler = handler;
+        this.port = port;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
         String mes;
         try {
             while ((mes = this.reader.readLine()) != null) {
-                this.handler.addMessage(mes);
+                this.handler.addMessage(port, mes);
             }
         } catch (final SocketTimeoutException ignored) {
             // readLine() Timeout)

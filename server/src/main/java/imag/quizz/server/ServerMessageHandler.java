@@ -9,13 +9,13 @@ public class ServerMessageHandler extends MessageHandler {
     }
 
     @Override
-    public void handleMessage(Message message) {
-        System.out.println("Server handling message : " + message.toString());
+    public void handleMessage(int port, Message message) {
+        System.out.println("Server handling message : " + message.toString() + " from port : " + port);
 
         switch (message.getCommand()) {
             //TODO: fill in each case
             case PING:
-                send(new PongMessage((PingMessage)message));
+                send(port, new PongMessage((PingMessage)message));
                 break;
             case PONG:
                 break;
