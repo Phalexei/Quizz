@@ -19,7 +19,7 @@ public class SocketSender extends AbstractRepeatingThread {
     }
 
     @Override
-    protected void work() throws InterruptedException {
+    protected void work() {
         String mes;
         try {
             while ((mes = this.buffer.poll()) != null) {

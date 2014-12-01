@@ -20,5 +20,6 @@ public class Manager {
 
     public void onButtonClick(final String textClicked) {
         Log.info("Réponse sélectionnée : \"" + textClicked + '"');
+        this.window.lockButtons();
     }
 }

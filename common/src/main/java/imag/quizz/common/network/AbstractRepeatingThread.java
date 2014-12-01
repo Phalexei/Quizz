@@ -16,6 +16,11 @@ public abstract class AbstractRepeatingThread extends Thread {
     protected final int loopTime;
 
     /**
+     * If this task should stop
+     */
+    private boolean stopAsked;
+
+    /**
      * This is the main AbstractRepeatingThread constructor.
      *
      * @param name     the name of this Thread
@@ -30,19 +35,18 @@ public abstract class AbstractRepeatingThread extends Thread {
      * Asks this Thread to stop.
      */
     public void askStop() {
-        this.interrupt();
+        this.stopAsked = true;
     }
 
     @Override
     public final void run() {
         try {
-            while (!this.isInterrupted()) {
+            while (!this.stopAsked) {
                 this.work();
                 Thread.sleep(this.loopTime);
             }
         } catch (final InterruptedException e) {
             Log.warn("AbstractRepeatingThread interrupted!", e);
-            this.interrupt();
         }
     }
 

@@ -26,10 +26,14 @@ public class SocketHandler {
 
         this.socketSender = new SocketSender(writer);
         handler.registerSocketHandler(port, this);
-        this.socketReceiver = new SocketReceiver(reader, handler, port);
+        this.socketReceiver = new SocketReceiver(reader, this, port);
 
         this.socketSender.start();
         this.socketReceiver.start();
+    }
+
+    /* package */ MessageHandler getHandler() {
+        return this.handler;
     }
 
     public boolean hasAnythingToWrite() {
