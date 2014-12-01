@@ -1,5 +1,6 @@
 package imag.quizz.server;
 
+import imag.quizz.common.Config;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.ServerSocketHandler;
 import org.apache.commons.lang3.NotImplementedException;
@@ -7,23 +8,32 @@ import org.apache.commons.lang3.NotImplementedException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * Handles connections from clients
+ * Handles connections
  */
 public class ConnectionManager extends Thread {
 
     private final int port;
+    private final int serverId;
     private boolean stop;
     private final HashMap<Integer, ServerSocketHandler> clients;
+    private final ArrayList<ServerSocketHandler> servers;
     private final MessageHandler handler;
+    private final Config config;
 
-    public ConnectionManager(int port, final MessageHandler handler) {
+    public ConnectionManager(int port, final MessageHandler handler, Config config, int serverId) {
         this.port = port;
         stop = false;
         clients = new HashMap<>();
+        servers = new ArrayList<>(config.getServers().size());
         this.handler = handler;
+        this.config = config;
+        this.serverId = serverId;
     }
 
     @Override
@@ -31,14 +41,32 @@ public class ConnectionManager extends Thread {
         try {
             final ServerSocket server = new ServerSocket(port);
 
-            Socket client;
+            //TODO: connect to other servers in config
+
+            Socket inSocket;
 
             while (!stop) {
-                client = server.accept();
-                if (Main.DEBUG) {
-                    System.out.println("New client on Port : " + client.getPort());
+                inSocket = server.accept();
+
+                Iterator<Map.Entry<Integer, String>> i = config.getServers().entrySet().iterator();
+                boolean isServer = false;
+
+                while (i.hasNext()) {
+                    Map.Entry<Integer, String> e = i.next();
+                    if (inSocket.getInetAddress().toString().compareTo(e.getValue()) == 0) {
+                        System.out.println("New Server on Port : " + inSocket.getPort());
+                        isServer = true;
+                        servers.add(e.getKey(), new ServerSocketHandler(inSocket, handler));
+                        break;
+                    }
                 }
-                clients.put(client.getPort(), new ServerSocketHandler(client, handler));
+
+                if (!isServer) {
+                    if (Main.DEBUG) {
+                        System.out.println("New client on Port : " + inSocket.getPort());
+                    }
+                    clients.put(inSocket.getPort(), new ServerSocketHandler(inSocket, handler));
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

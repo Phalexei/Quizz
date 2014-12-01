@@ -24,10 +24,11 @@ public class SocketReceiver extends AbstractRepeatingThread {
                 handler.addMessage(mes);
             }
         } catch (final SocketTimeoutException ignored) {
-            // readLine() Timeout
-        } catch (final SocketException e) {
+            // readLine() Timeout)
+        } /*catch (final SocketException e) {
+            //TODO: handle correctly
             this.interrupt();
-        } catch (final IOException e) {
+        } */catch (final IOException e) {
             e.printStackTrace();
         }
     }

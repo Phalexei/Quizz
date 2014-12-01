@@ -7,7 +7,7 @@ public class ClientMessageHandler extends MessageHandler {
     @Override
     public void handleMessage(Message message) {
         switch (message.getCommand()) {
-            //TODO : fill in each case
+            //TODO: fill in each case
             case PING:
                 break;
             case PONG:

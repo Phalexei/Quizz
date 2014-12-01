@@ -6,7 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Queue of incoming messages and handling thread.
- * Implementing classes should only override {@link #handleMessage(imag.quizz.common.protocol.message.Message)}
+ * Implementing classes should only override
+ * {@link #handleMessage(imag.quizz.common.protocol.message.Message)}
  */
 public abstract class MessageHandler extends Thread {
 
