@@ -80,7 +80,7 @@ public abstract class MessageHandler extends Thread {
             if (portAndMessage != null) {
                 messageString = portAndMessage.getTheString();
                 if (Log.isEnabledFor(Level.DEBUG)) {
-                    Log.debug("Message queued : " + messageString);
+                    Log.debug("Message handled : " + messageString);
                 }
                 try {
                     final Message message = Message.fromString(messageString);

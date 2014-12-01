@@ -7,9 +7,6 @@ import imag.quizz.common.protocol.message.PongMessage;
 
 public class ServerMessageHandler extends MessageHandler {
 
-    public ServerMessageHandler() {
-    }
-
     @Override
     public void handleMessage(int port, Message message) {
         System.out.println("Server handling message : " + message.toString() + " from port : " + port);

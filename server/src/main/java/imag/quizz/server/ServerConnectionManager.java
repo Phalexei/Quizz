@@ -17,9 +17,7 @@ import java.util.Map;
  */
 public class ServerConnectionManager {
 
-    private final int                                   port;
     private final int                                   serverId;
-    private       boolean                               stop;
     private final HashMap<Integer, ServerSocketHandler> clients;
     private final HashMap<Integer, ServerSocketHandler> servers;
     private final MessageHandler                        handler;
@@ -29,8 +27,6 @@ public class ServerConnectionManager {
     private Thread clientSocketChecker;
 
     public ServerConnectionManager(final int port, final MessageHandler handler, Config config, int serverId) {
-        this.port = port;
-        stop = false;
         clients = new HashMap<>();
         servers = new HashMap<>();
         this.handler = handler;
@@ -47,11 +43,11 @@ public class ServerConnectionManager {
 
                     Socket inSocket;
 
-                    while (!stop) {
+                    while (!this.isInterrupted()) {
                         inSocket = server.accept();
 
                         System.out.println("New Server on Port : " + inSocket.getPort());
-                        clients.put(inSocket.getPort(), new ServerSocketHandler(inSocket, handler));
+                        servers.put(inSocket.getPort(), new ServerSocketHandler(inSocket, handler));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -68,7 +64,7 @@ public class ServerConnectionManager {
 
                     Socket inSocket;
 
-                    while (!stop) {
+                    while (!this.isInterrupted()) {
                         inSocket = server.accept();
 
                         System.out.println("New Client on Port : " + inSocket.getPort());
@@ -98,13 +94,17 @@ public class ServerConnectionManager {
         }
     }
 
-    private void sendToLeader(String message) {
-        for (ServerSocketHandler s : servers.values()) {
-            if (s.isReady()) {
-                s.write(message);
-                break;
+    private void broadcast(String message) {
+        for (Map.Entry<Integer, ServerSocketHandler> entry : servers.entrySet()) {
+            if (entry.getKey() != this.serverId && entry.getValue().isReady()) {
+                entry.getValue().write(message);
             }
         }
+    }
+
+    public void stop() {
+        this.serverSocketChecker.interrupt();
+        this.clientSocketChecker.interrupt();
     }
 
     /**
