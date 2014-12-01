@@ -11,7 +11,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
 
     private final BufferedReader reader;
     private final MessageHandler handler;
-    private final int port;
+    private final int            port;
 
     /* package */ SocketReceiver(final BufferedReader reader, final MessageHandler handler, int port) {
         super("S-Receiver", 10);

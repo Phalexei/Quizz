@@ -7,9 +7,9 @@ import java.net.Socket;
  *
  */
 public class ServerSocketHandler {
-    private SocketSender socketSender;
-    private SocketReceiver socketReceiver;
-    private final Socket socket;
+    private       SocketSender   socketSender;
+    private       SocketReceiver socketReceiver;
+    private final Socket         socket;
 
     public ServerSocketHandler(Socket socket, MessageHandler handler) throws IOException {
         this.socket = socket;

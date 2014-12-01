@@ -3,16 +3,13 @@ package imag.quizz.server;
 import imag.quizz.common.Config;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.ServerSocketHandler;
-import imag.quizz.common.network.SocketHandler;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -20,13 +17,13 @@ import java.util.Map;
  */
 public class ServerConnectionManager {
 
-    private final int port;
-    private final int serverId;
-    private boolean stop;
+    private final int                                   port;
+    private final int                                   serverId;
+    private       boolean                               stop;
     private final HashMap<Integer, ServerSocketHandler> clients;
     private final HashMap<Integer, ServerSocketHandler> servers;
-    private final MessageHandler handler;
-    private final Config config;
+    private final MessageHandler                        handler;
+    private final Config                                config;
 
     private Thread serverSocketChecker;
     private Thread clientSocketChecker;

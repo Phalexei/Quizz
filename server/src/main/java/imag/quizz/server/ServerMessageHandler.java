@@ -1,7 +1,9 @@
 package imag.quizz.server;
 
 import imag.quizz.common.network.MessageHandler;
-import imag.quizz.common.protocol.message.*;
+import imag.quizz.common.protocol.message.Message;
+import imag.quizz.common.protocol.message.PingMessage;
+import imag.quizz.common.protocol.message.PongMessage;
 
 public class ServerMessageHandler extends MessageHandler {
 
@@ -15,7 +17,7 @@ public class ServerMessageHandler extends MessageHandler {
         switch (message.getCommand()) {
             //TODO: fill in each case
             case PING:
-                send(port, new PongMessage((PingMessage)message));
+                send(port, new PongMessage((PingMessage) message));
                 break;
             case PONG:
                 break;

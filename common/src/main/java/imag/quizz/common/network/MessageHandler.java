@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class MessageHandler extends Thread {
 
     class IntAndString {
-        private final int theInt;
+        private final int    theInt;
         private final String theString;
 
         public IntAndString(int theInt, String theString) {
@@ -31,7 +31,8 @@ public abstract class MessageHandler extends Thread {
             return theString;
         }
     }
-    private final ConcurrentLinkedQueue<IntAndString> messagePool = new ConcurrentLinkedQueue <>();
+
+    private final ConcurrentLinkedQueue<IntAndString> messagePool = new ConcurrentLinkedQueue<>();
 
     private ConcurrentHashMap<Integer, SocketSender> senders = new ConcurrentHashMap<>();
 

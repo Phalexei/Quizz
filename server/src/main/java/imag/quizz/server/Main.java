@@ -6,6 +6,7 @@ package imag.quizz.server;
 public class Main {
 
     public static final int SERVER_PORT = 26000;
+
     /**
      *
      */
@@ -18,6 +19,8 @@ public class Main {
         int serverId = Integer.valueOf(args[0]);
         Server server = new Server(serverId);
 
-        while (true) ;
+        while (true) {
+            ;
+        }
     }
 }
