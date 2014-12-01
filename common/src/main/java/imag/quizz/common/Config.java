@@ -44,7 +44,7 @@ public class Config {
                 final JSONObject serverObject = (JSONObject) aServersArray;
                 final int serverId = Integer.parseInt((String) serverObject.get("id"));
                 final String serverHost = (String) serverObject.get("host");
-                final String serverPort = (String) serverObject.get("port");
+                final int serverPort = Integer.parseInt((String) serverObject.get("port"));
                 this.servers.put(serverId, serverHost + ':' + serverPort);
             }
         } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException e) {

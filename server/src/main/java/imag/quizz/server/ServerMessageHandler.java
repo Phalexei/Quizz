@@ -1,9 +1,7 @@
 package imag.quizz.server;
 
 import imag.quizz.common.network.MessageHandler;
-import imag.quizz.common.protocol.message.Message;
-import imag.quizz.common.protocol.message.PingMessage;
-import imag.quizz.common.protocol.message.PongMessage;
+import imag.quizz.common.protocol.message.*;
 
 public class ServerMessageHandler extends MessageHandler {
 
@@ -12,9 +10,7 @@ public class ServerMessageHandler extends MessageHandler {
 
     @Override
     public void handleMessage(Message message) {
-        if (Main.DEBUG) {
-            System.out.println("Server handling message : " + message.toString());
-        }
+        System.out.println("Server handling message : " + message.toString());
 
         switch (message.getCommand()) {
             //TODO: fill in each case
