@@ -4,7 +4,7 @@ import imag.quizz.common.protocol.Command;
 
 public class LoginMessage extends AccountingMessage {
 
-    protected LoginMessage(final String login, final String password) {
+    protected LoginMessage(final int senderId, final String login, final String password) {
         super(Command.LOGIN, login, password);
     }
 

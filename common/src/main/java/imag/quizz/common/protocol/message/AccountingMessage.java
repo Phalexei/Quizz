@@ -18,8 +18,8 @@ public abstract class AccountingMessage extends Message {
     /* package*/ AccountingMessage(final Command command, final String[] messageSplit) {
         super(command);
         this.checkCommandName(messageSplit[0]);
-        this.login = messageSplit[1];
-        this.hashedPassword = messageSplit[2];
+        this.login = messageSplit[2];
+        this.hashedPassword = messageSplit[3];
     }
 
     public String getLogin() {

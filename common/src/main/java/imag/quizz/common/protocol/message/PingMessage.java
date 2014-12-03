@@ -6,7 +6,7 @@ public class PingMessage extends Message {
 
     private final String data;
 
-    public PingMessage() {
+    public PingMessage(int senderId) {
         super(Command.PING);
         this.data = Long.toString(System.nanoTime());
     }
@@ -14,7 +14,7 @@ public class PingMessage extends Message {
     /* package*/ PingMessage(final String[] messageSplit) {
         super(Command.PING);
         this.checkCommandName(messageSplit[0]);
-        this.data = messageSplit[1];
+        this.data = messageSplit[2];
     }
 
     public String getData() {

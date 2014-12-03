@@ -6,7 +6,7 @@ public class NokMessage extends Message {
 
     private final String errorMessage;
 
-    public NokMessage() {
+    public NokMessage(final int senderId) {
         super(Command.NOK);
         this.errorMessage = Long.toString(System.nanoTime());
     }
@@ -14,7 +14,7 @@ public class NokMessage extends Message {
     /* package*/ NokMessage(final String[] messageSplit) {
         super(Command.NOK);
         this.checkCommandName(messageSplit[0]);
-        this.errorMessage = messageSplit[1];
+        this.errorMessage = messageSplit[2];
     }
 
     public String getErrorMessage() {

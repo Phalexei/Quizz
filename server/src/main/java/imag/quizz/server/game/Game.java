@@ -54,4 +54,11 @@ public final class Game {
      * The next question the second opponent should answer.
      */
     private byte currentQuestionB;
+
+    public Game(Player playerA, Player playerB) {
+        this.playerA = playerA;
+        this.playerB = playerB;
+
+        //TODO: generate questions
+    }
 }

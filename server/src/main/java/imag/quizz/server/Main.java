@@ -33,7 +33,7 @@ public final class Main {
             System.exit(1);
         }
 
-        final MessageHandler handler = new ServerMessageHandler();
+        final ServerMessageHandler handler = new ServerMessageHandler();
         handler.start();
 
         final ServerInfo info = this.config.getServers().get(this.ownId);

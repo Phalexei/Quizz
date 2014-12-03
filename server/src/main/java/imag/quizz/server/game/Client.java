@@ -2,8 +2,12 @@ package imag.quizz.server.game;
 
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.message.Message;
+import imag.quizz.server.network.ServerConnectionManager;
 
-public class Client {
+/**
+ * A connected client : player or server
+ */
+public abstract class Client {
 
     /**
      * The Client's port.
@@ -20,7 +24,21 @@ public class Client {
      */
     private boolean connected;
 
-    public Client(SocketHandler socketHandler) {
+    /**
+     * The Client's ID
+     */
+    private int id;
+
+    protected final ServerConnectionManager connectionManager;
+
+    public abstract void receive(Message message);
+
+    public enum Type {
+        SERVER,
+        PLAYER
+    }
+
+    public Client(ServerConnectionManager connectionManager, SocketHandler socketHandler, int id) {
         if (socketHandler != null) {
             this.socketHandler = socketHandler;
             this.connected = true;
@@ -28,12 +46,19 @@ public class Client {
         } else {
             this.connected = false;
         }
+        this.id = id;
+        this.connectionManager = connectionManager;
     }
 
     public void disconnect() {
-        // TODO: handle disconnection
         this.connected = false;
+        this.disconnected();
     }
+
+    /**
+     * Called when the Socket of this Client got disconnected
+     */
+    protected abstract void disconnected();
 
     public boolean isConnected() {
         return this.connected;
@@ -41,6 +66,10 @@ public class Client {
 
     public int getPort() {
         return port;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void connect(SocketHandler socketHandler) {
@@ -54,7 +83,10 @@ public class Client {
 
     public void send(Message message) {
         if (this.connected) {
+            message.setSenderId(this.connectionManager.getLocalServerId());
             this.socketHandler.write(message.toString() + "\n");
         }
     }
+
+    public abstract Type getType();
 }

@@ -21,7 +21,7 @@ public class PlayMessage extends Message {
         super(Command.PLAY);
         this.checkCommandName(messageSplit[0]);
         try {
-            this.id = Integer.parseInt(messageSplit[1]);
+            this.id = Integer.parseInt(messageSplit[2]);
         } catch (final NumberFormatException e) {
             throw new IllegalArgumentException("Invalid PLAY message: " + Arrays.toString(messageSplit));
         }

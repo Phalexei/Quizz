@@ -19,29 +19,38 @@ public abstract class Message {
         } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid message: Invalid Command: '" + commandString + "'", e);
         }
+        Message newMessage = null;
         switch (command) {
             case PING:
-                return new PingMessage(messageSplit);
+                newMessage = new PingMessage(messageSplit);
+                break;
             case PONG:
-                return new PongMessage(messageSplit);
+                newMessage = new PongMessage(messageSplit);
+                break;
             case OK:
-                return new OkMessage(messageSplit);
+                newMessage = new OkMessage(messageSplit);
+                break;
             case NOK:
-                return new NokMessage(messageSplit);
+                newMessage = new NokMessage(messageSplit);
+                break;
             case INIT:
                 break; // TODO Hard
             case REGISTER:
-                return new RegisterMessage(messageSplit);
+                newMessage = new RegisterMessage(messageSplit);
+                break;
             case LOGIN:
-                return new LoginMessage(messageSplit);
+                newMessage = new LoginMessage(messageSplit);
+                break;
             case GAMES:
                 break; // TODO Hard
             case NEW:
-                return new NewMessage(messageSplit);
+                newMessage = new NewMessage(messageSplit);
+                break;
             case GAME:
                 break; // TODO Hard
             case PLAY:
-                return new PlayMessage(messageSplit);
+                newMessage = new PlayMessage(messageSplit);
+                break;
             case THEMES:
                 break;
             case THEME:
@@ -61,10 +70,27 @@ public abstract class Message {
             default:
                 throw new UnsupportedOperationException("Missing handler for Command '" + commandString + '\'');
         }
-        throw new UnsupportedOperationException("Not implemented yet: " + commandString); // TODO
+
+        if (newMessage != null ){
+            newMessage.setSenderId(Integer.parseInt(messageSplit[1]));
+        } else {
+            throw new UnsupportedOperationException("Not implemented yet: " + commandString); // TODO
+        }
+
+        return newMessage;
     }
 
     protected final Command command;
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    protected int senderId;
+
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
+    }
 
     protected Message(final Command command) {
         this.command = command;
@@ -82,6 +108,7 @@ public abstract class Message {
 
     public final String toString() {
         final String parameters = this.getParametersString();
-        return this.command.name() + (parameters == null ? "" : Separator.LEVEL_1 + parameters);
+        return this.command.name() + Separator.LEVEL_1 + this.getSenderId()
+                + (parameters == null ? "" : Separator.LEVEL_1 + parameters);
     }
 }

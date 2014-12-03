@@ -3,8 +3,18 @@ package imag.quizz.common.protocol.message;
 import imag.quizz.common.protocol.Command;
 
 public class InitMessage extends Message {
-    public InitMessage() {
+
+    private final String data;
+
+    public InitMessage(final int senderId) {
         super(Command.INIT);
+        data = ""; //TODO
+    }
+
+    /* package*/ InitMessage(final String[] messageSplit) {
+        super(Command.INIT);
+        data = messageSplit[2];
+        //TODO
     }
 
     @Override

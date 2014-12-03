@@ -2,6 +2,8 @@ package imag.quizz.client;
 
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.protocol.message.Message;
+import imag.quizz.common.protocol.message.PingMessage;
+import imag.quizz.common.protocol.message.PongMessage;
 
 public class ClientMessageHandler extends MessageHandler {
 
@@ -10,7 +12,7 @@ public class ClientMessageHandler extends MessageHandler {
     }
 
     @Override
-    public void handleMessage(final int theInt, final Message message) {
+    public void handleMessage(final int port, final Message message) {
         switch (message.getCommand()) {
             //TODO: fill in each case
             case PING:
