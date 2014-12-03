@@ -8,7 +8,7 @@ public final class Game {
     /**
      * The first of the 2 opponents.
      */
-    private Client clientA;
+    private Player playerA;
 
     /**
      * The themes proposed to the first opponent.
@@ -33,7 +33,7 @@ public final class Game {
     /**
      * The second of the 2 opponents.
      */
-    private Client clientB;
+    private Player playerB;
 
     /**
      * The themes proposed to the second opponent.

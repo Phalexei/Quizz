@@ -53,7 +53,7 @@ public abstract class MessageHandler extends AbstractRepeatingThread {
     }
 
     /**
-     * Sends a message to the socket attached to this handler.
+     * Sends a message to the socket attached to this handler on this port
      * @param port the port on which to send the message
      * @param message the message to be sent
      */

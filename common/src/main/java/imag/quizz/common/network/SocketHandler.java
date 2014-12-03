@@ -73,4 +73,8 @@ public class SocketHandler {
             Log.warn("Failed to close socket (is it already closed?)", e);
         }
     }
+
+    public int getPort() {
+        return socket.getPort();
+    }
 }

@@ -1,37 +1,60 @@
 package imag.quizz.server.game;
 
-/**
- * Represents a Client.
- */
-public final class Client {
+import imag.quizz.common.network.SocketHandler;
+import imag.quizz.common.protocol.message.Message;
+
+public class Client {
 
     /**
-     * The Client's login.
+     * The Client's port.
      */
-    private String login;
+    private int port;
 
     /**
-     * The hashed Client's password.
+     * The Client's socket handler
      */
-    private String passwordHash;
+    private SocketHandler socketHandler;
 
     /**
-     * If this Client has logged in.
+     * True if we are currently connected to this client
      */
-    private boolean isLoggedIn;
+    private boolean connected;
 
-    /**
-     * Amount of Games the Client won.
-     */
-    private int wonGames;
+    public Client(SocketHandler socketHandler) {
+        if (socketHandler != null) {
+            this.socketHandler = socketHandler;
+            this.connected = true;
+            this.port = socketHandler.getPort();
+        } else {
+            this.connected = false;
+        }
+    }
 
-    /**
-     * Amount of Games the Client lost.
-     */
-    private int lostGames;
+    public void disconnect() {
+        // TODO: handle disconnection
+        this.connected = false;
+    }
 
-    /**
-     * Amount of Games the Client neither won nor lost.
-     */
-    private int drawGames;
+    public boolean isConnected() {
+        return this.connected;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void connect(SocketHandler socketHandler) {
+        if (this.connected) {
+            //TODO: wtf ?
+        }
+        this.connected = true;
+        this.socketHandler = socketHandler;
+
+    }
+
+    public void send(Message message) {
+        if (this.connected) {
+            this.socketHandler.write(message.toString() + "\n");
+        }
+    }
 }

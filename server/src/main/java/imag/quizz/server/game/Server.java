@@ -1,9 +1,11 @@
 package imag.quizz.server.game;
 
+import imag.quizz.common.network.SocketHandler;
+
 /**
  * Represents a Server.
  */
-public final class Server {
+public final class Server extends Client {
 
     /**
      * The Server's ID.
@@ -15,8 +17,12 @@ public final class Server {
      */
     private String ip;
 
-    /**
-     * The Server's port.
-     */
-    private int port;
+    public Server(SocketHandler socketHandler, int id) {
+        super(socketHandler);
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

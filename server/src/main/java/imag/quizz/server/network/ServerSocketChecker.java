@@ -8,24 +8,23 @@ import org.apache.log4j.Level;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 /**
  * Created by Ribesg.
  */
 public class ServerSocketChecker extends Thread {
 
-    private final MessageHandler              messageHandler;
-    private final Map<Integer, SocketHandler> handlers;
-    private final int                         serverSocketPort;
-    private final boolean                     listensToClients;
+    private final int                     serverSocketPort;
+    private final boolean listensToPlayers;
+    private final ServerConnectionManager serverConnectionManager;
+    private final MessageHandler          messageHandler;
 
-    public ServerSocketChecker(final MessageHandler messageHandler, final Map<Integer, SocketHandler> handlers, final int serverSocketPort, final boolean listensToClients) {
-        super((listensToClients ? "Client" : "Server") + "ServerSocketChecker");
-        this.messageHandler = messageHandler;
-        this.handlers = handlers;
+    public ServerSocketChecker(ServerConnectionManager serverConnectionManager, final int serverSocketPort, final boolean listensToPlayers, MessageHandler messageHandler) {
+        super((listensToPlayers ? "Player" : "Server") + "ServerSocketChecker");
         this.serverSocketPort = serverSocketPort;
-        this.listensToClients = listensToClients;
+        this.listensToPlayers = listensToPlayers;
+        this.serverConnectionManager = serverConnectionManager;
+        this.messageHandler = messageHandler;
     }
 
     @Override
@@ -43,10 +42,11 @@ public class ServerSocketChecker extends Thread {
             try {
                 inSocket = server.accept();
                 if (Log.isEnabledFor(Level.DEBUG)) {
-                    Log.debug("New " + (this.listensToClients ? "Client" : "Server") + " on Port : " + inSocket.getPort());
+                    Log.debug("New " + (this.listensToPlayers ? "Player" : "Server") + " on Port : " + inSocket.getPort());
                 }
                 try {
-                    this.handlers.put(inSocket.getPort(), new SocketHandler(inSocket, this.messageHandler));
+                    SocketHandler socketHandler = new SocketHandler(inSocket, this.messageHandler);
+                    serverConnectionManager.addNewConnection(listensToPlayers, socketHandler, inSocket.getPort());
                 } catch (final IOException e) {
                     Log.error("Failed to create socket handler", e);
                     try {

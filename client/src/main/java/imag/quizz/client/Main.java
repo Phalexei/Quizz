@@ -55,7 +55,7 @@ public final class Main {
         for (final int id : serverInfos) {
             final ServerInfo info = this.config.getServers().get(id);
             try {
-                handler = new SocketHandler(new Socket(info.getHost(), info.getClientPort()), msgHandler);
+                handler = new SocketHandler(new Socket(info.getHost(), info.getPlayerPort()), msgHandler);
                 break;
             } catch (final IOException ignored) {
             }

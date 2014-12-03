@@ -42,7 +42,7 @@ public final class Main {
             System.exit(2);
         }
 
-        new ServerConnectionManager(handler, this.config, this.ownId);
+        ServerConnectionManager manager = new ServerConnectionManager(handler, this.config, this.ownId);
     }
 
     private void parseArgs(final String[] args) {

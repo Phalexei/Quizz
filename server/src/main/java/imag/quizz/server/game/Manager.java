@@ -10,14 +10,14 @@ import java.util.Map;
 public final class Manager {
 
     /**
-     * Games currently running for each Client.
+     * Games currently running for each Player.
      */
-    private final Map<Client, List<Game>> clientGames;
+    private final Map<Player, List<Game>> playerGames;
 
     /**
      * Builds a Game Manager.
      */
     public Manager() {
-        this.clientGames = new HashMap<>();
+        this.playerGames = new HashMap<>();
     }
 }

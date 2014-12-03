@@ -24,13 +24,13 @@ public class Config {
         private final int    id;
         private final String host;
         private final int    serverPort;
-        private final int    clientPort;
+        private final int playerPort;
 
-        public ServerInfo(final int id, final String host, final int serverPort, final int clientPort) {
+        public ServerInfo(final int id, final String host, final int serverPort, final int playerPort) {
             this.id = id;
             this.host = host;
             this.serverPort = serverPort;
-            this.clientPort = clientPort;
+            this.playerPort = playerPort;
         }
 
         public int getId() {
@@ -45,8 +45,8 @@ public class Config {
             return this.serverPort;
         }
 
-        public int getClientPort() {
-            return this.clientPort;
+        public int getPlayerPort() {
+            return this.playerPort;
         }
     }
 
@@ -67,7 +67,7 @@ public class Config {
             Log.debug("Configuration file parsed. " + this.servers.size() + " servers found:");
             for (final Entry<Integer, ServerInfo> e : this.servers.entrySet()) {
                 final ServerInfo info = e.getValue();
-                Log.debug("Server n°" + e.getKey() + " : " + info.getHost() + " - " + info.getServerPort() + "/" + info.getClientPort());
+                Log.debug("Server n°" + e.getKey() + " : " + info.getHost() + " - " + info.getServerPort() + "/" + info.getPlayerPort());
             }
         }
     }
@@ -81,8 +81,8 @@ public class Config {
                 final int serverId = Integer.parseInt((String) serverObject.get("id"));
                 final String serverHost = (String) serverObject.get("host");
                 final int serverPort = Integer.parseInt((String) serverObject.get("serverPort"));
-                final int clientPort = Integer.parseInt((String) serverObject.get("clientPort"));
-                this.servers.put(serverId, new ServerInfo(serverId, serverHost, serverPort, clientPort));
+                final int playerPort = Integer.parseInt((String) serverObject.get("playerPort"));
+                this.servers.put(serverId, new ServerInfo(serverId, serverHost, serverPort, playerPort));
             }
         } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException e) {
             throw new IllegalArgumentException("Malformed configuration file", e);
