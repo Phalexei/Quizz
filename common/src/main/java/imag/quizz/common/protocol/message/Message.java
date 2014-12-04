@@ -71,9 +71,7 @@ public abstract class Message {
                 throw new UnsupportedOperationException("Missing handler for Command '" + commandString + '\'');
         }
 
-        if (newMessage != null ){
-            newMessage.setSenderId(Integer.parseInt(messageSplit[1]));
-        } else {
+        if (newMessage == null) {
             throw new UnsupportedOperationException("Not implemented yet: " + commandString); // TODO
         }
 
@@ -81,19 +79,11 @@ public abstract class Message {
     }
 
     protected final Command command;
+    protected final int     senderId;
 
-    public int getSenderId() {
-        return senderId;
-    }
-
-    protected int senderId;
-
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
-    }
-
-    protected Message(final Command command) {
+    protected Message(final Command command, final int senderId) {
         this.command = command;
+        this.senderId = senderId;
     }
 
     public final Command getCommand() {
@@ -108,7 +98,7 @@ public abstract class Message {
 
     public final String toString() {
         final String parameters = this.getParametersString();
-        return this.command.name() + Separator.LEVEL_1 + this.getSenderId()
-                + (parameters == null ? "" : Separator.LEVEL_1 + parameters);
+        return this.command.name() + Separator.LEVEL_1 + this.senderId
+                + (parameters == null ? "" : Separator.LEVEL_1 + parameters) + '\n';
     }
 }

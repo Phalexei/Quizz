@@ -22,11 +22,8 @@ public class SocketHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), "UTF-8"));
         final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream(), "UTF-8"));
 
-        final int port = this.socket.getPort();
-
         this.socketSender = new SocketSender(writer);
-        handler.registerSocketHandler(port, this);
-        this.socketReceiver = new SocketReceiver(reader, this, port);
+        this.socketReceiver = new SocketReceiver(reader, this);
 
         this.socketSender.start();
         this.socketReceiver.start();
@@ -74,7 +71,7 @@ public class SocketHandler {
         }
     }
 
-    public int getPort() {
-        return socket.getPort();
+    public Socket getSocket() {
+        return this.socket;
     }
 }

@@ -1,7 +1,5 @@
 package imag.quizz.server.network;
 
-import imag.quizz.common.network.MessageHandler;
-import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.tool.Log;
 import org.apache.log4j.Level;
 
@@ -10,25 +8,31 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Created by Ribesg.
+ * This Thread waits for new connections either from Servers or Players.
  */
 public class ServerSocketChecker extends Thread {
 
-    private final int                     serverSocketPort;
-    private final boolean listensToPlayers;
-    private final ServerConnectionManager serverConnectionManager;
-    private final MessageHandler          messageHandler;
+    private final boolean           listensToPlayers;
+    private final int               serverSocketPort;
+    private final ConnectionManager connectionManager;
 
-    public ServerSocketChecker(ServerConnectionManager serverConnectionManager, final int serverSocketPort, final boolean listensToPlayers, MessageHandler messageHandler) {
-        super((listensToPlayers ? "Player" : "Server") + "ServerSocketChecker");
-        this.serverSocketPort = serverSocketPort;
+    private boolean stopAsked;
+
+    public ServerSocketChecker(final boolean listensToPlayers, final ConnectionManager connectionManager, final int serverSocketPort) {
+        super((listensToPlayers ? "Player" : "Server") + "ServerSocketChecker"); // Thread name
         this.listensToPlayers = listensToPlayers;
-        this.serverConnectionManager = serverConnectionManager;
-        this.messageHandler = messageHandler;
+        this.serverSocketPort = serverSocketPort;
+        this.connectionManager = connectionManager;
+        this.stopAsked = false;
+    }
+
+    public void askStop() {
+        this.stopAsked = true;
     }
 
     @Override
     public void run() {
+        // Opens Server socket on appropriate port
         final ServerSocket server;
         try {
             server = new ServerSocket(this.serverSocketPort);
@@ -37,16 +41,17 @@ public class ServerSocketChecker extends Thread {
             return;
         }
 
-        Socket inSocket;
-        while (!this.isInterrupted()) {
+        // Wait for incoming connections
+        while (!this.stopAsked) {
             try {
-                inSocket = server.accept();
+                final Socket inSocket = server.accept();
+                // Incoming connection!
                 if (Log.isEnabledFor(Level.DEBUG)) {
                     Log.debug("New " + (this.listensToPlayers ? "Player" : "Server") + " on Port : " + inSocket.getPort());
                 }
                 try {
-                    SocketHandler socketHandler = new SocketHandler(inSocket, this.messageHandler);
-                    serverConnectionManager.addNewConnection(listensToPlayers, socketHandler, inSocket.getPort());
+                    // Handle the new socket and register the new connection
+                    this.connectionManager.newIncomingConnection(inSocket);
                 } catch (final IOException e) {
                     Log.error("Failed to create socket handler", e);
                     try {
@@ -55,7 +60,7 @@ public class ServerSocketChecker extends Thread {
                     }
                 }
             } catch (final IOException e) {
-                Log.error("Failed to open accept socket", e);
+                Log.error("Failed to open server socket", e);
             }
         }
     }

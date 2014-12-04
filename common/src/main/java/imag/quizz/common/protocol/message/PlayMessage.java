@@ -8,17 +8,17 @@ public class PlayMessage extends Message {
 
     private final Integer id;
 
-    public PlayMessage() {
-        this(null);
+    public PlayMessage(final int senderId) {
+        this(senderId, null);
     }
 
-    public PlayMessage(final int id) {
-        super(Command.PLAY);
+    public PlayMessage(final int senderId, final Integer id) {
+        super(Command.PLAY, senderId);
         this.id = id;
     }
 
     /* package*/ PlayMessage(final String[] messageSplit) {
-        super(Command.PLAY);
+        super(Command.PLAY, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         try {
             this.id = Integer.parseInt(messageSplit[2]);

@@ -6,17 +6,17 @@ public class NewMessage extends Message {
 
     private final String opponent;
 
-    public NewMessage() {
-        this((String) null);
+    public NewMessage(final int senderId) {
+        this(senderId, null);
     }
 
-    public NewMessage(final String opponent) {
-        super(Command.NEW);
+    public NewMessage(final int senderId, final String opponent) {
+        super(Command.NEW, senderId);
         this.opponent = opponent;
     }
 
     /* package*/ NewMessage(final String[] messageSplit) {
-        super(Command.NEW);
+        super(Command.NEW, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.opponent = messageSplit[2];
     }

@@ -9,14 +9,14 @@ public abstract class AccountingMessage extends Message {
     private final String login;
     private final String hashedPassword;
 
-    protected AccountingMessage(final Command command, final String login, final String password) {
-        super(command);
+    protected AccountingMessage(final Command command, final int senderId, final String login, final String password) {
+        super(command, senderId);
         this.login = login;
         this.hashedPassword = Hash.md5(password);
     }
 
     /* package*/ AccountingMessage(final Command command, final String[] messageSplit) {
-        super(command);
+        super(command, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.login = messageSplit[2];
         this.hashedPassword = messageSplit[3];

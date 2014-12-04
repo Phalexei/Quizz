@@ -5,76 +5,58 @@ import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.Pair;
 import org.apache.log4j.Level;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Queue of incoming messages and handling thread.
+ *
  * Implementing classes should only override
- * {@link #handleMessage(int, imag.quizz.common.protocol.message.Message)}
+ * {@link #handleMessage(imag.quizz.common.network.SocketHandler, imag.quizz.common.protocol.message.Message)}
  */
 public abstract class MessageHandler extends AbstractRepeatingThread {
 
     /**
      * Received messages ready to be handled.
      */
-    private final ConcurrentLinkedQueue<Pair<Integer, String>> messagePool = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Pair<SocketHandler, String>> messagePool = new ConcurrentLinkedQueue<>();
 
     /**
-     * Map of opened sockets.
+     * Constructor.
+     *
+     * @param name name of the Thread
      */
-    private ConcurrentHashMap<Integer, SocketHandler> handlers = new ConcurrentHashMap<>();
-
     protected MessageHandler(final String name) {
         super(name, 50);
     }
 
     /**
      * Adds a message to the queue. It will be handled in
-     * {@link #handleMessage(int, imag.quizz.common.protocol.message.Message)}
-     * @param port the port on which to send the message
-     * @param message the message to add to the queue
+     * {@link #handleMessage(imag.quizz.common.network.SocketHandler, imag.quizz.common.protocol.message.Message)}
+     *
+     * @param socketHandler the socket handler that received the message
+     * @param message the message
      */
-    public final void addMessage(final int port, final String message) {
-        messagePool.offer(new Pair<>(port, message));
+    public final void queue(final SocketHandler socketHandler, final String message) {
+        this.messagePool.offer(new Pair<>(socketHandler, message));
         if (Log.isEnabledFor(Level.DEBUG)) {
-            Log.debug("Message queued : " + message);
+            Log.debug("Message queued: " + message);
         }
-    }
-
-    /**
-     * Registers the {@link imag.quizz.common.network.SocketSender} as the correct
-     * sender on the specified port.
-     * @param port the port on which to bind the sender
-     * @param socketHandler the handler to bind on the port
-     */
-    public final void registerSocketHandler(final int port, final SocketHandler socketHandler) {
-        this.handlers.put(port, socketHandler);
-    }
-
-    /**
-     * Sends a message to the socket attached to this handler on this port
-     * @param port the port on which to send the message
-     * @param message the message to be sent
-     */
-    public final void send(final int port, final Message message) {
-        this.handlers.get(port).write(message.toString() + '\n');
     }
 
     @Override
     public final void work() {
         String messageString;
-        Pair<Integer, String> portAndMessage;
-        while (!messagePool.isEmpty()) {
-            portAndMessage = messagePool.poll();
-            if (portAndMessage != null) {
-                messageString = portAndMessage.getB();
+        Pair<SocketHandler, String> socketAndMessage;
+        while (!this.messagePool.isEmpty()) {
+            socketAndMessage = this.messagePool.poll();
+            if (socketAndMessage != null) {
+                messageString = socketAndMessage.getB();
                 if (Log.isEnabledFor(Level.DEBUG)) {
-                    Log.debug("Message handled : " + messageString);
+                    Log.debug("Handling message: " + messageString);
                 }
                 try {
                     final Message message = Message.fromString(messageString);
-                    handleMessage(portAndMessage.getA(), message);
+                    this.handleMessage(socketAndMessage.getA(), message);
                 } catch (final IllegalArgumentException e) {
                     Log.error("Received invalid message, ignoring it", e);
                 }
@@ -85,8 +67,9 @@ public abstract class MessageHandler extends AbstractRepeatingThread {
     /**
      * This method is called by a {@link imag.quizz.common.network.SocketReceiver}
      * on each incoming message. The treatment of the message should happen here.
-     * @param port the message's origin port
+     *
+     * @param socketHandler the socket handle that received the message
      * @param message the message to be handled
      */
-    public abstract void handleMessage(int port, Message message);
+    public abstract void handleMessage(final SocketHandler socketHandler, final Message message);
 }
