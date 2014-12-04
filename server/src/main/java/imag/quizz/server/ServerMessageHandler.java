@@ -24,7 +24,7 @@ public class ServerMessageHandler extends MessageHandler {
         Client client = serverConnectionManager.getClientByPort(port);
 
         if (client == null) {
-            message.getSenderId(); // TODO: new client using this id ?
+            client = serverConnectionManager.addClient(port, message.getSenderId());
         }
 
         if (client != null) {

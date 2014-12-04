@@ -53,6 +53,7 @@ public abstract class Client {
     public void disconnect() {
         this.connected = false;
         this.disconnected();
+        this.connectionManager.removeConnection(this);
     }
 
     /**
@@ -79,7 +80,13 @@ public abstract class Client {
         this.connected = true;
         this.socketHandler = socketHandler;
 
+        this.connected();
     }
+
+    /**
+     * Called when the Socket of this client just connected
+     */
+    protected abstract void connected();
 
     public void send(Message message) {
         if (this.connected) {

@@ -3,7 +3,6 @@ package imag.quizz.server.network;
 import imag.quizz.common.Config;
 import imag.quizz.common.Config.ServerInfo;
 import imag.quizz.common.network.SocketHandler;
-import imag.quizz.common.protocol.message.InitMessage;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.ServerMessageHandler;
@@ -93,7 +92,7 @@ public class ServerConnectionManager {
             try {
                 s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
                 try {
-                    this.serverSockets.put(entry.getKey(), new SocketHandler(s, this.messageHandler));
+                    this.serverSockets.put(s.getLocalPort(), new SocketHandler(s, this.messageHandler));
                     successCount++;
                 } catch (final IOException e) {
                     Log.error("Failed to create SocketHandler for server " + info.getId(), e);
@@ -107,7 +106,7 @@ public class ServerConnectionManager {
     }
 
     /**
-     * Register a new incoming connection
+     * Registers a new incoming connection
      * @param playerConnection true if this a new player, false if it is a server
      * @param socketHandler the handler associated to this new socket
      * @param port the port of the socket
@@ -116,30 +115,73 @@ public class ServerConnectionManager {
         if (playerConnection) { // new client
             if (playerSockets.get(port) != null) {
                 //TODO: wtf?
+            } else {
+                playerSockets.put(port, socketHandler);
             }
-            playerSockets.put(port, socketHandler);
-            //TODO: we do not know who the player is...
-            // => first message he sends us will contain his ID...
         } else { // new server
             if (serverSockets.get(port) != null) {
                 //TODO: wtf?
+            } else {
+                serverSockets.put(port, socketHandler);
             }
-            serverSockets.put(port, socketHandler);
+        }
+    }
 
-            final Server s = getServerByPort(port);
-            if (s == null) {
-                // TODO: find ID of server that connected to us. HOW ? :'(
-                // => first message he sends us will contain his ID...
-                //s = new Server(socketHandler, ID)
+    /**
+     * Registers a new Client on a port
+     * @param port the port on which to register the Client
+     * @param clientId the ID of the Client
+     */
+    public Client addClient(final int port, final int clientId) {
+        SocketHandler handler = serverSockets.get(port);
+        Client newClient = null;
+        if (handler != null) {
+            newClient = this.servers.get(clientId);
+
+            if (newClient == null) {
+                newClient = new Server(this, handler, clientId);
+            } else {
+                newClient.connect(handler);
             }
-            if (s != null) {
-                s.connect(socketHandler);
-                if (s.getId() < this.serverId && isLeader(this.serverId)) {
-                    //TODO: s is the future new leader. Send him INIT
-                    s.send(new InitMessage(this.serverId));
-                    Log.info("Sending INIT to new leader");
+            this.servers.put(clientId, (Server)newClient);
+        } else {
+            handler = this.playerSockets.get(port);
+
+            if (handler == null) {
+                //TODO
+                Log.error("No handler found on port " + port);
+            } else {
+                newClient = this.players.get(clientId);
+                if (newClient == null) {
+                    newClient = new Player(this, handler, clientId);
+                } else {
+                    newClient.connect(handler);
                 }
+                this.players.put(clientId, (Player)newClient);
             }
+        }
+        return newClient;
+    }
+
+    /**
+     * Registers a new Player connected to any server
+     * @param playerId
+     */
+    public void addPlayer(final int playerId) {
+        this.players.put(playerId, new Player(this, null, playerId));
+    }
+
+    /** Notify of a lost connection
+     * @param client the client that got disconnected
+     */
+    public void removeConnection(Client client) {
+        switch (client.getType()) {
+            case PLAYER:
+                playerSockets.remove(client.getPort());
+                break;
+            case SERVER:
+                serverSockets.remove(client.getPort());
+                break;
         }
     }
 
@@ -249,5 +291,9 @@ public class ServerConnectionManager {
 
     public int getLocalServerId() {
         return this.serverId;
+    }
+
+    public int getRandomPlayerId() {
+        throw new NotImplementedException("TODO");
     }
 }

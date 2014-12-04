@@ -27,12 +27,9 @@ public final class Server extends Client {
         this.proc = new AbstractRepeatingThread("server proc", SERVER_PROC_TIME) {
             @Override
             protected void work() throws InterruptedException {
-                if (Server.this.isConnected()) {
-                    Server.this.proc();
-                }
+                Server.this.proc();
             }
         };
-        this.proc.start();
 
         this.waitingPong = false;
         this.pongCounter = 0;
@@ -40,7 +37,12 @@ public final class Server extends Client {
 
     @Override
     protected void disconnected() {
-        //TODO: handle disconnection
+        this.proc.askStop();
+    }
+
+    @Override
+    protected void connected() {
+        this.proc.start();
     }
 
     private void proc() {
@@ -50,7 +52,7 @@ public final class Server extends Client {
     private void checkPing() {
         if (this.waitingPong) {
             if ((this.pongCounter += SERVER_PROC_TIME) >= SERVER_PONG_TIMEOUT) {
-                //TODO: no pong received
+                this.disconnect();
             }
         } else {
             send(new PingMessage(this.getId()));
