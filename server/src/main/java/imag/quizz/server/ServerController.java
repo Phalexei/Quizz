@@ -1,6 +1,8 @@
 package imag.quizz.server;
 
 import imag.quizz.common.Config;
+import imag.quizz.common.Controller;
+import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.message.Message;
@@ -42,9 +44,8 @@ public class ServerController extends MessageHandler implements Controller {
         this.config = config;
         this.servers = new TreeMap<>();
 
-        this.connectionManager = new ServerConnectionManager(this);
-
-        this.pingPongTask = new PingPongTask(this, 3_000, this.config);
+        this.connectionManager = new ServerConnectionManager(this, ownId);
+        this.pingPongTask = new PingPongTask(this, 3_000);
         this.pingPongTask.start();
     }
 
@@ -158,5 +159,11 @@ public class ServerController extends MessageHandler implements Controller {
 
     public void setCurrentLeaderLocalPort(final Integer currentLeaderLocalPort) {
         this.currentLeaderLocalPort = currentLeaderLocalPort;
+    }
+
+    @Override
+    public void lostConnection(SocketHandler socketHandler) {
+        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
+        //TODO
     }
 }

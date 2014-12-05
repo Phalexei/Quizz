@@ -52,6 +52,7 @@ public class SocketHandler {
     public void kill() {
         this.socketReceiver.askStop();
         this.socketSender.askStop();
+
         try {
             this.socketReceiver.join();
         } catch (final InterruptedException e) {
@@ -69,6 +70,8 @@ public class SocketHandler {
         } catch (final IOException e) {
             Log.warn("Failed to close socket (is it already closed?)", e);
         }
+
+        this.getHandler().lostConnection(this);
     }
 
     public Socket getSocket() {

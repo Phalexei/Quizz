@@ -20,11 +20,13 @@ public abstract class ConnectionManager {
     protected final Map<Integer, SocketHandler> connections;
     protected final MessageHandler              messageHandler;
     protected final ServerSocketChecker         serverSocketChecker;
+    private final int                           ownId;
 
-    protected ConnectionManager(final MessageHandler messageHandler, final boolean isPlayer, final int localPort) {
+    protected ConnectionManager(final MessageHandler messageHandler, final boolean isPlayer, final int localPort, final int ownId) {
         this.connectedPeers = new HashMap<>();
         this.connections = new HashMap<>();
         this.messageHandler = messageHandler;
+        this.ownId = ownId;
         this.serverSocketChecker = new ServerSocketChecker(isPlayer, this, localPort);
 
         this.serverSocketChecker.start();
@@ -100,5 +102,9 @@ public abstract class ConnectionManager {
     public void forgetConnection(final int port) {
         this.connectedPeers.remove(port);
         this.connections.remove(port);
+    }
+
+    public int getOwnId() {
+        return this.ownId;
     }
 }

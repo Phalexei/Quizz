@@ -1,23 +1,23 @@
 package imag.quizz.client.ui;
 
-import imag.quizz.client.game.Manager;
+import imag.quizz.client.game.ClientController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Map button clicks to the game's {@link imag.quizz.client.game.Manager}.
+ * Map button clicks to the game's {@link imag.quizz.client.game.ClientController}.
  */
 public class InputHandler implements ActionListener {
 
-    private final Manager manager;
+    private final ClientController clientController;
 
-    public InputHandler(final Manager manager) {
-        this.manager = manager;
+    public InputHandler(final ClientController clientController) {
+        this.clientController = clientController;
     }
 
     @Override
     public void actionPerformed(final ActionEvent event) {
-        this.manager.onButtonClick(event.getActionCommand());
+        this.clientController.onButtonClick(event.getActionCommand());
     }
 }

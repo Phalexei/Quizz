@@ -1,6 +1,6 @@
 package imag.quizz.client.ui;
 
-import imag.quizz.client.game.Manager;
+import imag.quizz.client.game.ClientController;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -21,13 +21,13 @@ public class Window {
     private final JTextPane questionTextPane;
     private final JTextArea logsTextArea;
 
-    public Window(final Manager manager) {
+    public Window(final ClientController clientController) {
         this.topLeftButton = new JButton("Oui");
         this.topRightButton = new JButton("Non");
         this.bottomLeftButton = new JButton("Peut-être");
         this.bottomRightButton = new JButton("42");
 
-        final InputHandler inputHandler = new InputHandler(manager);
+        final InputHandler inputHandler = new InputHandler(clientController);
         this.topLeftButton.addActionListener(inputHandler);
         this.topRightButton.addActionListener(inputHandler);
         this.bottomLeftButton.addActionListener(inputHandler);
@@ -71,8 +71,11 @@ public class Window {
         frame.setResizable(false);
         frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        manager.setWindow(this);
         new Log4JAppender(this);
+
+        clientController.setWindow(this);
+        clientController.start();
+        clientController.connect();
     }
 
     public void setQuestion(final String question) {
@@ -125,5 +128,10 @@ public class Window {
             }
         }
         Window.this.logsTextArea.setCaretPosition(document.getLength());
+    }
+
+    public void noConnection() {
+        this.lockButtons();
+        // TODO: show popup informing that no connection is available. Add a "Close" and "Retry" button ?
     }
 }

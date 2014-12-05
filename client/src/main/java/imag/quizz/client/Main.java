@@ -1,19 +1,11 @@
 package imag.quizz.client;
 
-import imag.quizz.client.game.Manager;
-import imag.quizz.client.network.ConnectionManager;
+import imag.quizz.client.game.ClientController;
 import imag.quizz.client.ui.Window;
 import imag.quizz.common.Config;
-import imag.quizz.common.Config.ServerInfo;
-import imag.quizz.common.network.MessageHandler;
-import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.tool.Log;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -43,7 +35,7 @@ public final class Main {
         }
 
         // Create main window
-        new Window(new Manager(config));
+        new Window(new ClientController(config));
 
         Log.info("Ready");
     }

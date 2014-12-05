@@ -72,4 +72,6 @@ public abstract class MessageHandler extends AbstractRepeatingThread {
      * @param message the message to be handled
      */
     public abstract void handleMessage(final SocketHandler socketHandler, final Message message);
+
+    public abstract void lostConnection(final SocketHandler socketHandler);
 }

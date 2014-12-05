@@ -23,8 +23,8 @@ public class ServerConnectionManager extends ConnectionManager {
 
     private boolean isConnectedToLambdas;
 
-    public ServerConnectionManager(final ServerController controller) {
-        super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort());
+    public ServerConnectionManager(final ServerController controller, final int ownId) {
+        super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort(), ownId);
         this.controller = controller;
         this.isConnectedToLambdas = false;
 
@@ -43,7 +43,7 @@ public class ServerConnectionManager extends ConnectionManager {
             this.controller.setCurrentLeaderId(this.controller.getOwnId());
             Log.info("Server started alone.");
         } else {
-            if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
+            if (this.controller.getCurrentLeaderId() > this.getOwnId()) {
                 this.controller.setLeader(false);
                 Log.info("Server started as future new leader, waiting for INIT from current leader");
             } else {
@@ -63,7 +63,7 @@ public class ServerConnectionManager extends ConnectionManager {
     private Integer connectLeader() {
         for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
             final int id = entry.getKey();
-            if (id == this.controller.getOwnId()) {
+            if (id == this.getOwnId()) {
                 // This server's configuration entry, ignore
                 continue;
             }
@@ -95,15 +95,15 @@ public class ServerConnectionManager extends ConnectionManager {
     public int connectServers() {
         Validate.isTrue(!this.isConnectedToLambdas, "Illegal State: already connected to servers once");
         final int oldLeaderId = this.controller.getCurrentLeaderId();
-        if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
+        if (this.controller.getCurrentLeaderId() > this.getOwnId()) {
             this.controller.setLeader(true);
-            this.controller.setCurrentLeaderId(this.controller.getOwnId());
+            this.controller.setCurrentLeaderId(this.getOwnId());
             this.controller.setCurrentLeaderLocalPort(null);
             Log.info("We are now Leader");
         }
         int successCount = 0;
         for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
-            if (entry.getKey() == this.controller.getOwnId() || entry.getKey() == oldLeaderId) {
+            if (entry.getKey() == this.getOwnId() || entry.getKey() == oldLeaderId) {
                 // Ignore
                 continue;
             }
@@ -161,5 +161,11 @@ public class ServerConnectionManager extends ConnectionManager {
         for (final SocketHandler handler : this.connections.values()) {
             handler.write(message.toString());
         }
+    }
+
+    @Override
+    public void forgetConnection(int port) {
+        super.forgetConnection(port);
+        //TODO : devenir leader ? plus aucun server ? autre ?
     }
 }

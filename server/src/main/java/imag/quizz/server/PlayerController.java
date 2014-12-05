@@ -1,10 +1,11 @@
 package imag.quizz.server;
 
+import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.message.Message;
+import imag.quizz.common.protocol.message.PongMessage;
 import imag.quizz.server.game.Game;
-import imag.quizz.server.game.Peer;
 import imag.quizz.server.game.Player;
 import imag.quizz.server.game.QuestionBase;
 import imag.quizz.server.network.PlayerConnectionManager;
@@ -34,11 +35,12 @@ public class PlayerController extends MessageHandler implements Controller {
      * Constructor.
      *
      * @param serverController the Server controller
+     * @param ownId
      */
-    public PlayerController(final ServerController serverController, final int localPlayerPort, final QuestionBase questionBase) {
+    public PlayerController(final ServerController serverController, final int localPlayerPort, final QuestionBase questionBase, Integer ownId) {
         super("PlayerController");
         this.serverController = serverController;
-        this.connectionManager = new PlayerConnectionManager(this, localPlayerPort);
+        this.connectionManager = new PlayerConnectionManager(this, localPlayerPort, ownId);
 
         this.questionBase = questionBase;
 
@@ -88,7 +90,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and continue game
                     break;
                 case PING:
-                    // TODO Pong
+                    this.connectionManager.send(player, new PongMessage(this.connectionManager.getOwnId(), message));
                     break;
                 case PLAY:
                     // TODO Check Game id, send THEMES, QUESTION or WAIT to Player
@@ -123,5 +125,10 @@ public class PlayerController extends MessageHandler implements Controller {
                     break;
             }
         }
+    }
+
+    @Override
+    public void lostConnection(SocketHandler socketHandler) {
+        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
     }
 }
