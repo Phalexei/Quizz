@@ -138,10 +138,10 @@ public class ServerConnectionManager extends ConnectionManager {
     public void broadcast(final Message message) {
         if (this.isLeader) {
             for (final int port : this.connectedPeers.keySet()) {
-                this.connections.get(port).write(message.toString() + '\n');
+                this.connections.get(port).write(message.toString());
             }
         } else {
-            this.connections.get(this.currentLeaderLocalPort).write(message.toString() + '\n');
+            this.connections.get(this.currentLeaderLocalPort).write(message.toString());
         }
     }
 }
