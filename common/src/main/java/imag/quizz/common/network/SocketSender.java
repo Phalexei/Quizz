@@ -13,7 +13,7 @@ public class SocketSender extends AbstractRepeatingThread {
     private final Deque<String>  buffer;
 
     /* package */ SocketSender(final BufferedWriter writer) {
-        super(" S-Sender ", 50);
+        super("SocketSender", 50);
         this.writer = writer;
         this.buffer = new ConcurrentLinkedDeque<>();
     }

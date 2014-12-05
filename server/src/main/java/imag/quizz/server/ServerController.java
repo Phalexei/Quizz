@@ -96,7 +96,6 @@ public class ServerController extends MessageHandler implements Controller {
                 // TODO Load data
                 this.connectionManager.connectServers();
                 this.connectionManager.broadcast(new OkMessage(this.ownId));
-                Log.info("We are now Leader");
                 break;
             case REGISTER:
                 break;

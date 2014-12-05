@@ -94,9 +94,16 @@ public class ServerConnectionManager extends ConnectionManager {
      */
     public int connectServers() {
         Validate.isTrue(!this.isConnectedToLambdas, "Illegal State: already connected to servers once");
+        final int oldLeaderId = this.controller.getCurrentLeaderId();
+        if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
+            this.controller.setLeader(true);
+            this.controller.setCurrentLeaderId(this.controller.getOwnId());
+            this.controller.setCurrentLeaderLocalPort(null);
+            Log.info("We are now Leader");
+        }
         int successCount = 0;
         for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
-            if (entry.getKey() == this.controller.getOwnId() || entry.getKey() == this.controller.getCurrentLeaderId()) {
+            if (entry.getKey() == this.controller.getOwnId() || entry.getKey() == oldLeaderId) {
                 // Ignore
                 continue;
             }
@@ -114,11 +121,6 @@ public class ServerConnectionManager extends ConnectionManager {
                 Log.info("Failed to connect to server " + info.getId() + ", ignoring");
                 Log.trace("Error was:", e);
             }
-        }
-        if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
-            this.controller.setLeader(true);
-            this.controller.setCurrentLeaderId(this.controller.getOwnId());
-            this.controller.setCurrentLeaderLocalPort(null);
         }
         this.isConnectedToLambdas = true;
         return successCount;
