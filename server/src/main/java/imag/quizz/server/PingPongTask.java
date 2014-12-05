@@ -12,6 +12,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public class PingPongTask extends AbstractRepeatingThread {
 
+    private static final int PING_FREQ = 10_000;
+
+    private final int timeout;
+
     private final Controller controller;
 
     // Port ; Waiting for a Pong from this Peer
@@ -23,9 +27,10 @@ public class PingPongTask extends AbstractRepeatingThread {
     // Ports
     private final Set<Integer> pingedPorts;
 
-    public PingPongTask(final Controller controller, final Config config) {
+    public PingPongTask(final Controller controller, final int timeout, final Config config) {
         super("PingPongTask", 250);
         this.controller = controller;
+        this.timeout = timeout;
         this.waitingPong = new ConcurrentHashMap<>();
         this.lastPingDate = new ConcurrentHashMap<>();
         this.pingedPorts = new CopyOnWriteArraySet<>();
@@ -50,10 +55,10 @@ public class PingPongTask extends AbstractRepeatingThread {
                 this.lastPingDate.remove(port);
             }
             if (entry.getValue()) {
-                if (this.lastPingDate.get(port) + 3000 < System.currentTimeMillis()) {
+                if (this.lastPingDate.get(port) + this.timeout < System.currentTimeMillis()) {
                     this.controller.pingTimeout(port);
                 }
-            } else if (this.lastPingDate.get(port) + 10000 < System.currentTimeMillis()) {
+            } else if (this.lastPingDate.get(port) + PingPongTask.PING_FREQ < System.currentTimeMillis()) {
                 this.controller.ping(port);
             }
         }

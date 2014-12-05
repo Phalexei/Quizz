@@ -34,7 +34,8 @@ public abstract class Message {
                 newMessage = new NokMessage(messageSplit);
                 break;
             case INIT:
-                break; // TODO Hard
+                newMessage = new InitMessage(messageSplit); // TODO Add Data
+                break;
             case REGISTER:
                 newMessage = new RegisterMessage(messageSplit);
                 break;

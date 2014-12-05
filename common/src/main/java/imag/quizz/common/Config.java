@@ -14,9 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Config {
 
@@ -24,7 +24,7 @@ public class Config {
         private final int    id;
         private final String host;
         private final int    serverPort;
-        private final int playerPort;
+        private final int    playerPort;
 
         public ServerInfo(final int id, final String host, final int serverPort, final int playerPort) {
             this.id = id;
@@ -52,10 +52,10 @@ public class Config {
 
     private static final URL configUrl = Config.class.getResource("/config.json");
 
-    private final Map<Integer, ServerInfo> servers;
+    private final SortedMap<Integer, ServerInfo> servers;
 
     public Config() throws IOException {
-        this.servers = new HashMap<>();
+        this.servers = new TreeMap<>();
         try {
             final Path configFilePath = Paths.get(Config.configUrl.toURI());
             final String configString = new String(Files.readAllBytes(configFilePath), StandardCharsets.UTF_8);
@@ -89,7 +89,7 @@ public class Config {
         }
     }
 
-    public Map<Integer, ServerInfo> getServers() {
+    public SortedMap<Integer, ServerInfo> getServers() {
         return this.servers;
     }
 }

@@ -40,7 +40,7 @@ public class ServerController extends MessageHandler implements Controller {
 
         this.servers = new TreeMap<>();
 
-        this.pingPongTask = new PingPongTask(this, this.config);
+        this.pingPongTask = new PingPongTask(this, 3_000, this.config);
         this.pingPongTask.start();
     }
 
@@ -62,8 +62,7 @@ public class ServerController extends MessageHandler implements Controller {
             Server server = (Server) this.connectionManager.getLinkedPeer(localPort);
 
             if (server == null) { //server unknown for now, get his ID and register him to the connection manager
-                int id = message.getSenderId();
-                server = new Server(id, socketHandler.getSocket().getLocalPort());
+                server = new Server(message.getSenderId(), socketHandler.getSocket().getLocalPort());
                 this.connectionManager.learnConnectionPeerIdentity(server, socketHandler);
             }
 
@@ -80,6 +79,9 @@ public class ServerController extends MessageHandler implements Controller {
                 case NOK:
                     break;
                 case INIT:
+                    // TODO Check INIT origin and current state
+                    // TODO Load data
+                    this.connectionManager.connectServers();
                     break;
                 case REGISTER:
                     break;
