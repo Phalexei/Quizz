@@ -41,7 +41,7 @@ public final class Main {
         this.initializeServerConnection();
 
         // Start Player-Server connections management
-        this.initializePlayerConnection();
+        //this.initializePlayerConnection();
     }
 
     private void parseArgs(final String[] args) {
@@ -98,12 +98,14 @@ public final class Main {
 
     private void initializeServerConnection() {
         this.serverController = new ServerController(this.ownId, this.config);
+        this.serverController.start();
         // TODO Maybe something? Maybe not...
     }
 
     private void initializePlayerConnection() {
         final int playerPort = this.config.getServers().get(this.ownId).getPlayerPort();
         this.playerController = new PlayerController(this.serverController, playerPort, this.questionBase);
+        this.playerController.start();
         // TODO Maybe something? Maybe not...
     }
 
