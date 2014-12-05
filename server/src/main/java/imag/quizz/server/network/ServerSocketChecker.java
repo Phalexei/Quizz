@@ -19,7 +19,7 @@ public class ServerSocketChecker extends Thread {
     private boolean stopAsked;
 
     public ServerSocketChecker(final boolean listensToPlayers, final ConnectionManager connectionManager, final int serverSocketPort) {
-        super((listensToPlayers ? "Player" : "Server") + "ServerSocketChecker"); // Thread name
+        super((listensToPlayers ? "Play" : "Srv") + "SrvSockCheck"); // Thread name
         this.listensToPlayers = listensToPlayers;
         this.serverSocketPort = serverSocketPort;
         this.connectionManager = connectionManager;

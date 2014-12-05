@@ -1,10 +1,11 @@
 package imag.quizz.server.network;
 
-import imag.quizz.common.Config;
 import imag.quizz.common.Config.ServerInfo;
-import imag.quizz.common.network.MessageHandler;
+import imag.quizz.common.network.SocketHandler;
+import imag.quizz.common.protocol.message.InitMessage;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
+import imag.quizz.server.ServerController;
 import imag.quizz.server.game.Server;
 import org.apache.commons.lang3.Validate;
 
@@ -18,20 +19,13 @@ import java.util.Map.Entry;
  */
 public class ServerConnectionManager extends ConnectionManager {
 
-    private final int    ownId;
-    private final Config config;
-
-    private boolean isLeader;
-    private int     currentLeaderId;
-    private Integer currentLeaderLocalPort;
+    private final ServerController controller;
 
     private boolean isConnectedToLambdas;
 
-    public ServerConnectionManager(final MessageHandler messageHandler, final int ownId, final Config config) {
-        super(messageHandler, false, config.getServers().get(ownId).getServerPort());
-        this.ownId = ownId;
-        this.config = config;
-
+    public ServerConnectionManager(final ServerController controller) {
+        super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort());
+        this.controller = controller;
         this.isConnectedToLambdas = false;
 
         // Attempt to join other servers
@@ -45,15 +39,16 @@ public class ServerConnectionManager extends ConnectionManager {
         final Integer port = this.connectLeader();
 
         if (port == null) {
-            this.isLeader = true;
+            this.controller.setLeader(true);
+            this.controller.setCurrentLeaderId(this.controller.getOwnId());
             Log.info("Server started alone.");
         } else {
-            if (this.currentLeaderId > this.ownId) {
-                this.isLeader = false;
+            if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
+                this.controller.setLeader(false);
                 Log.info("Server started as future new leader, waiting for INIT from current leader");
             } else {
-                this.isLeader = false;
-                this.currentLeaderLocalPort = port;
+                this.controller.setLeader(false);
+                this.controller.setCurrentLeaderLocalPort(port);
                 Log.info("Server started as lambda server, waiting for INIT from current leader");
             }
         }
@@ -66,8 +61,9 @@ public class ServerConnectionManager extends ConnectionManager {
      * none
      */
     private Integer connectLeader() {
-        for (final Entry<Integer, ServerInfo> entry : this.config.getServers().entrySet()) {
-            if (entry.getKey() == this.ownId) {
+        for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
+            final int id = entry.getKey();
+            if (id == this.controller.getOwnId()) {
                 // This server's configuration entry, ignore
                 continue;
             }
@@ -76,14 +72,14 @@ public class ServerConnectionManager extends ConnectionManager {
             try {
                 s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
                 try {
-                    this.newConnection(new Server(entry.getKey(), s.getLocalPort()), s);
-                    this.currentLeaderId = entry.getKey();
+                    this.newConnection(new Server(id, s.getLocalPort()), s);
+                    this.controller.setCurrentLeaderId(id);
                     return s.getLocalPort();
                 } catch (final IOException e) {
-                    Log.error("Failed to create SocketHandler for server " + info.getId(), e);
+                    Log.error("Failed to create SocketHandler for server " + id, e);
                 }
             } catch (final IOException e) {
-                Log.info("Failed to connect to server " + info.getId() + ", ignoring");
+                Log.info("Failed to connect to server " + id + ", ignoring");
                 Log.trace("Error was:", e);
             }
         }
@@ -98,14 +94,16 @@ public class ServerConnectionManager extends ConnectionManager {
      */
     public int connectServers() {
         Validate.isTrue(!this.isConnectedToLambdas, "Illegal State: already connected to servers once");
-        if (this.currentLeaderId > this.ownId) {
-            this.isLeader = true;
-            this.currentLeaderId = this.ownId;
-            this.currentLeaderLocalPort = null;
+        final int oldLeaderId = this.controller.getCurrentLeaderId();
+        if (this.controller.getCurrentLeaderId() > this.controller.getOwnId()) {
+            this.controller.setLeader(true);
+            this.controller.setCurrentLeaderId(this.controller.getOwnId());
+            this.controller.setCurrentLeaderLocalPort(null);
+            Log.info("We are now Leader");
         }
         int successCount = 0;
-        for (final Entry<Integer, ServerInfo> entry : this.config.getServers().entrySet()) {
-            if (entry.getKey() == this.ownId || entry.getKey() == this.currentLeaderId) {
+        for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
+            if (entry.getKey() == this.controller.getOwnId() || entry.getKey() == oldLeaderId) {
                 // Ignore
                 continue;
             }
@@ -128,6 +126,15 @@ public class ServerConnectionManager extends ConnectionManager {
         return successCount;
     }
 
+    @Override
+    public void newIncomingConnection(final Socket socket) throws IOException {
+        super.newIncomingConnection(socket);
+        if (this.controller.isLeader()) {
+            final SocketHandler socketHandler = this.connections.get(socket.getLocalPort());
+            socketHandler.write(new InitMessage(this.controller.getOwnId()).toString());
+        }
+    }
+
     /**
      * Broadcasts a Message to every servers by either sending it to the
      * current leader if this server isn't the leader, or by sending it
@@ -135,13 +142,24 @@ public class ServerConnectionManager extends ConnectionManager {
      *
      * @param message the message
      */
-    public void broadcast(final Message message) {
-        if (this.isLeader) {
+    public void leaderBroadcast(final Message message) {
+        if (this.controller.isLeader()) {
             for (final int port : this.connectedPeers.keySet()) {
                 this.connections.get(port).write(message.toString());
             }
         } else {
-            this.connections.get(this.currentLeaderLocalPort).write(message.toString());
+            this.connections.get(this.controller.getCurrentLeaderLocalPort()).write(message.toString() + '\n');
+        }
+    }
+
+    /**
+     * Directly sends a message to every servers.
+     *
+     * @param message the message
+     */
+    public void broadcast(final Message message) {
+        for (final SocketHandler handler : this.connections.values()) {
+            handler.write(message.toString());
         }
     }
 }

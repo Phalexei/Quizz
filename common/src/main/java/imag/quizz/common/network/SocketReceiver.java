@@ -13,7 +13,7 @@ public class SocketReceiver extends AbstractRepeatingThread {
     private final SocketHandler  handler;
 
     /* package */ SocketReceiver(final BufferedReader reader, final SocketHandler handler) {
-        super("S-Receiver", 10);
+        super("SocketReceiver", 10);
         this.reader = reader;
         this.handler = handler;
     }

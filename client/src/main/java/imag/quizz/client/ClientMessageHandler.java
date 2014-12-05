@@ -7,7 +7,7 @@ import imag.quizz.common.protocol.message.Message;
 public class ClientMessageHandler extends MessageHandler {
 
     public ClientMessageHandler() {
-        super("ClientMessageHandler");
+        super("ClientMsgHandler");
     }
 
     @Override
