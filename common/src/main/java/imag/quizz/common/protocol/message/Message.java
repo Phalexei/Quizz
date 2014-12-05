@@ -90,6 +90,10 @@ public abstract class Message {
         return this.command;
     }
 
+    public int getSenderId() {
+        return senderId;
+    }
+
     protected void checkCommandName(final String commandName) {
         Validate.isTrue(this.command.name().equals(commandName), "Invalid " + this.command.name() + " message");
     }

@@ -59,7 +59,14 @@ public class ServerController extends MessageHandler implements Controller {
         final int localPort = socketHandler.getSocket().getLocalPort();
         if (this.connectionManager.linksToPeer(localPort)) {
             // Known Server
-            final Server server = (Server) this.connectionManager.getLinkedPeer(localPort);
+            Server server = (Server) this.connectionManager.getLinkedPeer(localPort);
+
+            if (server == null) { //server unknown for now, get his ID and register him to the connection manager
+                int id = message.getSenderId();
+                server = new Server(id, socketHandler.getSocket().getLocalPort());
+                this.connectionManager.learnConnectionPeerIdentity(server, socketHandler);
+            }
+
             switch (message.getCommand()) {
                 // TODO Remove useless stuff and implement all the things
                 case PING:
@@ -67,49 +74,6 @@ public class ServerController extends MessageHandler implements Controller {
                     break;
                 case PONG:
                     // TODO Validate?
-                    break;
-                case OK:
-                    break;
-                case NOK:
-                    break;
-                case INIT:
-                    break;
-                case REGISTER:
-                    break;
-                case LOGIN:
-                    break;
-                case GAMES:
-                    break;
-                case NEW:
-                    break;
-                case GAME:
-                    break;
-                case PLAY:
-                    break;
-                case THEMES:
-                    break;
-                case THEME:
-                    break;
-                case QUESTION:
-                    break;
-                case ANSWER:
-                    break;
-                case NOANSWER:
-                    break;
-                case WAIT:
-                    break;
-                case DROP:
-                    break;
-                case END:
-                    break;
-            }
-        } else {
-            // Unknown Server: new incoming connection
-            switch (message.getCommand()) {
-                // TODO Remove useless stuff and implement all the things
-                case PING:
-                    break;
-                case PONG:
                     break;
                 case OK:
                     break;
