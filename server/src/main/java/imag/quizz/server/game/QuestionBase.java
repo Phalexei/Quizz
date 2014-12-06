@@ -65,6 +65,10 @@ public final class QuestionBase {
         }
     }
 
+    public Map<String, List<Question>> getThemes() {
+        return this.themes;
+    }
+
     private void parseJsonConfig(final String json) throws IllegalArgumentException {
         try {
             final JSONObject jsonRoot = (JSONObject) new JSONParser().parse(json);
@@ -86,7 +90,13 @@ public final class QuestionBase {
                     }
                     questions.add(new Question(question, answer, wrongAnswers));
                 }
+                if (questions.size() < 5) {
+                    throw new IllegalArgumentException("Every theme should have AT THE VERY LEAST 5 questions (10 or more is better)");
+                }
                 this.themes.put(themeName, questions);
+            }
+            if (this.themes.size() < 8) {
+                throw new IllegalArgumentException("There should be AT THE VERY LEAST 8 themes (more is better)");
             }
         } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Malformed configuration file", e);

@@ -2,10 +2,7 @@ package imag.quizz.server.game;
 
 import imag.quizz.server.game.QuestionBase.Question;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Represents a Game.
@@ -36,7 +33,7 @@ public final class Game {
     /**
      * The questions chosen for the first opponent themes.
      */
-    private final Map<String, List<Question>> questionsA;
+    private final Map<String, Question[]> questionsA;
 
     /**
      * The theme chosen by the first opponent.
@@ -61,7 +58,7 @@ public final class Game {
     /**
      * The questions chosen for the second opponent themes.
      */
-    private final Map<String, List<Question>> questionsB;
+    private final Map<String, Question[]> questionsB;
 
     /**
      * The theme chosen by the second opponent.
@@ -79,19 +76,54 @@ public final class Game {
         this.playerA = playerA;
         this.playerB = playerB;
 
-        this.themesA = new String[4];
-        this.themesB = new String[4];
+        final LinkedList<String> themes = new LinkedList<>(base.getThemes().keySet());
+        Collections.shuffle(themes);
 
-        this.questionsA = new LinkedHashMap<>();
-        this.questionsB = new LinkedHashMap<>();
+        this.themesA = new String[]{
+                themes.poll(),
+                themes.poll(),
+                themes.poll(),
+                themes.poll()
+        };
+        this.themesB = new String[]{
+                themes.poll(),
+                themes.poll(),
+                themes.poll(),
+                themes.poll()
+        };
+
+        this.questionsA = Collections.unmodifiableMap(new HashMap<String, Question[]>() {{
+            for (final String theme : Game.this.themesA) {
+                final LinkedList<Question> availableQuestions = new LinkedList<>(base.getThemes().get(theme));
+                Collections.shuffle(availableQuestions);
+                Game.this.questionsA.put(theme, new Question[]{
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll()
+                });
+            }
+        }});
+        this.questionsB = Collections.unmodifiableMap(new HashMap<String, Question[]>() {{
+            for (final String theme : Game.this.themesB) {
+                final LinkedList<Question> availableQuestions = new LinkedList<>(base.getThemes().get(theme));
+                Collections.shuffle(availableQuestions);
+                Game.this.questionsB.put(theme, new Question[]{
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll(),
+                        availableQuestions.poll()
+                });
+            }
+        }});
 
         this.chosenThemeA = -1;
         this.chosenThemeB = -1;
 
         this.currentQuestionA = -1;
         this.currentQuestionB = -1;
-
-        // TODO Questions!
     }
 
     public Player getOpponent(final Player player) {
@@ -112,7 +144,7 @@ public final class Game {
         return this.themesA;
     }
 
-    public Map<String, List<Question>> getQuestionsA() {
+    public Map<String, Question[]> getQuestionsA() {
         return this.questionsA;
     }
 
@@ -132,7 +164,7 @@ public final class Game {
         return this.themesB;
     }
 
-    public Map<String, List<Question>> getQuestionsB() {
+    public Map<String, Question[]> getQuestionsB() {
         return this.questionsB;
     }
 
