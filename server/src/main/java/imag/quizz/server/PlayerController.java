@@ -3,6 +3,7 @@ package imag.quizz.server;
 import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
+import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.server.game.Game;
 import imag.quizz.server.game.Games;
@@ -21,6 +22,8 @@ public class PlayerController extends MessageHandler implements Controller {
     private final PlayerConnectionManager connectionManager;
 
     private final int ownId;
+
+    private final PingPongTask pingPongTask;
 
     // Player Login ; Player
     private final Map<String, Player> players;
@@ -42,6 +45,9 @@ public class PlayerController extends MessageHandler implements Controller {
 
         this.players = new HashMap<>();
         this.games = new Games(questionBase);
+
+        this.pingPongTask = new PingPongTask(this, 3_000);
+        this.pingPongTask.start();
     }
 
     @Override
@@ -86,13 +92,13 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and continue game
                     break;
                 case PING:
-                    this.connectionManager.send(player, new PongMessage(this.connectionManager.getOwnId(), message));
+                    this.connectionManager.send(player, new PongMessage(this.ownId, message));
                     break;
                 case PLAY:
                     // TODO Check Game id, send THEMES, QUESTION or WAIT to Player
                     break;
                 case PONG:
-                    // TODO Check value with PING
+                    this.pingPongTask.pong(localPort);
                     break;
                 case REGISTER:
                     // TODO Check that Player has logged out

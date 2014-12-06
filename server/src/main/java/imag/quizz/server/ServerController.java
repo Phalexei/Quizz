@@ -73,7 +73,7 @@ public class ServerController extends MessageHandler implements Controller {
                 socketHandler.write(new PongMessage(this.ownId, message).toString());
                 break;
             case PONG:
-                // TODO Validate?
+                this.pingPongTask.pong(localPort);
                 break;
             case OK:
                 // Handle Leader switch
