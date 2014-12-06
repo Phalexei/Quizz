@@ -3,49 +3,45 @@ package imag.quizz.server;
 import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
-import imag.quizz.common.protocol.message.Message;
-import imag.quizz.common.protocol.message.PongMessage;
+import imag.quizz.common.protocol.message.*;
 import imag.quizz.server.game.Game;
+import imag.quizz.server.game.Games;
 import imag.quizz.server.game.Player;
 import imag.quizz.server.game.QuestionBase;
 import imag.quizz.server.network.PlayerConnectionManager;
+import imag.quizz.server.tool.IdGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Set;
 
-/**
- * Created by Ribesg.
- */
 public class PlayerController extends MessageHandler implements Controller {
 
     private final ServerController        serverController;
     private final PlayerConnectionManager connectionManager;
 
-    private final QuestionBase questionBase;
+    private final int ownId;
 
     // Player Login ; Player
     private final Map<String, Player> players;
 
-    // Game ID ; Game
-    private final SortedMap<Long, Game> games;
+    private final Games games;
 
     /**
      * Constructor.
      *
      * @param serverController the Server controller
-     * @param ownId
+     * @param ownId this server's identifier
      */
-    public PlayerController(final ServerController serverController, final int localPlayerPort, final QuestionBase questionBase, Integer ownId) {
+    public PlayerController(final ServerController serverController, final int localPlayerPort, final QuestionBase questionBase, final int ownId) {
         super("PlayerController");
         this.serverController = serverController;
         this.connectionManager = new PlayerConnectionManager(this, localPlayerPort, ownId);
 
-        this.questionBase = questionBase;
+        this.ownId = ownId;
 
         this.players = new HashMap<>();
-        this.games = new TreeMap<>();
+        this.games = new Games(questionBase);
     }
 
     @Override
@@ -115,10 +111,39 @@ public class PlayerController extends MessageHandler implements Controller {
             // Unknown Player new connection or logged out client
             switch (message.getCommand()) {
                 case LOGIN:
-                    // TODO Check and login
+                    final LoginMessage loginMessage = (LoginMessage) message;
+                    final String loginMessageLogin = loginMessage.getLogin();
+                    final String hashedPassword = loginMessage.getHashedPassword();
+                    if (!this.players.containsKey(loginMessageLogin)) {
+                        this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                    } else {
+                        final Player player = this.players.get(loginMessageLogin);
+                        if (player.getPasswordHash().equals(hashedPassword)) {
+                            player.setLoggedIn(true);
+                            player.setPort(localPort);
+                            final Set<Game> playerGames = this.games.getByPlayer(player);
+                            // TODO if (playerGames == null) {
+                            this.connectionManager.send(localPort, new OkMessage(this.ownId));
+                            // TODO } else {
+                            // TODO     this.connectionManager.send(localPort, new GamesMessage(playerGames /* TODO */));
+                            // TODO }
+                        } else {
+                            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                        }
+                    }
                     break;
                 case REGISTER:
-                    // TODO Check and register
+                    final RegisterMessage registerMessage = (RegisterMessage) message;
+                    final String registerMessageLogin = registerMessage.getLogin();
+                    if (this.players.containsKey(registerMessageLogin)) {
+                        this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                    } else {
+                        final long id = IdGenerator.nextPlayer();
+                        final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
+                        this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
+                        this.players.put(registerMessageLogin, player);
+                        this.connectionManager.send(player, new OkMessage(this.ownId));
+                    }
                     break;
                 default:
                     // TODO Refuse message as it is invalid
@@ -128,7 +153,8 @@ public class PlayerController extends MessageHandler implements Controller {
     }
 
     @Override
-    public void lostConnection(SocketHandler socketHandler) {
+    public void lostConnection(final SocketHandler socketHandler) {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
+        // TODO Broadcast logout
     }
 }

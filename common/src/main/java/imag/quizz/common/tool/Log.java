@@ -15,7 +15,7 @@ import java.util.Map.Entry;
  *
  * @author Ribesg
  */
-public class Log {
+public final class Log {
 
     // ################# //
     // ## Back Logger ## //
@@ -151,5 +151,11 @@ public class Log {
     public static void assertLog(final boolean assertion, final String message) {
         Log.logger.assertLog(assertion, message);
         Log.logToCustomAppenders(Level.ERROR, message, null);
+    }
+
+    /**
+     * Never instantiate this tool class.
+     */
+    private Log() {
     }
 }

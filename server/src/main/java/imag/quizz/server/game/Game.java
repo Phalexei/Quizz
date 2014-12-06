@@ -73,7 +73,7 @@ public final class Game {
      */
     private int currentQuestionB;
 
-    public Game(final Player playerA, final Player playerB) {
+    public Game(final QuestionBase base, final Player playerA, final Player playerB) {
         this.id = Game.randomId();
 
         this.playerA = playerA;
@@ -90,6 +90,8 @@ public final class Game {
 
         this.currentQuestionA = -1;
         this.currentQuestionB = -1;
+
+        // TODO Questions!
     }
 
     public Player getOpponent(final Player player) {

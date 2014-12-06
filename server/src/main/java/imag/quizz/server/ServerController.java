@@ -16,9 +16,6 @@ import imag.quizz.server.network.ServerConnectionManager;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-/**
- * Created by Ribesg.
- */
 public class ServerController extends MessageHandler implements Controller {
 
     private final ServerConnectionManager connectionManager;

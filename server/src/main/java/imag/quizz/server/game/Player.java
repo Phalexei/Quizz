@@ -40,10 +40,15 @@ public final class Player extends Peer {
      */
     private int drawGames;
 
-    public Player(final int id, final int port, final String login, final String passwordHash) {
+    public Player(final long id, final int port, final String login, final String passwordHash) {
         super(id, port);
         this.login = login;
         this.passwordHash = passwordHash;
+        this.isLoggedIn = true;
+        this.currentGame = null;
+        this.wonGames = 0;
+        this.lostGames = 0;
+        this.drawGames = 0;
     }
 
     public String getLogin() {

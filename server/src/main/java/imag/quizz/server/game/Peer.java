@@ -13,24 +13,28 @@ public abstract class Peer {
     /**
      * The peer identifier
      */
-    protected final int id;
+    protected final long id;
 
     /**
      * The peer current port
      */
     protected int port;
 
-    public Peer(final int id, final int port) {
+    public Peer(final long id, final int port) {
         this.id = id;
         this.port = port;
     }
 
-    public int getId() {
+    public long getId() {
         return this.id;
     }
 
     public int getPort() {
         return this.port;
+    }
+
+    public void setPort(final int port) {
+        this.port = port;
     }
 
     public abstract Type getType();

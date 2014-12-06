@@ -22,4 +22,10 @@ public final class Hash {
             throw new IllegalStateException("Fatal error: can't even md5!");
         }
     }
+
+    /**
+     * Never instantiate this tool class.
+     */
+    private Hash() {
+    }
 }

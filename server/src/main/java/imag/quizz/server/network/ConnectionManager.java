@@ -20,7 +20,7 @@ public abstract class ConnectionManager {
     protected final Map<Integer, SocketHandler> connections;
     protected final MessageHandler              messageHandler;
     protected final ServerSocketChecker         serverSocketChecker;
-    private final int                           ownId;
+    protected final int                         ownId;
 
     protected ConnectionManager(final MessageHandler messageHandler, final boolean isPlayer, final int localPort, final int ownId) {
         this.connectedPeers = new HashMap<>();
