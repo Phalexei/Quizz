@@ -15,7 +15,7 @@ public class NewMessage extends Message {
         this.opponent = opponent;
     }
 
-    /* package*/ NewMessage(final String[] messageSplit) {
+    /* package */ NewMessage(final String[] messageSplit) {
         super(Command.NEW, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.opponent = messageSplit[2];

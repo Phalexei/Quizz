@@ -97,14 +97,14 @@ public final class Main {
     }
 
     private void initializeServerConnection() {
-        this.serverController = new ServerController(this.ownId, this.config);
+        this.serverController = new ServerController(this.ownId, this.config, this.questionBase);
         this.serverController.start();
         // TODO Maybe something? Maybe not...
     }
 
     private void initializePlayerConnection() {
         final int playerPort = this.config.getServers().get(this.ownId).getPlayerPort();
-        this.playerController = new PlayerController(this.serverController, playerPort, this.questionBase, this.ownId);
+        this.playerController = new PlayerController(this.serverController, playerPort, this.ownId);
         this.playerController.start();
         // TODO Maybe something? Maybe not...
     }

@@ -12,7 +12,7 @@ public class GameMessage extends Message {
         this.gameData = gameData;
     }
 
-    public GameMessage(final String[] messageSplit) {
+    /* package */ GameMessage(final String[] messageSplit) {
         super(Command.GAME, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
 

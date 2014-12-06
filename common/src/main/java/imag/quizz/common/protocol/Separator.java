@@ -11,89 +11,71 @@ public final class Separator {
     /**
      * File Separator ASCII code
      */
-    public static final char LEVEL_1 = 0x1C;
-
-    /**
-     * String representation of {@link #LEVEL_1}.
-     */
-    public static final String LEVEL_1S = Character.toString(Separator.LEVEL_1);
+    private static final char FILE_SEPARATOR = 0x1C;
 
     /**
      * Group Separator ASCII code
      */
-    public static final char LEVEL_2 = 0x1D;
-
-    /**
-     * String representation of {@link #LEVEL_2}.
-     */
-    public static final String LEVEL_2S = Character.toString(Separator.LEVEL_2);
+    private static final char GROUP_SEPARATOR = 0x1D;
 
     /**
      * Record Separator ASCII code
      */
-    public static final char LEVEL_3 = 0x1E;
-
-    /**
-     * String representation of {@link #LEVEL_3}.
-     */
-    public static final String LEVEL_3S = Character.toString(Separator.LEVEL_3);
+    private static final char RECORD_SEPARATOR = 0x1E;
 
     /**
      * Unit Separator ASCII code
      */
-    public static final char LEVEL_4 = 0x1F;
+    private static final char UNIT_SEPARATOR = 0x1F;
 
     /**
-     * String representation of {@link #LEVEL_4}.
+     * Level 1 separator
      */
-    public static final String LEVEL_4S = Character.toString(Separator.LEVEL_4);
+    public static final String LEVEL_1 = "" + Separator.FILE_SEPARATOR + Separator.FILE_SEPARATOR;
 
     /**
-     * Gets a char separator based on its level.
-     *
-     * @param level the level
-     *
-     * @return the char separator
+     * Level 2 separator
      */
-    public static char getChar(final int level) {
-        Validate.inclusiveBetween(1, 4, level, "Invalid level");
-        switch (level) {
-            case 1:
-                return Separator.LEVEL_1;
-            case 2:
-                return Separator.LEVEL_2;
-            case 3:
-                return Separator.LEVEL_3;
-            case 4:
-                return Separator.LEVEL_4;
-            default:
-                // Impossible
-                return '!';
-        }
-    }
+    public static final String LEVEL_2 = "" + Separator.FILE_SEPARATOR;
 
     /**
-     * Gets a String separator based on its level.
+     * Level 3 separator
+     */
+    public static final String LEVEL_3 = "" + Separator.GROUP_SEPARATOR;
+
+    /**
+     * Level 4 separator
+     */
+    public static final String LEVEL_4 = "" + Separator.RECORD_SEPARATOR;
+
+    /**
+     * Level 5 separator
+     */
+    public static final String LEVEL_5 = "" + Separator.UNIT_SEPARATOR;
+
+    /**
+     * All separators
+     */
+    private static final String[] SEPARATORS = new String[]{
+            Separator.LEVEL_1,
+            Separator.LEVEL_2,
+            Separator.LEVEL_3,
+            Separator.LEVEL_4,
+            Separator.LEVEL_5
+    };
+
+    public static final int AMOUNT = Separator.SEPARATORS.length;
+
+    /**
+     * Gets a separator based on its level.
      *
      * @param level the level
      *
      * @return the String separator
      */
     public static String getString(final int level) {
-        Validate.inclusiveBetween(1, 4, level, "Invalid level");
-        switch (level) {
-            case 1:
-                return Separator.LEVEL_1S;
-            case 2:
-                return Separator.LEVEL_2S;
-            case 3:
-                return Separator.LEVEL_3S;
-            case 4:
-                return Separator.LEVEL_4S;
-            default:
-                // Impossible
-                return null;
-        }
+        Validate.inclusiveBetween(1, Separator.AMOUNT, level, "Invalid level");
+        return Separator.SEPARATORS[level - 1];
     }
 
     /**

@@ -11,7 +11,7 @@ public abstract class Message {
 
     public static Message fromString(final String messageString) {
         Validate.notEmpty(messageString, "messageString should not be null nor empty");
-        final String[] messageSplit = messageString.split(Separator.LEVEL_1S);
+        final String[] messageSplit = messageString.split(Separator.LEVEL_1);
         final String commandString = messageSplit[0];
         final Command command;
         try {
@@ -19,7 +19,7 @@ public abstract class Message {
         } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid message: Invalid Command: '" + commandString + "'", e);
         }
-        Message newMessage = null;
+        Message newMessage;
         switch (command) {
             case PING:
                 newMessage = new PingMessage(messageSplit);
@@ -102,7 +102,7 @@ public abstract class Message {
     }
 
     public int getSenderId() {
-        return senderId;
+        return this.senderId;
     }
 
     protected void checkCommandName(final String commandName) {

@@ -7,6 +7,8 @@ import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
+import imag.quizz.server.game.Games;
+import imag.quizz.server.game.QuestionBase;
 import imag.quizz.server.game.Server;
 import imag.quizz.server.network.ServerConnectionManager;
 
@@ -29,14 +31,17 @@ public class ServerController extends MessageHandler implements Controller {
     // Server ID ; Server
     private final SortedMap<Integer, Server> servers;
 
+    private final Games games;
+
     /**
      * Constructor.
      */
-    protected ServerController(final int ownId, final Config config) {
+    protected ServerController(final int ownId, final Config config, final QuestionBase questionBase) {
         super("ServerController");
         this.ownId = ownId;
         this.config = config;
         this.servers = new TreeMap<>();
+        this.games = new Games(questionBase);
 
         this.connectionManager = new ServerConnectionManager(this, ownId);
         this.pingPongTask = new PingPongTask(this, 3_000);
@@ -126,6 +131,20 @@ public class ServerController extends MessageHandler implements Controller {
         }
     }
 
+    private String buildInitData() {
+        final StringBuilder builder = new StringBuilder();
+        // TODO Append Player data
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void lostConnection(final SocketHandler socketHandler) {
+        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
+        // TODO Update leader eventually
+        // TODO Maybe other things
+    }
+
     public int getOwnId() {
         return this.ownId;
     }
@@ -146,6 +165,10 @@ public class ServerController extends MessageHandler implements Controller {
         return this.currentLeaderLocalPort;
     }
 
+    public Games getGames() {
+        return this.games;
+    }
+
     public void setLeader(final boolean isLeader) {
         this.isLeader = isLeader;
     }
@@ -156,12 +179,5 @@ public class ServerController extends MessageHandler implements Controller {
 
     public void setCurrentLeaderLocalPort(final Integer currentLeaderLocalPort) {
         this.currentLeaderLocalPort = currentLeaderLocalPort;
-    }
-
-    @Override
-    public void lostConnection(final SocketHandler socketHandler) {
-        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
-        // TODO Update leader eventually
-        // TODO Maybe other things
     }
 }

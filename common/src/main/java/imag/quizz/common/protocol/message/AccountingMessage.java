@@ -15,7 +15,7 @@ public abstract class AccountingMessage extends Message {
         this.hashedPassword = Hash.md5(password);
     }
 
-    /* package*/ AccountingMessage(final Command command, final String[] messageSplit) {
+    /* package */ AccountingMessage(final Command command, final String[] messageSplit) {
         super(command, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.login = messageSplit[2];

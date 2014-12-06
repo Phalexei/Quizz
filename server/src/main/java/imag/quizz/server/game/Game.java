@@ -252,12 +252,12 @@ public final class Game {
     }
 
     public String toMessageData(final int baseSeparatorLevel) {
-        Validate.inclusiveBetween(1, 2, baseSeparatorLevel, "Invalid separator level");
+        Validate.inclusiveBetween(1, Separator.AMOUNT - 2, baseSeparatorLevel, "Invalid separator level");
 
-        final char[] separators = new char[]{
-                Separator.getChar(baseSeparatorLevel),
-                Separator.getChar(baseSeparatorLevel + 1),
-                Separator.getChar(baseSeparatorLevel + 2),
+        final String[] separators = new String[]{
+                Separator.getString(baseSeparatorLevel),
+                Separator.getString(baseSeparatorLevel + 1),
+                Separator.getString(baseSeparatorLevel + 2),
         };
 
         final StringBuilder builder = new StringBuilder();
@@ -286,7 +286,7 @@ public final class Game {
             final StringBuilder builder,
             final String[] themes,
             final Map<String, Question[]> questions,
-            final char[] separators
+            final String[] separators
                              ) {
         for (final String theme : themes) {
             builder.append(theme).append(separators[2]);
@@ -303,7 +303,7 @@ public final class Game {
     }
 
     public static Game fromMessageData(final Map<String, Player> players, final String gameData, final int baseSeparatorLevel) {
-        Validate.inclusiveBetween(1, 2, baseSeparatorLevel, "Invalid separator level");
+        Validate.inclusiveBetween(1, Separator.AMOUNT - 2, baseSeparatorLevel, "Invalid separator level");
 
         final String[] separators = new String[]{
                 Separator.getString(baseSeparatorLevel),

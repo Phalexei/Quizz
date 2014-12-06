@@ -6,15 +6,15 @@ import imag.quizz.common.protocol.Separator;
 public class DropMessage extends Message {
 
     private final String userLogin;
-    private final long gameId;
+    private final long   gameId;
 
-    public DropMessage(final String[] messageSplit, final int senderId, final String userLogin, final long gameId) {
+    public DropMessage(final int senderId, final String userLogin, final long gameId) {
         super(Command.DROP, senderId);
         this.userLogin = userLogin;
         this.gameId = gameId;
     }
 
-    public DropMessage(String[] messageSplit) {
+    /* package */ DropMessage(final String[] messageSplit) {
         super(Command.DROP, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.userLogin = messageSplit[2];
@@ -22,15 +22,15 @@ public class DropMessage extends Message {
     }
 
     public long getGameId() {
-        return gameId;
+        return this.gameId;
     }
 
     public String getUserLogin() {
-        return userLogin;
+        return this.userLogin;
     }
 
     @Override
     protected String getParametersString() {
-        return this.userLogin + Separator.LEVEL_1S + this.gameId;
+        return this.userLogin + Separator.LEVEL_1 + this.gameId;
     }
 }

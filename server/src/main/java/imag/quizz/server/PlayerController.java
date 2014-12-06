@@ -28,15 +28,13 @@ public class PlayerController extends MessageHandler implements Controller {
     // Player Login ; Player
     private final Map<String, Player> players;
 
-    private final Games games;
-
     /**
      * Constructor.
      *
      * @param serverController the Server controller
      * @param ownId this server's identifier
      */
-    public PlayerController(final ServerController serverController, final int localPlayerPort, final QuestionBase questionBase, final int ownId) {
+    public PlayerController(final ServerController serverController, final int localPlayerPort, final int ownId) {
         super("PlayerController");
         this.serverController = serverController;
         this.connectionManager = new PlayerConnectionManager(this, localPlayerPort, ownId);
@@ -44,7 +42,6 @@ public class PlayerController extends MessageHandler implements Controller {
         this.ownId = ownId;
 
         this.players = new HashMap<>();
-        this.games = new Games(questionBase);
 
         this.pingPongTask = new PingPongTask(this, 3_000);
         this.pingPongTask.start();
@@ -76,7 +73,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and end game
                     break;
                 case GAMES:
-                    final Set<Game> playerGames = this.games.getByPlayer(player);
+                    final Set<Game> playerGames = this.serverController.getGames().getByPlayer(player);
                     // TODO this.connectionManager.send(localPort, new GamesMessage(playerGames /* TODO */));
                     break;
                 case NEW:
@@ -91,7 +88,7 @@ public class PlayerController extends MessageHandler implements Controller {
                             potentialOpponents.remove(player);
                             final Player opponent = potentialOpponents.get(PlayerController.RANDOM.nextInt(potentialOpponents.size()));
                             // TODO Merge following code with code in next else block as it's the same thing
-                            final Game game = this.games.newGame(player, opponent);
+                            final Game game = this.serverController.getGames().newGame(player, opponent);
                             /* TODO
                             this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
                             this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
@@ -102,7 +99,7 @@ public class PlayerController extends MessageHandler implements Controller {
                         if (opponent == null) {
                             this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
                         } else {
-                            final Game game = this.games.newGame(player, opponent);
+                            final Game game = this.serverController.getGames().newGame(player, opponent);
                             /* TODO
                             this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
                             this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
@@ -145,7 +142,7 @@ public class PlayerController extends MessageHandler implements Controller {
                         if (player.getPasswordHash().equals(hashedPassword)) {
                             player.setLoggedIn(true);
                             player.setPort(localPort);
-                            final Set<Game> playerGames = this.games.getByPlayer(player);
+                            final Set<Game> playerGames = this.serverController.getGames().getByPlayer(player);
                             // TODO if (playerGames == null) {
                             this.connectionManager.send(localPort, new OkMessage(this.ownId));
                             // TODO } else {

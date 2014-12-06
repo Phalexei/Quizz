@@ -17,7 +17,7 @@ public class PlayMessage extends Message {
         this.id = id;
     }
 
-    /* package*/ PlayMessage(final String[] messageSplit) {
+    /* package */ PlayMessage(final String[] messageSplit) {
         super(Command.PLAY, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         try {

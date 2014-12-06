@@ -8,7 +8,7 @@ public class OkMessage extends Message {
         super(Command.OK, senderId);
     }
 
-    /* package*/ OkMessage(final String[] messageSplit) {
+    /* package */ OkMessage(final String[] messageSplit) {
         super(Command.OK, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
     }

@@ -13,7 +13,7 @@ public class EndMessage extends Message {
         this.opponentScore = opponentScore;
     }
 
-    public EndMessage(String[] messageSplit) {
+    /* package */ EndMessage(final String[] messageSplit) {
         super(Command.END, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.userScore = Integer.parseInt(messageSplit[2]);
@@ -21,15 +21,15 @@ public class EndMessage extends Message {
     }
 
     public int getOpponentScore() {
-        return opponentScore;
+        return this.opponentScore;
     }
 
     public int getUserScore() {
-        return userScore;
+        return this.userScore;
     }
 
     @Override
     protected String getParametersString() {
-        return this.userScore + Separator.LEVEL_1S + this.opponentScore;
+        return this.userScore + Separator.LEVEL_1 + this.opponentScore;
     }
 }

@@ -13,7 +13,7 @@ public class PongMessage extends Message {
         this.data = ((PingMessage) ping).getData();
     }
 
-    /* package*/ PongMessage(final String[] messageSplit) {
+    /* package */ PongMessage(final String[] messageSplit) {
         super(Command.PONG, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.data = messageSplit[1];

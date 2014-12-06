@@ -5,7 +5,7 @@ import imag.quizz.common.protocol.Separator;
 
 public class InitMessage extends Message {
 
-    private String data;
+    private final String data;
 
     public InitMessage(final int senderId, final String data) {
         super(Command.INIT, senderId);
