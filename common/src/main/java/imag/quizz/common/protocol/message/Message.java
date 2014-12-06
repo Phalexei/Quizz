@@ -43,30 +43,40 @@ public abstract class Message {
                 newMessage = new LoginMessage(messageSplit);
                 break;
             case GAMES:
-                break; // TODO Hard
+                newMessage = new GamesMessage(messageSplit);
+                break;
             case NEW:
                 newMessage = new NewMessage(messageSplit);
                 break;
             case GAME:
-                break; // TODO Hard
+                newMessage = new GameMessage(messageSplit);
+                break;
             case PLAY:
                 newMessage = new PlayMessage(messageSplit);
                 break;
             case THEMES:
+                newMessage = new ThemesMessage(messageSplit);
                 break;
             case THEME:
+                newMessage = new ThemeMessage(messageSplit);
                 break;
             case QUESTION:
+                newMessage = new QuestionMessage(messageSplit);
                 break;
             case ANSWER:
+                newMessage = new AnswerMessage(messageSplit);
                 break;
             case NOANSWER:
+                newMessage = new NoAnswerMessage(messageSplit);
                 break;
             case WAIT:
+                newMessage = new WaitMessage(messageSplit);
                 break;
             case DROP:
+                newMessage = new DropMessage(messageSplit);
                 break;
             case END:
+                newMessage = new EndMessage(messageSplit);
                 break;
             default:
                 throw new UnsupportedOperationException("Missing handler for Command '" + commandString + '\'');
