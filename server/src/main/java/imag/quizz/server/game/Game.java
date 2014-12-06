@@ -1,6 +1,7 @@
 package imag.quizz.server.game;
 
 import imag.quizz.server.game.QuestionBase.Question;
+import org.apache.commons.lang3.Validate;
 
 import java.util.*;
 
@@ -8,6 +9,23 @@ import java.util.*;
  * Represents a Game.
  */
 public final class Game {
+
+    public enum PlayerStatus {
+        /**
+         * If the player has to select a theme
+         */
+        SELECT_THEME,
+
+        /**
+         * If the player has to answer a question
+         */
+        ANSWER_QUESTION,
+
+        /**
+         * If the player has to wait for the opponent to do something
+         */
+        WAIT
+    }
 
     private static final Random RANDOM = new Random();
 
@@ -41,6 +59,16 @@ public final class Game {
     private int chosenThemeA;
 
     /**
+     * The status of the first opponent.
+     */
+    private PlayerStatus playerAStatus;
+
+    /**
+     * The score of the first opponent.
+     */
+    private int playerAScore;
+
+    /**
      * The next question the first opponent should answer.
      */
     private int currentQuestionA;
@@ -59,6 +87,16 @@ public final class Game {
      * The questions chosen for the second opponent themes.
      */
     private final Map<String, Question[]> questionsB;
+
+    /**
+     * The status of the second opponent.
+     */
+    private PlayerStatus playerBStatus;
+
+    /**
+     * The score of the second opponent.
+     */
+    private int playerBScore;
 
     /**
      * The theme chosen by the second opponent.
@@ -122,8 +160,76 @@ public final class Game {
         this.chosenThemeA = -1;
         this.chosenThemeB = -1;
 
+        this.playerAStatus = PlayerStatus.SELECT_THEME;
+        this.playerBStatus = PlayerStatus.SELECT_THEME;
+
+        this.playerAScore = 0;
+        this.playerBScore = 0;
+
         this.currentQuestionA = -1;
         this.currentQuestionB = -1;
+    }
+
+    public void playerSelectTheme(final Player player, final int themeIndex) {
+        Validate.isTrue(themeIndex < 4, "Invalid themeIndex value (" + themeIndex + ")");
+        if (this.playerA == player) {
+            this.chosenThemeA = themeIndex;
+            this.currentQuestionA = 0;
+            this.playerAStatus = PlayerStatus.ANSWER_QUESTION;
+            if (this.playerBStatus == PlayerStatus.WAIT) {
+                this.playerBStatus = PlayerStatus.ANSWER_QUESTION;
+            }
+        } else if (this.playerB == player) {
+            this.chosenThemeB = themeIndex;
+            this.currentQuestionB = 0;
+            this.playerBStatus = PlayerStatus.ANSWER_QUESTION;
+            if (this.playerAStatus == PlayerStatus.WAIT) {
+                this.playerAStatus = PlayerStatus.ANSWER_QUESTION;
+            }
+        } else {
+            throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
+        }
+    }
+
+    public boolean playerSelectAnswer(final Player player, final int answerIndex) {
+        Validate.isTrue(answerIndex < 4, "Invalid answerIndex value (" + answerIndex + ")");
+        if (this.playerA == player) {
+            final Question question;
+            if (this.currentQuestionA < 4) {
+                question = this.questionsA.get(this.getThemesA()[this.chosenThemeA])[this.currentQuestionA];
+            } else {
+                question = this.questionsB.get(this.getThemesB()[this.chosenThemeB])[this.currentQuestionA - 4];
+            }
+            this.currentQuestionA++;
+            if (this.currentQuestionA > 7 || this.currentQuestionA > 3 && this.playerBStatus == PlayerStatus.SELECT_THEME) {
+                this.playerAStatus = PlayerStatus.WAIT;
+            }
+            if (question.getCorrectAnswerIndex() == answerIndex) {
+                this.playerAScore++;
+                return true;
+            } else {
+                return false;
+            }
+        } else if (this.playerB == player) {
+            final Question question;
+            if (this.currentQuestionB < 4) {
+                question = this.questionsB.get(this.getThemesB()[this.chosenThemeB])[this.currentQuestionB];
+            } else {
+                question = this.questionsA.get(this.getThemesA()[this.chosenThemeA])[this.currentQuestionB - 4];
+            }
+            this.currentQuestionB++;
+            if (this.currentQuestionB > 7 || this.currentQuestionB > 3 && this.playerAStatus == PlayerStatus.SELECT_THEME) {
+                this.playerAStatus = PlayerStatus.WAIT;
+            }
+            if (question.getCorrectAnswerIndex() == answerIndex) {
+                this.playerBScore++;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
+        }
     }
 
     public Player getOpponent(final Player player) {
@@ -134,6 +240,10 @@ public final class Game {
         } else {
             throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
         }
+    }
+
+    public long getId() {
+        return this.id;
     }
 
     public Player getPlayerA() {
@@ -150,6 +260,14 @@ public final class Game {
 
     public int getChosenThemeA() {
         return this.chosenThemeA;
+    }
+
+    public PlayerStatus getPlayerAStatus() {
+        return this.playerAStatus;
+    }
+
+    public int getPlayerAScore() {
+        return this.playerAScore;
     }
 
     public int getCurrentQuestionA() {
@@ -172,23 +290,15 @@ public final class Game {
         return this.chosenThemeB;
     }
 
+    public PlayerStatus getPlayerBStatus() {
+        return this.playerBStatus;
+    }
+
+    public int getPlayerBScore() {
+        return this.playerBScore;
+    }
+
     public int getCurrentQuestionB() {
         return this.currentQuestionB;
-    }
-
-    public void setChosenThemeA(final int chosenThemeA) {
-        this.chosenThemeA = chosenThemeA;
-    }
-
-    public void setCurrentQuestionA(final int currentQuestionA) {
-        this.currentQuestionA = currentQuestionA;
-    }
-
-    public void setChosenThemeB(final int chosenThemeB) {
-        this.chosenThemeB = chosenThemeB;
-    }
-
-    public void setCurrentQuestionB(final int currentQuestionB) {
-        this.currentQuestionB = currentQuestionB;
     }
 }

@@ -26,26 +26,32 @@ public final class QuestionBase {
 
     public final class Question {
         private final String   question;
-        private final String   answer;
-        private final String[] wrongAnswers;
+        private final String[] answers;
+        private final int      correctAnswerIndex;
 
         public Question(final String question, final String answer, final String[] wrongAnswers) {
             Validate.isTrue(wrongAnswers.length == 3);
             this.question = question;
-            this.answer = answer;
-            this.wrongAnswers = wrongAnswers;
+
+            // Create an array with the 4 answers
+            this.correctAnswerIndex = this.question.hashCode() % 4;
+            this.answers = new String[4];
+            int j = 0;
+            for (int i = 0; i < 4; i++) {
+                this.answers[i] = this.correctAnswerIndex == i ? answer : wrongAnswers[j++];
+            }
         }
 
         public String getQuestion() {
             return this.question;
         }
 
-        public String getAnswer() {
-            return this.answer;
+        public String[] getAnswers() {
+            return this.answers;
         }
 
-        public String[] getWrongAnswers() {
-            return this.wrongAnswers;
+        public int getCorrectAnswerIndex() {
+            return this.correctAnswerIndex;
         }
     }
 

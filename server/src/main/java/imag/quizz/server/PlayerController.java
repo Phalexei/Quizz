@@ -78,12 +78,23 @@ public class PlayerController extends MessageHandler implements Controller {
                 case GAMES:
                     // TODO Send Games to player
                     break;
-                case LOGIN:
-                    // TODO Check that Player has logged out
-                    // TODO If not, log him out and attempt login
-                    // TODO Change Peer associated to connection
-                    break;
                 case NEW:
+                    final NewMessage newMessage = (NewMessage) message;
+                    final String opponentLogin = newMessage.getOpponent();
+                    if (opponentLogin == null) {
+                        // TODO Get random opponent
+                    } else {
+                        final Player opponent = this.players.get(opponentLogin);
+                        if (opponent == null) {
+                            this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
+                        } else {
+                            final Game game = this.games.newGame(player, opponent);
+                            /* TODO
+                            this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
+                            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
+                            */
+                        }
+                    }
                     // TODO Check for argument and available opponent
                     // TODO Eventually start a new game
                     break;
@@ -99,11 +110,6 @@ public class PlayerController extends MessageHandler implements Controller {
                     break;
                 case PONG:
                     this.pingPongTask.pong(localPort);
-                    break;
-                case REGISTER:
-                    // TODO Check that Player has logged out
-                    // TODO If not, log him out and attempt register
-                    // TODO Change Peer associated to connection
                     break;
                 case THEME:
                     // TODO Check current game and theme status
