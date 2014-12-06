@@ -73,7 +73,7 @@ public final class Separator {
      *
      * @return the String separator
      */
-    public static String getString(final int level) {
+    public static String get(final int level) {
         Validate.inclusiveBetween(1, Separator.AMOUNT, level, "Invalid level");
         return Separator.SEPARATORS[level - 1];
     }

@@ -255,9 +255,9 @@ public final class Game {
         Validate.inclusiveBetween(1, Separator.AMOUNT - 2, baseSeparatorLevel, "Invalid separator level");
 
         final String[] separators = new String[]{
-                Separator.getString(baseSeparatorLevel),
-                Separator.getString(baseSeparatorLevel + 1),
-                Separator.getString(baseSeparatorLevel + 2),
+                Separator.get(baseSeparatorLevel),
+                Separator.get(baseSeparatorLevel + 1),
+                Separator.get(baseSeparatorLevel + 2),
         };
 
         final StringBuilder builder = new StringBuilder();
@@ -306,9 +306,9 @@ public final class Game {
         Validate.inclusiveBetween(1, Separator.AMOUNT - 2, baseSeparatorLevel, "Invalid separator level");
 
         final String[] separators = new String[]{
-                Separator.getString(baseSeparatorLevel),
-                Separator.getString(baseSeparatorLevel + 1),
-                Separator.getString(baseSeparatorLevel + 2),
+                Separator.get(baseSeparatorLevel),
+                Separator.get(baseSeparatorLevel + 1),
+                Separator.get(baseSeparatorLevel + 2),
         };
 
         final String[] firstLevelSplit = gameData.split(separators[0]);
