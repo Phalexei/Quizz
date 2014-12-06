@@ -4,7 +4,7 @@ import imag.quizz.common.protocol.Command;
 
 public class RegisterMessage extends AccountingMessage {
 
-    protected RegisterMessage(final int senderId, final String login, final String password) {
+    public RegisterMessage(final int senderId, final String login, final String password) {
         super(Command.REGISTER, senderId, login, password);
     }
 
