@@ -110,7 +110,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and continue game
                     break;
                 default:
-                    // TODO Invalid message
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
                     break;
             }
         } else {
@@ -152,7 +152,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     }
                     break;
                 default:
-                    // TODO Refuse message as it is invalid
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
                     break;
             }
         }

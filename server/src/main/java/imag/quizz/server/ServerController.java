@@ -2,13 +2,10 @@ package imag.quizz.server;
 
 import imag.quizz.common.Config;
 import imag.quizz.common.Controller;
-import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
-import imag.quizz.common.protocol.message.Message;
-import imag.quizz.common.protocol.message.OkMessage;
-import imag.quizz.common.protocol.message.PingMessage;
-import imag.quizz.common.protocol.message.PongMessage;
+import imag.quizz.common.protocol.PingPongTask;
+import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.game.Server;
 import imag.quizz.server.network.ServerConnectionManager;
@@ -122,6 +119,9 @@ public class ServerController extends MessageHandler implements Controller {
             case DROP:
                 break;
             case END:
+                break;
+            default:
+                this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
                 break;
         }
     }
