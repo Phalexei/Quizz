@@ -131,7 +131,7 @@ public class ServerConnectionManager extends ConnectionManager {
         super.newIncomingConnection(socket);
         if (this.controller.isLeader()) {
             final SocketHandler socketHandler = this.connections.get(socket.getLocalPort());
-            socketHandler.write(new InitMessage(this.controller.getOwnId()).toString());
+            socketHandler.write(new InitMessage(this.controller.getOwnId(), this.controller.buildInitData()).toString());
         }
     }
 

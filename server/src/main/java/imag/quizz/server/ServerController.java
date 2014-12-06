@@ -131,7 +131,7 @@ public class ServerController extends MessageHandler implements Controller {
         }
     }
 
-    private String buildInitData() {
+    public String buildInitData() {
         final StringBuilder builder = new StringBuilder();
         // TODO Append Player data
         // TODO
