@@ -42,6 +42,14 @@ public final class QuestionBase {
             }
         }
 
+        public Question(final String question, final String[] answers, final int correctAnswerIndex) {
+            Validate.isTrue(answers.length == 4);
+            Validate.inclusiveBetween(0, 3, correctAnswerIndex);
+            this.question = question;
+            this.answers = answers;
+            this.correctAnswerIndex = correctAnswerIndex;
+        }
+
         public String getQuestion() {
             return this.question;
         }

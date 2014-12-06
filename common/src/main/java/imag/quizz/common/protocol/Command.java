@@ -57,7 +57,7 @@ public enum Command {
      * <li> [x]: Number of chosen theme among following themeIds. 0 (not
      * chosen yet) to 4.
      * <li> [y]: Number of next question to answer. 0 (theme not chosen) to
-     * 8.
+     * 9.
      * <li> [themes]: [[themeId][questionId]{4}]{4}
      * </ul></ul>
      * <p>
