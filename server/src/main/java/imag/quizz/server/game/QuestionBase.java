@@ -15,16 +15,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class QuestionBase {
 
     private static final URL questionBaseUrl = QuestionBase.class.getResource("/questionBase.json");
 
-    public final class Question {
+    public static final class Question {
+
+        private static final Random RANDOM = new Random();
+
         private final String   question;
         private final String[] answers;
         private final int      correctAnswerIndex;
@@ -34,7 +34,7 @@ public final class QuestionBase {
             this.question = question;
 
             // Create an array with the 4 answers
-            this.correctAnswerIndex = this.question.hashCode() % 4;
+            this.correctAnswerIndex = (this.question + Question.RANDOM.nextLong()).hashCode() % 4;
             this.answers = new String[4];
             int j = 0;
             for (int i = 0; i < 4; i++) {
