@@ -79,6 +79,21 @@ public final class Separator {
     }
 
     /**
+     * Replaces every separator in a String by spaces.
+     *
+     * @param string a String
+     *
+     * @return the same String without separators
+     */
+    public static String clean(final String string) {
+        String result = string;
+        for (final String separator : Separator.SEPARATORS) {
+            result = result.replace(separator, " ");
+        }
+        return result;
+    }
+
+    /**
      * Never instantiate this tool class.
      */
     private Separator() {

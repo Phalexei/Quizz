@@ -1,5 +1,6 @@
 package imag.quizz.common.network;
 
+import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.Pair;
@@ -39,7 +40,7 @@ public abstract class MessageHandler extends AbstractRepeatingThread {
     public final void queue(final SocketHandler socketHandler, final String message) {
         this.messagePool.offer(new Pair<>(socketHandler, message));
         if (Log.isEnabledFor(Level.DEBUG)) {
-            Log.debug("Message queued: " + message);
+            Log.debug("Message queued: " + Separator.clean(message));
         }
     }
 
@@ -52,7 +53,7 @@ public abstract class MessageHandler extends AbstractRepeatingThread {
             if (socketAndMessage != null) {
                 messageString = socketAndMessage.getB();
                 if (Log.isEnabledFor(Level.DEBUG)) {
-                    Log.debug("Handling message: " + messageString);
+                    Log.debug("Handling message: " + Separator.clean(messageString));
                 }
                 try {
                     final Message message = Message.fromString(messageString);
