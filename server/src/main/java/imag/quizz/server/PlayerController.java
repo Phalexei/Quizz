@@ -12,11 +12,11 @@ import imag.quizz.server.game.QuestionBase;
 import imag.quizz.server.network.PlayerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PlayerController extends MessageHandler implements Controller {
+
+    private static final Random RANDOM = new Random();
 
     private final ServerController        serverController;
     private final PlayerConnectionManager connectionManager;
@@ -76,13 +76,27 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and end game
                     break;
                 case GAMES:
-                    // TODO Send Games to player
+                    final Set<Game> playerGames = this.games.getByPlayer(player);
+                    // TODO this.connectionManager.send(localPort, new GamesMessage(playerGames /* TODO */));
                     break;
                 case NEW:
                     final NewMessage newMessage = (NewMessage) message;
                     final String opponentLogin = newMessage.getOpponent();
                     if (opponentLogin == null) {
-                        // TODO Get random opponent
+                        if (this.players.size() == 1) {
+                            // No opponent available
+                            this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
+                        } else {
+                            final ArrayList<Player> potentialOpponents = new ArrayList<>(this.players.values());
+                            potentialOpponents.remove(player);
+                            final Player opponent = potentialOpponents.get(PlayerController.RANDOM.nextInt(potentialOpponents.size()));
+                            // TODO Merge following code with code in next else block as it's the same thing
+                            final Game game = this.games.newGame(player, opponent);
+                            /* TODO
+                            this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
+                            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
+                            */
+                        }
                     } else {
                         final Player opponent = this.players.get(opponentLogin);
                         if (opponent == null) {
@@ -95,8 +109,6 @@ public class PlayerController extends MessageHandler implements Controller {
                             */
                         }
                     }
-                    // TODO Check for argument and available opponent
-                    // TODO Eventually start a new game
                     break;
                 case NOANSWER:
                     // TODO Check current game and question
