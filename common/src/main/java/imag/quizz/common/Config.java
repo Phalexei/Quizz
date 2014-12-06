@@ -1,11 +1,11 @@
 package imag.quizz.common;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import imag.quizz.common.tool.Log;
 import org.apache.log4j.Level;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -74,17 +74,17 @@ public class Config {
 
     private void parseJsonConfig(final String json) throws IllegalArgumentException {
         try {
-            final JSONObject jsonRoot = (JSONObject) new JSONParser().parse(json);
-            final JSONArray serversArray = (JSONArray) jsonRoot.get("servers");
-            for (final Object aServersArray : serversArray) {
-                final JSONObject serverObject = (JSONObject) aServersArray;
-                final int serverId = Integer.parseInt((String) serverObject.get("id"));
-                final String serverHost = (String) serverObject.get("host");
-                final int serverPort = Integer.parseInt((String) serverObject.get("serverPort"));
-                final int playerPort = Integer.parseInt((String) serverObject.get("playerPort"));
+            final JsonObject root = new JsonParser().parse(json).getAsJsonObject();
+            final JsonArray serversArray = root.getAsJsonArray("servers");
+            for (final JsonElement server : serversArray) {
+                final JsonObject serverObject = (JsonObject) server;
+                final int serverId = serverObject.get("id").getAsInt();
+                final String serverHost = serverObject.get("host").getAsString();
+                final int serverPort = serverObject.get("serverPort").getAsInt();
+                final int playerPort = serverObject.get("playerPort").getAsInt();
                 this.servers.put(serverId, new ServerInfo(serverId, serverHost, serverPort, playerPort));
             }
-        } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException e) {
+        } catch (final ClassCastException | NullPointerException | NumberFormatException e) {
             throw new IllegalArgumentException("Malformed configuration file", e);
         }
     }

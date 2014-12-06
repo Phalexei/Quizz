@@ -1,12 +1,12 @@
 package imag.quizz.server.game;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import imag.quizz.common.tool.Log;
 import org.apache.commons.lang3.Validate;
 import org.apache.log4j.Level;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,7 +34,7 @@ public final class QuestionBase {
             this.question = question;
 
             // Create an array with the 4 answers
-            this.correctAnswerIndex = (this.question + Question.RANDOM.nextLong()).hashCode() % 4;
+            this.correctAnswerIndex = Math.abs((this.question + Question.RANDOM.nextLong()).hashCode()) % 4;
             this.answers = new String[4];
             int j = 0;
             for (int i = 0; i < 4; i++) {
@@ -67,7 +67,11 @@ public final class QuestionBase {
             throw new IOException("Error while reading configuration file", e1);
         }
         if (Log.isEnabledFor(Level.DEBUG)) {
-            Log.debug("QuestionBase file parsed. " + this.themes.size() + " themes found");
+            int questions = 0;
+            for (final List<Question> themeQuestions : this.themes.values()) {
+                questions += themeQuestions.size();
+            }
+            Log.debug("QuestionBase file parsed. " + this.themes.size() + " themes found with a total of " + questions + " questions");
         }
     }
 
@@ -77,22 +81,22 @@ public final class QuestionBase {
 
     private void parseJsonConfig(final String json) throws IllegalArgumentException {
         try {
-            final JSONObject jsonRoot = (JSONObject) new JSONParser().parse(json);
-            final JSONArray themesArray = (JSONArray) jsonRoot.get("themes");
-            for (final Object themeObject : themesArray) {
-                final JSONObject themeJsonObject = (JSONObject) themeObject;
-                final String themeName = (String) themeJsonObject.get("name");
+            final JsonObject jsonRoot = new JsonParser().parse(json).getAsJsonObject();
+            final JsonArray themesArray = jsonRoot.get("themes").getAsJsonArray();
+            for (final JsonElement themeObject : themesArray) {
+                final JsonObject themeJsonObject = (JsonObject) themeObject;
+                final String themeName = themeJsonObject.get("name").getAsString();
                 final List<Question> questions = new LinkedList<>();
-                final JSONArray questionsArray = (JSONArray) themeJsonObject.get("questions");
-                for (final Object questionObject : questionsArray) {
-                    final JSONObject questionJsonObject = (JSONObject) questionObject;
-                    final String question = (String) questionJsonObject.get("question");
-                    final String answer = (String) questionJsonObject.get("answer");
+                final JsonArray questionsArray = themeJsonObject.get("questions").getAsJsonArray();
+                for (final JsonElement questionObject : questionsArray) {
+                    final JsonObject questionJsonObject = (JsonObject) questionObject;
+                    final String question = questionJsonObject.get("question").getAsString();
+                    final String answer = questionJsonObject.get("answer").getAsString();
                     final String[] wrongAnswers = new String[3];
-                    final JSONArray wrongAnswersArray = (JSONArray) questionJsonObject.get("wrongAnswers");
+                    final JsonArray wrongAnswersArray = questionJsonObject.get("wrongAnswers").getAsJsonArray();
                     int i = 0;
-                    for (final Object wrongAnswerObject : wrongAnswersArray) {
-                        wrongAnswers[i++] = (String) wrongAnswerObject;
+                    for (final JsonElement wrongAnswerObject : wrongAnswersArray) {
+                        wrongAnswers[i++] = wrongAnswerObject.getAsString();
                     }
                     questions.add(new Question(question, answer, wrongAnswers));
                 }
@@ -104,7 +108,7 @@ public final class QuestionBase {
             if (this.themes.size() < 8) {
                 throw new IllegalArgumentException("There should be AT THE VERY LEAST 8 themes (more is better)");
             }
-        } catch (final ParseException | ClassCastException | NullPointerException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
+        } catch (final ClassCastException | NullPointerException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new IllegalArgumentException("Malformed configuration file", e);
         }
     }
