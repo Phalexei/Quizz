@@ -159,8 +159,9 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     @Override
-    public void lostConnection(SocketHandler socketHandler) {
+    public void lostConnection(final SocketHandler socketHandler) {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
-        //TODO
+        // TODO Update leader eventually
+        // TODO Maybe other things
     }
 }

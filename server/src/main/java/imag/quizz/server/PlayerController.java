@@ -162,5 +162,6 @@ public class PlayerController extends MessageHandler implements Controller {
     public void lostConnection(final SocketHandler socketHandler) {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
         // TODO Broadcast logout
+        // TODO Maybe other things
     }
 }
