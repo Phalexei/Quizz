@@ -26,6 +26,10 @@ public class GameMessage extends Message {
         this.gameData = builder.toString();
     }
 
+    public String getGameData() {
+        return this.gameData;
+    }
+
     @Override
     protected String getParametersString() {
         return this.gameData;
