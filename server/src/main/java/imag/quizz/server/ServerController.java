@@ -141,21 +141,33 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     public String buildInitData() {
+        final boolean players = !this.players.isEmpty();
+        final boolean games = !this.games.getGames().isEmpty();
+
         final StringBuilder builder = new StringBuilder();
-        final Iterator<Player> itPlayer = this.players.values().iterator();
-        while (itPlayer.hasNext()) {
-            builder.append(itPlayer.next().toMessageData(3));
-            if (itPlayer.hasNext()) {
-                builder.append(Separator.LEVEL_2);
+
+        if (players) {
+            final Iterator<Player> itPlayer = this.players.values().iterator();
+            while (itPlayer.hasNext()) {
+                builder.append(itPlayer.next().toMessageData(3));
+                if (itPlayer.hasNext()) {
+                    builder.append(Separator.LEVEL_2);
+                }
             }
+        } else {
+            builder.append("null");
         }
         builder.append(Separator.LEVEL_1);
-        final Iterator<Game> itGame = this.games.getGames().values().iterator();
-        while (itGame.hasNext()) {
-            builder.append(itGame.next().toMessageData(3));
-            if (itGame.hasNext()) {
-                builder.append(Separator.LEVEL_2);
+        if (games) {
+            final Iterator<Game> itGame = this.games.getGames().values().iterator();
+            while (itGame.hasNext()) {
+                builder.append(itGame.next().toMessageData(3));
+                if (itGame.hasNext()) {
+                    builder.append(Separator.LEVEL_2);
+                }
             }
+        } else {
+            builder.append("null");
         }
         return builder.toString();
     }
@@ -168,6 +180,9 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     private void loadInitPlayers(final String playersData) {
+        if ("null".equals(playersData)) {
+            return;
+        }
         final String[] split = playersData.split(Separator.LEVEL_2);
         for (final String playerString : split) {
             final Player player = Player.fromMessageData(playerString, 3);
@@ -176,6 +191,9 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     private void loadInitGames(final String gamesData) {
+        if ("null".equals(gamesData)) {
+            return;
+        }
         final String[] split = gamesData.split(Separator.LEVEL_2);
         for (final String gameString : split) {
             final Game game = Game.fromMessageData(this.players, gameString, 3);
