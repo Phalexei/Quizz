@@ -6,7 +6,7 @@ public class AnswerMessage extends Message {
 
     private final int chosenAnswer;
 
-    protected AnswerMessage(final long senderId, final int chosenAnswer) {
+    public AnswerMessage(final long senderId, final int chosenAnswer) {
         super(Command.ANSWER, senderId);
         this.chosenAnswer = chosenAnswer;
     }
