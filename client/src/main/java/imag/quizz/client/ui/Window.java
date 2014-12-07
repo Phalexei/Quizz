@@ -170,6 +170,9 @@ public class Window {
         retryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
+                retryButton.setEnabled(false);
+
+                // TODO Don't do this here. Needs to be done by the main thread!
                 Window.this.clientController.connect();
             }
         });
@@ -198,12 +201,18 @@ public class Window {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
+                loginButton.setEnabled(false);
+
+                // TODO Don't do this here. Needs to be done by the main thread!
                 Window.this.clientController.login(username.getText(), password.getPassword());
             }
         });
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
+                registerButton.setEnabled(false);
+
+                // TODO Don't do this here. Needs to be done by the main thread!
                 Window.this.clientController.register(username.getText(), password.getPassword());
             }
         });
