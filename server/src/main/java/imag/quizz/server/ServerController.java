@@ -32,6 +32,8 @@ public class ServerController extends MessageHandler implements Controller {
     private final Map<String, Player>        players;
     private final Games                      games;
 
+    private boolean initialized;
+
     /**
      * Constructor.
      */
@@ -42,6 +44,8 @@ public class ServerController extends MessageHandler implements Controller {
         this.servers = new TreeMap<>();
         this.players = new HashMap<>();
         this.games = new Games(questionBase);
+
+        this.initialized = false;
 
         this.connectionManager = new ServerConnectionManager(this, ownId);
         this.pingPongTask = new PingPongTask(this, 3_000);
@@ -91,11 +95,16 @@ public class ServerController extends MessageHandler implements Controller {
             case NOK:
                 break;
             case INIT:
-                // TODO Check INIT origin and current state
-                Log.info("Received INIT from current leader with ID " + message.getSenderId());
-                this.loadInitData(((InitMessage) message).getData());
-                this.connectionManager.connectServers();
-                this.connectionManager.broadcast(new OkMessage(this.ownId));
+                if (this.initialized) {
+                    Log.warn("Received INIT message from server " + message.getSenderId() + " while already being initialized");
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                } else {
+                    Log.info("Received INIT from current leader with ID " + message.getSenderId());
+                    this.loadInitData(((InitMessage) message).getData());
+                    this.initialized = true;
+                    this.connectionManager.connectServers();
+                    this.connectionManager.broadcast(new OkMessage(this.ownId));
+                }
                 break;
             case REGISTER:
                 break;
