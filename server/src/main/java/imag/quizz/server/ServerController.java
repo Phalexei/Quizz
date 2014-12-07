@@ -136,15 +136,15 @@ public class ServerController extends MessageHandler implements Controller {
                     this.leaderBroadcast(message);
                 }
                 break;
-            case GAMES:
-                break;
-            case NEW:
-                break;
             case GAME:
+                final GameMessage gameMessage = (GameMessage) message;
+                final Game game = Game.fromMessageData(this.players, gameMessage.getGameData(), 1);
+                this.games.getGames().put(game.getId(), game);
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case PLAY:
-                break;
-            case THEMES:
                 break;
             case THEME:
                 break;
@@ -153,8 +153,6 @@ public class ServerController extends MessageHandler implements Controller {
             case ANSWER:
                 break;
             case NOANSWER:
-                break;
-            case WAIT:
                 break;
             case DROP:
                 break;
