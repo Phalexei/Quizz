@@ -2,6 +2,7 @@ package imag.quizz.common.protocol;
 
 import imag.quizz.common.Controller;
 import imag.quizz.common.network.AbstractRepeatingThread;
+import imag.quizz.common.tool.Log;
 
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,7 @@ public class PingPongTask extends AbstractRepeatingThread {
                     this.waitingPong.remove(uri);
                 }
             } else if (this.lastPingDate.get(uri) + PingPongTask.PING_FREQ < currentTime) {
+                Log.debug("Pinging " + uri);
                 this.controller.ping(uri);
                 this.lastPingDate.put(uri, currentTime);
                 this.waitingPong.add(uri);
