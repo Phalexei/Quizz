@@ -9,6 +9,7 @@ import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.game.*;
+import imag.quizz.server.game.QuestionBase.Question;
 import imag.quizz.server.network.ServerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 import org.apache.commons.lang3.Validate;
@@ -160,7 +161,15 @@ public class ServerController extends MessageHandler implements Controller {
                 final ThemeMessage themeMessage = (ThemeMessage) message;
                 for (final Player player : this.players.values()) {
                     if (player.getId() == themeMessage.getSenderId()) {
-                        this.games.getGames().get(themeMessage.getGameId()).playerSelectTheme(player, themeMessage.getChosenTheme());
+                        final Game currentGame = this.games.getGames().get(themeMessage.getGameId());
+                        final boolean opponentUnlocked = currentGame.playerSelectTheme(player, themeMessage.getChosenTheme());
+                        final Player opponent = currentGame.getOpponent(player);
+                        if (opponentUnlocked && opponent.getPort() != -1) {
+                            final Question question = currentGame.getCurrentQuestion(opponent);
+                            this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                        }
+                        final Question question = currentGame.getCurrentQuestion(player);
+                        this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
                         break;
                     }
                 }

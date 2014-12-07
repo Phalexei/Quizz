@@ -175,7 +175,14 @@ public final class Game {
         // Empty
     }
 
-    public void playerSelectTheme(final Player player, final int themeIndex) {
+    /**
+     *
+     * @param player
+     * @param themeIndex
+     *
+     * @return true if the opponent no long has to wait
+     */
+    public boolean playerSelectTheme(final Player player, final int themeIndex) {
         Validate.isTrue(themeIndex < 4, "Invalid themeIndex value (" + themeIndex + ")");
         if (this.playerA == player) {
             this.chosenThemeA = themeIndex;
@@ -183,6 +190,7 @@ public final class Game {
             this.playerAStatus = PlayerStatus.ANSWER_QUESTION;
             if (this.playerBStatus == PlayerStatus.WAIT) {
                 this.playerBStatus = PlayerStatus.ANSWER_QUESTION;
+                return true;
             }
         } else if (this.playerB == player) {
             this.chosenThemeB = themeIndex;
@@ -190,10 +198,12 @@ public final class Game {
             this.playerBStatus = PlayerStatus.ANSWER_QUESTION;
             if (this.playerAStatus == PlayerStatus.WAIT) {
                 this.playerAStatus = PlayerStatus.ANSWER_QUESTION;
+                return true;
             }
         } else {
             throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
         }
+        return false;
     }
 
     public boolean playerSelectAnswer(final Player player, final int answerIndex) {
@@ -235,6 +245,30 @@ public final class Game {
         } else {
             throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
         }
+    }
+
+    public Question getCurrentQuestion(final Player player) {
+        final Question question;
+        if (this.playerA == player) {
+            final int currentQuestion = this.currentQuestionA;
+            if (currentQuestion < 5) {
+                final String theme = this.themesA[this.chosenThemeA];
+                question = this.questionsA.get(theme)[currentQuestion - 1];
+            } else {
+                final String theme =this.themesB[this.chosenThemeB];
+                question = this.questionsB.get(theme)[currentQuestion - 1 - 4];
+            }
+        } else {
+            final int currentQuestion = this.currentQuestionB;
+            if (currentQuestion < 5) {
+                final String theme = this.themesB[this.chosenThemeB];
+                question = this.questionsB.get(theme)[currentQuestion - 1];
+            } else {
+                final String theme = this.themesA[this.chosenThemeA];
+                question =this.questionsA.get(theme)[currentQuestion - 1 - 4];
+            }
+        }
+        return question;
     }
 
     public Player getOpponent(final Player player) {

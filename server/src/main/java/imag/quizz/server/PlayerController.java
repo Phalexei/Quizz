@@ -131,26 +131,7 @@ public class PlayerController extends MessageHandler implements Controller {
                                 this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), isPlayerA ? game.getThemesA() : game.getThemesB()));
                                 break;
                             case ANSWER_QUESTION:
-                                final Question question;
-                                if (isPlayerA) {
-                                    final int currentQuestion = game.getCurrentQuestionA();
-                                    if (currentQuestion < 5) {
-                                        final String theme = game.getThemesA()[game.getChosenThemeA()];
-                                        question = game.getQuestionsA().get(theme)[currentQuestion - 1];
-                                    } else {
-                                        final String theme = game.getThemesB()[game.getChosenThemeB()];
-                                        question = game.getQuestionsB().get(theme)[currentQuestion - 1 - 4];
-                                    }
-                                } else {
-                                    final int currentQuestion = game.getCurrentQuestionB();
-                                    if (currentQuestion < 5) {
-                                        final String theme = game.getThemesB()[game.getChosenThemeB()];
-                                        question = game.getQuestionsB().get(theme)[currentQuestion - 1];
-                                    } else {
-                                        final String theme = game.getThemesA()[game.getChosenThemeA()];
-                                        question = game.getQuestionsA().get(theme)[currentQuestion - 1 - 4];
-                                    }
-                                }
+                                final Question question = game.getCurrentQuestion(player);
                                 this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
                                 break;
                             case WAIT:
@@ -168,8 +149,24 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.register(localPort, socketHandler, message);
                     break;
                 case THEME:
-                    // TODO Check current game and theme status
-                    // TODO Update and continue game
+                    final ThemeMessage themeMessage = (ThemeMessage) message;
+                    final Game currentGame = this.serverController.getGames().getGames().get(player.getCurrentGameId());
+                    final boolean isPlayerA = currentGame.getPlayerA() == player;
+                    if (isPlayerA && currentGame.getPlayerAStatus() != PlayerStatus.SELECT_THEME || !isPlayerA && currentGame.getPlayerBStatus() != PlayerStatus.SELECT_THEME) {
+                        this.connectionManager.send(localPort, new NokMessage(this.ownId, "Player doesn't have to choose a theme", message));
+                    } else {
+                        if (this.serverController.isLeader()) {
+                            final boolean opponentUnlocked = currentGame.playerSelectTheme(player, themeMessage.getChosenTheme());
+                            final Player opponent = currentGame.getOpponent(player);
+                            if (opponentUnlocked && opponent.getPort() != -1) {
+                                final Question question = currentGame.getCurrentQuestion(opponent);
+                                this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                            }
+                            final Question question = currentGame.getCurrentQuestion(player);
+                            this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                        }
+                        this.serverController.leaderBroadcast(message);
+                    }
                     break;
                 default:
                     this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
