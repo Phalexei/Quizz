@@ -4,11 +4,12 @@ import imag.quizz.common.protocol.Command;
 import imag.quizz.common.protocol.Separator;
 
 public class EndMessage extends Message {
+
     private final int userScore;
     private final int opponentScore;
 
-    public EndMessage(final long senderId, final int userScore, final int opponentScore) {
-        super(Command.END, senderId);
+    public EndMessage(final long sourceId, final int userScore, final int opponentScore) {
+        super(Command.END, sourceId);
         this.userScore = userScore;
         this.opponentScore = opponentScore;
     }

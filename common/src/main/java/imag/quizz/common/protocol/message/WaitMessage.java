@@ -6,8 +6,8 @@ public class WaitMessage extends Message {
 
     private final String text;
 
-    public WaitMessage(final long senderId, final String text) {
-        super(Command.WAIT, senderId);
+    public WaitMessage(final long sourceId, final String text) {
+        super(Command.WAIT, sourceId);
         this.text = text;
     }
 

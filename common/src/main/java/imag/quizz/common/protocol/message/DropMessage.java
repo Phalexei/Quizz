@@ -4,8 +4,8 @@ import imag.quizz.common.protocol.Command;
 
 public class DropMessage extends Message {
 
-    public DropMessage(final long senderId) {
-        super(Command.DROP, senderId);
+    public DropMessage(final long sourceId) {
+        super(Command.DROP, sourceId);
     }
 
     /* package */ DropMessage(final String[] messageSplit) {

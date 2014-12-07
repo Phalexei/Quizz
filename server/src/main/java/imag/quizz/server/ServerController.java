@@ -8,6 +8,7 @@ import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
+import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.*;
 import imag.quizz.server.game.Game.PlayerStatus;
 import imag.quizz.server.game.QuestionBase.Question;
@@ -26,14 +27,14 @@ public class ServerController extends MessageHandler implements Controller {
 
     private boolean isLeader;
     private long    currentLeaderId;
-    private Integer currentLeaderLocalPort;
+    private String  currentLeaderUri;
 
     private final PingPongTask pingPongTask;
 
     // Server ID ; Server
-    private final SortedMap<Integer, Server> servers;
-    private final Map<String, Player>        players;
-    private final Games                      games;
+    private final SortedMap<Long, Server> servers;
+    private final Map<String, Player>     players;
+    private final Games                   games;
 
     private boolean initialized;
 
@@ -56,23 +57,23 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     @Override
-    public void pingTimeout(final int port) {
+    public void pingTimeout(final String uri) {
         Log.warn("Ping timeout!"); // TODO
     }
 
     @Override
-    public void ping(final int port) {
-        this.connectionManager.send(port, new PingMessage(this.ownId));
+    public void ping(final String uri) {
+        this.connectionManager.send(uri, new PingMessage(this.ownId));
     }
 
     @Override
     public void handleMessage(final SocketHandler socketHandler, final Message message) {
-        final int localPort = socketHandler.getSocket().getLocalPort();
+        final String uri = SockUri.from(socketHandler.getSocket());
         // Known Server
-        Server server = (Server) this.connectionManager.getLinkedPeer(localPort);
+        Server server = (Server) this.connectionManager.getLinkedPeer(uri);
 
         if (server == null) { //server unknown for now, get his ID and register him to the connection manager
-            server = new Server(message.getSenderId(), socketHandler.getSocket().getLocalPort());
+            server = new Server(message.getSourceId(), uri);
             this.connectionManager.learnConnectionPeerIdentity(server, socketHandler);
         }
 
@@ -87,16 +88,16 @@ public class ServerController extends MessageHandler implements Controller {
                 socketHandler.write(new PongMessage(this.ownId, message).toString());
                 break;
             case PONG:
-                this.pingPongTask.pong(localPort);
+                this.pingPongTask.pong(uri);
                 break;
             case OK:
                 // Handle Leader switch
-                if (message.getSenderId() < this.currentLeaderId) {
+                if (message.getSourceId() < this.currentLeaderId) {
                     Log.info((this.currentLeaderId == this.ownId ? "We were leader" : "Leader was server " + this.currentLeaderId)
-                                     + ", the leader is now server " + message.getSenderId());
+                                     + ", the leader is now server " + message.getSourceId());
                     this.isLeader = false;
-                    this.currentLeaderId = message.getSenderId();
-                    this.currentLeaderLocalPort = socketHandler.getSocket().getLocalPort();
+                    this.currentLeaderId = message.getSourceId();
+                    this.currentLeaderUri = uri;
                 }
                 // TODO Other things
                 break;
@@ -104,10 +105,10 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case INIT:
                 if (this.initialized) {
-                    Log.warn("Received INIT message from server " + message.getSenderId() + " while already being initialized");
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId, message));
+                    Log.warn("Received INIT message from server " + message.getSourceId() + " while already being initialized");
+                    this.connectionManager.send(uri, new NokMessage(this.ownId, message));
                 } else {
-                    Log.info("Received INIT from current leader with ID " + message.getSenderId());
+                    Log.info("Received INIT from current leader with ID " + message.getSourceId());
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
                     this.connectionManager.broadcast(new OkMessage(this.ownId, message));
@@ -118,12 +119,12 @@ public class ServerController extends MessageHandler implements Controller {
                 final RegisterMessage registerMessage = (RegisterMessage) message;
                 if (this.isLeader) {
                     final long id = IdGenerator.nextPlayer();
-                    player = new Player(id, -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    player = new Player(id, null, registerMessage.getLogin(), registerMessage.getHashedPassword());
                     this.players.put(player.getLogin(), player);
-                    registerMessage.setSenderId(id);
+                    registerMessage.setSourceId(id);
                     this.leaderBroadcast(registerMessage);
                 } else {
-                    player = new Player(message.getSenderId(), -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    player = new Player(message.getSourceId(), null, registerMessage.getLogin(), registerMessage.getHashedPassword());
                     this.players.put(player.getLogin(), player);
                 }
                 break;
@@ -153,19 +154,19 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case PLAY:
                 final PlayMessage playMessage = (PlayMessage) message;
-                player = this.getPlayer(playMessage.getSenderId());
-                player.setCurrentGameId(playMessage.getId());
+                player = this.getPlayer(playMessage.getSourceId());
+                player.setCurrentGameId(playMessage.getGameId());
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
             case THEME:
                 final ThemeMessage themeMessage = (ThemeMessage) message;
-                player = this.getPlayer(themeMessage.getSenderId());
+                player = this.getPlayer(themeMessage.getSourceId());
                 game = this.games.getGames().get(player.getCurrentGameId());
                 final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
                 opponent = game.getOpponent(player);
-                if (opponentUnlocked && opponent.getPort() != -1) {
+                if (opponentUnlocked && opponent.getUri() != null) {
                     final Question question = game.getCurrentQuestion(opponent);
                     this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
                 }
@@ -177,7 +178,7 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case ANSWER:
                 final AnswerMessage answerMessage = (AnswerMessage) message;
-                player = this.getPlayer(answerMessage.getSenderId());
+                player = this.getPlayer(answerMessage.getSourceId());
                 game = this.getGames().getGames().get(player.getCurrentGameId());
                 isPlayerA = game.getPlayerA() == player;
                 game.playerSelectAnswer(player, answerMessage.getChosenAnswer());
@@ -187,7 +188,7 @@ public class ServerController extends MessageHandler implements Controller {
                         final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                         final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                         opponent = game.getOpponent(player);
-                        if (opponent.getPort() != -1) {
+                        if (opponent.getUri() != null) {
                             this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                         }
                     }
@@ -197,7 +198,7 @@ public class ServerController extends MessageHandler implements Controller {
                 }
                 break;
             case NOANSWER:
-                player = this.getPlayer(message.getSenderId());
+                player = this.getPlayer(message.getSourceId());
                 game = this.getGames().getGames().get(player.getCurrentGameId());
                 isPlayerA = game.getPlayerA() == player;
                 game.playerDoesntAnswer(player);
@@ -207,7 +208,7 @@ public class ServerController extends MessageHandler implements Controller {
                         final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                         final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                         opponent = game.getOpponent(player);
-                        if (opponent.getPort() != -1) {
+                        if (opponent.getUri() != null) {
                             this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                         }
                     }
@@ -217,14 +218,14 @@ public class ServerController extends MessageHandler implements Controller {
                 }
                 break;
             case DROP:
-                player = this.getPlayer(message.getSenderId());
+                player = this.getPlayer(message.getSourceId());
                 game = this.getGames().getGames().get(player.getCurrentGameId());
                 isPlayerA = game.getPlayerA() == player;
                 game.playerDrop(player);
                 final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                 final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                 opponent = game.getOpponent(player);
-                if (opponent.getPort() != -1) {
+                if (opponent.getUri() != null) {
                     this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                 }
                 if (this.isLeader) {
@@ -232,7 +233,7 @@ public class ServerController extends MessageHandler implements Controller {
                 }
                 break;
             default:
-                this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
+                this.connectionManager.send(uri, new NokMessage(this.ownId, "Unexpected message", message));
                 break;
         }
     }
@@ -300,7 +301,7 @@ public class ServerController extends MessageHandler implements Controller {
 
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
-        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
+        this.connectionManager.forgetConnection(SockUri.from(socketHandler.getSocket()));
         // TODO Update leader eventually
         // TODO Maybe other things
     }
@@ -338,8 +339,8 @@ public class ServerController extends MessageHandler implements Controller {
         return this.currentLeaderId;
     }
 
-    public Integer getCurrentLeaderLocalPort() {
-        return this.currentLeaderLocalPort;
+    public String getCurrentLeaderUri() {
+        return this.currentLeaderUri;
     }
 
     public Map<String, Player> getPlayers() {
@@ -358,7 +359,7 @@ public class ServerController extends MessageHandler implements Controller {
         this.currentLeaderId = currentLeaderId;
     }
 
-    public void setCurrentLeaderLocalPort(final Integer currentLeaderLocalPort) {
-        this.currentLeaderLocalPort = currentLeaderLocalPort;
+    public void setCurrentLeaderUri(final String currentLeaderUri) {
+        this.currentLeaderUri = currentLeaderUri;
     }
 }

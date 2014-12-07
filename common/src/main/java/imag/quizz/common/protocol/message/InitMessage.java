@@ -7,8 +7,8 @@ public class InitMessage extends Message {
 
     private final String data;
 
-    public InitMessage(final long senderId, final String data) {
-        super(Command.INIT, senderId);
+    public InitMessage(final long sourceId, final String data) {
+        super(Command.INIT, sourceId);
         this.data = data;
     }
 

@@ -9,8 +9,8 @@ public class ThemesMessage extends Message {
     private final long     gameId;
     private final String[] themes;
 
-    public ThemesMessage(final long senderId, final long gameId, final String[] themes) {
-        super(Command.THEMES, senderId);
+    public ThemesMessage(final long sourceId, final long gameId, final String[] themes) {
+        super(Command.THEMES, sourceId);
         Validate.isTrue(themes.length == 4);
         this.gameId = gameId;
         this.themes = themes;

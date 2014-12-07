@@ -10,6 +10,7 @@ import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
+import imag.quizz.common.tool.SockUri;
 
 /**
  * Created by Ribesg.
@@ -20,14 +21,14 @@ public class ClientController extends MessageHandler implements Controller {
     private final ConnectionManager connectionManager;
     private final PingPongTask      pingPongTask;
     private       long              playerId;
-    private       long              currentGame;
+    private       long              currentGameId;
 
     public ClientController(final Config config) {
         super("Controller");
         this.window = null;
         this.connectionManager = new ConnectionManager(config, this);
         this.playerId = -1; // -1 is invalid : no ID yet
-        this.currentGame = -1; // -1 is invalid : not yet playing
+        this.currentGameId = -1; // -1 is invalid : not yet playing
         this.pingPongTask = new PingPongTask(this, 5_000);
         this.pingPongTask.start();
     }
@@ -50,7 +51,7 @@ public class ClientController extends MessageHandler implements Controller {
                 this.connectionManager.send(new PongMessage(this.playerId, message));
                 break;
             case PONG:
-                this.pingPongTask.pong(socketHandler.getSocket().getLocalPort());
+                this.pingPongTask.pong(SockUri.from(socketHandler.getSocket()));
                 break;
             case GAMES:
                 this.updateAvailableGames((GamesMessage) message);
@@ -77,13 +78,13 @@ public class ClientController extends MessageHandler implements Controller {
                     case REGISTER:
                         this.connectionManager.send(new GamesMessage(this.playerId, null));
                     case LOGIN:
-                        this.setPlayerId(message.getSenderId());
+                        this.setPlayerId(message.getSourceId());
                         this.window.loggedIn();
                         break;
                 }
                 break;
             case NOK:
-                this.handleNok((NokMessage)message);
+                this.handleNok((NokMessage) message);
                 // wut
                 break;
 
@@ -100,11 +101,11 @@ public class ClientController extends MessageHandler implements Controller {
                 //TODO: wtf : messages for servers
             default:
                 // TODO KEK
-                this.connectionManager.send(new NokMessage(playerId, "Unhandled message", message));
+                this.connectionManager.send(new NokMessage(this.playerId, "Unhandled message", message));
         }
     }
 
-    private void handleNok(NokMessage message) {
+    private void handleNok(final NokMessage message) {
         this.window.showError(message.getText());
     }
 
@@ -121,30 +122,30 @@ public class ClientController extends MessageHandler implements Controller {
         this.window.setPanel(Window.PanelType.CHOICE);
         this.window.setQuestion(message.getQuestion());
         int i = 1;
-        for (String answer : message.getAnswers()) {
+        for (final String answer : message.getAnswers()) {
             this.window.setAnswer(i++, answer);
         }
         this.window.unlockButtons();
     }
 
     private void showAvailableThemes(final ThemesMessage message) {
-        window.setPanel(Window.PanelType.CHOICE);
-        window.setQuestion("Choisissez un thème");
+        this.window.setPanel(Window.PanelType.CHOICE);
+        this.window.setQuestion("Choisissez un thème");
         int i = 1;
-        for (String theme : message.getThemes()) {
-            window.setAnswer(i++, theme);
+        for (final String theme : message.getThemes()) {
+            this.window.setAnswer(i++, theme);
         }
-        window.unlockButtons();
+        this.window.unlockButtons();
     }
 
     public void newGame(final String opponent) {
-        this.connectionManager.send(new NewMessage(playerId, opponent));
+        this.connectionManager.send(new NewMessage(this.playerId, opponent));
     }
 
     private void updateAvailableGames(final GamesMessage message) {
         final String data = message.getGamesData();
         this.window.clearGames();
-        for (String game : data.split(Separator.LEVEL_1)) {
+        for (final String game : data.split(Separator.LEVEL_1)) {
             if (!game.isEmpty()) {
                 final String[] split = game.split(Separator.LEVEL_2);
 
@@ -170,20 +171,20 @@ public class ClientController extends MessageHandler implements Controller {
 
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
-        this.pingPongTask.removePort(this.connectionManager.getSocketHandler().getSocket().getLocalPort());
+        this.pingPongTask.removeUri(SockUri.from(socketHandler.getSocket()));
         this.connectionManager.lostConnection();
         this.connect();
     }
 
     @Override
-    public void pingTimeout(final int port) {
+    public void pingTimeout(final String uri) {
         if (this.isLoggedIn()) {
             this.lostConnection(null);
         }
     }
 
     @Override
-    public void ping(final int port) {
+    public void ping(final String uri) {
         if (this.isLoggedIn()) {
             this.connectionManager.send(new PingMessage(this.playerId));
         }
@@ -192,7 +193,7 @@ public class ClientController extends MessageHandler implements Controller {
     public void connect() {
         try {
             this.connectionManager.tryConnect();
-            this.pingPongTask.addPort(this.connectionManager.getSocketHandler().getSocket().getLocalPort());
+            this.pingPongTask.addUri(SockUri.from(this.connectionManager.getSocketHandler().getSocket()));
             this.window.connected();
         } catch (final ConnectionManager.NoServerException e) {
             this.window.noConnection();
@@ -200,7 +201,7 @@ public class ClientController extends MessageHandler implements Controller {
     }
 
     public void login(final String username, final char[] password) {
-        this.connectionManager.send(new LoginMessage(this.playerId, username,new String(password)));
+        this.connectionManager.send(new LoginMessage(this.playerId, username, new String(password)));
     }
 
     public void register(final String username, final char[] password) {
@@ -212,10 +213,10 @@ public class ClientController extends MessageHandler implements Controller {
     }
 
     public boolean isPlaying() {
-        return this.currentGame != -1;
+        return this.currentGameId != -1;
     }
 
-    private void setPlayerId(long playerId) {
+    private void setPlayerId(final long playerId) {
         this.playerId = playerId;
     }
 }

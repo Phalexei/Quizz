@@ -4,12 +4,12 @@ import imag.quizz.common.protocol.Command;
 
 public class NokMessage extends OkNokMessage {
 
-    public NokMessage(final long senderId, final Message source) {
-        this(senderId, null, source);
+    public NokMessage(final long sourceId, final Message source) {
+        this(sourceId, null, source);
     }
 
-    public NokMessage(final long senderId, final String text, final Message source) {
-        super(Command.NOK, senderId, text, source);
+    public NokMessage(final long sourceId, final String text, final Message source) {
+        super(Command.NOK, sourceId, text, source);
     }
 
     /* package */ NokMessage(final String[] messageSplit) {

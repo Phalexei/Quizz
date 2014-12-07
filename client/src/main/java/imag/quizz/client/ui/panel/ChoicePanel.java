@@ -10,9 +10,9 @@ import java.awt.*;
 public class ChoicePanel extends Panel {
 
     private final JButton topLeftButton;
-    private final JButton   topRightButton;
-    private final JButton   bottomLeftButton;
-    private final JButton   bottomRightButton;
+    private final JButton topRightButton;
+    private final JButton bottomLeftButton;
+    private final JButton bottomRightButton;
 
     private final JTextPane questionTextPane;
 

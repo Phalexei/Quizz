@@ -19,7 +19,7 @@ public final class Main {
         new Main(args);
     }
 
-    private Long      ownId;
+    private Long         ownId;
     private Config       config;
     private QuestionBase questionBase;
 

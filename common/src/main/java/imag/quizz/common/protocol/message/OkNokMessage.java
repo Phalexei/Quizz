@@ -7,12 +7,12 @@ import java.util.Arrays;
 
 public abstract class OkNokMessage extends Message {
 
-    private final String  text;
+    private final String text;
 
     private final Message source;
 
-    protected OkNokMessage(final Command command, final long senderId, final String text, final Message source) {
-        super(command, senderId);
+    protected OkNokMessage(final Command command, final long sourceId, final String text, final Message source) {
+        super(command, sourceId);
         this.text = text;
         this.source = source;
     }

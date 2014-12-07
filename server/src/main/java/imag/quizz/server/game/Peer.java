@@ -16,25 +16,25 @@ public abstract class Peer {
     protected final long id;
 
     /**
-     * The peer current port
+     * The peer current uri
      */
-    protected int port;
+    protected String uri;
 
-    public Peer(final long id, final int port) {
+    public Peer(final long id, final String uri) {
         this.id = id;
-        this.port = port;
+        this.uri = uri;
     }
 
     public long getId() {
         return this.id;
     }
 
-    public int getPort() {
-        return this.port;
+    public String getUri() {
+        return this.uri;
     }
 
-    public void setPort(final int port) {
-        this.port = port;
+    public void setUri(final String uri) {
+        this.uri = uri;
     }
 
     public abstract Type getType();

@@ -5,7 +5,9 @@ import imag.quizz.client.ui.panel.*;
 import imag.quizz.client.ui.panel.Panel;
 
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
 import java.awt.*;
 
 public class Window {
@@ -18,14 +20,14 @@ public class Window {
     final JPanel mainPanel;
     final JFrame frame;
 
-    private final ChoicePanel choicePanel;
-    private final GamesPanel gamesPanel;
-    private final LoginPanel loginPanel;
+    private final ChoicePanel       choicePanel;
+    private final GamesPanel        gamesPanel;
+    private final LoginPanel        loginPanel;
     private final NoConnectionPanel noConnectionPanel;
-    private final WelcomePanel welcomePanel;
-    private final NewGamePanel newGamePanel;
-    private       PanelType currentPanelType;
-    private       Panel currentPanel;
+    private final WelcomePanel      welcomePanel;
+    private final NewGamePanel      newGamePanel;
+    private       PanelType         currentPanelType;
+    private       Panel             currentPanel;
 
     private final ClientController clientController;
 

@@ -7,8 +7,8 @@ public class GamesMessage extends Message {
 
     private final String gamesData;
 
-    public GamesMessage(final long senderId, final String gamesData) {
-        super(Command.GAMES, senderId);
+    public GamesMessage(final long sourceId, final String gamesData) {
+        super(Command.GAMES, sourceId);
         this.gamesData = gamesData;
     }
 

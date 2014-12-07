@@ -7,8 +7,8 @@ public class PongMessage extends Message {
 
     private final String data;
 
-    public PongMessage(final long senderId, final Message ping) {
-        super(Command.PONG, senderId);
+    public PongMessage(final long sourceId, final Message ping) {
+        super(Command.PONG, sourceId);
         Validate.isInstanceOf(PingMessage.class, ping, "Argument isn't a PingMessage");
         this.data = ((PingMessage) ping).getData();
     }
