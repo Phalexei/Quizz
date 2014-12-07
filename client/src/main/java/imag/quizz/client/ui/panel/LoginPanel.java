@@ -1,9 +1,7 @@
 package imag.quizz.client.ui.panel;
 
-import com.sun.security.ntlm.Client;
 import imag.quizz.client.game.ClientController;
 import imag.quizz.client.ui.*;
-import imag.quizz.client.ui.Window;
 
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;
@@ -48,8 +46,7 @@ public class LoginPanel extends Panel {
             }
         });
 
-        final JPanel loginPanel = new JPanel(new BorderLayout());
-        loginPanel.add(this.loginTextPane, BorderLayout.CENTER);
+        this.add(this.loginTextPane, BorderLayout.CENTER);
 
         final JPanel loginSouthPanel = new JPanel(new BorderLayout());
 
@@ -82,7 +79,7 @@ public class LoginPanel extends Panel {
         loginButtons.add(registerButton);
         loginSouthPanel.add(loginButtons, BorderLayout.SOUTH);
 
-        loginPanel.add(loginSouthPanel, BorderLayout.SOUTH);
+        this.add(loginSouthPanel, BorderLayout.SOUTH);
     }
 
     @Override

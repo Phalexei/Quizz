@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class NoConnectionPanel extends Panel {
+
     public NoConnectionPanel(final ClientController clientController) {
         final String noConnection = "Aucun serveur disponible.";
 
@@ -26,11 +27,9 @@ public class NoConnectionPanel extends Panel {
             }
         });
 
-        final JPanel noConnectionPanel = new JPanel();
-        final BorderLayout layout = new BorderLayout();
-        noConnectionPanel.setLayout(layout);
-        noConnectionPanel.add(noConnectionTextPane, BorderLayout.CENTER);
-        noConnectionPanel.add(retryButton, BorderLayout.SOUTH);
+        this.setLayout(new BorderLayout());
+        this.add(noConnectionTextPane, BorderLayout.CENTER);
+        this.add(retryButton, BorderLayout.SOUTH);
     }
 
     @Override

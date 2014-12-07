@@ -13,12 +13,12 @@ import java.awt.event.ActionListener;
 public class NewGamePanel extends Panel {
 
     public NewGamePanel(final ClientController clientController) {
+        super(new BorderLayout());
         final String newGame = "Entrez le pseudo d'un adversaire. Laissez blanc pour un adversaire aléatoire";
         final JTextPane newGameTextPane = CenteredTextPaneHandler.create(newGame);
         newGameTextPane.setEditable(false);
 
-        final JPanel newGamePanel = new JPanel(new BorderLayout());
-        newGamePanel.add(newGameTextPane, BorderLayout.CENTER);
+        this.add(newGameTextPane, BorderLayout.CENTER);
 
         final JPanel newGameSouthPanel = new JPanel(new BorderLayout());
 
@@ -52,7 +52,7 @@ public class NewGamePanel extends Panel {
 
         newGameSouthPanel.add(newGameButton, BorderLayout.SOUTH);
 
-        newGamePanel.add(newGameSouthPanel, BorderLayout.SOUTH);
+        this.add(newGameSouthPanel, BorderLayout.SOUTH);
     }
     @Override
     public void showError(String error) {
