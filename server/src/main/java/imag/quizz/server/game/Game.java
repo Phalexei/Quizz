@@ -139,7 +139,6 @@ public final class Game {
                         availableQuestions.poll(),
                         availableQuestions.poll(),
                         availableQuestions.poll(),
-                        availableQuestions.poll(),
                         availableQuestions.poll()
                 });
             }
@@ -149,7 +148,6 @@ public final class Game {
                 final LinkedList<Question> availableQuestions = new LinkedList<>(base.getThemes().get(theme));
                 Collections.shuffle(availableQuestions);
                 Game.this.questionsB.put(theme, new Question[]{
-                        availableQuestions.poll(),
                         availableQuestions.poll(),
                         availableQuestions.poll(),
                         availableQuestions.poll(),
