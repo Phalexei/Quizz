@@ -110,6 +110,11 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case LOGIN:
                 break;
+            case LOGOUT:
+                final LogoutMessage logoutMessage = (LogoutMessage) message;
+                final Player player = this.players.get(logoutMessage.getPlayerLogin());
+                player.setLoggedIn(false);
+                break;
             case GAMES:
                 break;
             case NEW:
@@ -206,6 +211,14 @@ public class ServerController extends MessageHandler implements Controller {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
         // TODO Update leader eventually
         // TODO Maybe other things
+    }
+
+    public void leaderBroadcast(final Message message) {
+        this.connectionManager.leaderBroadcast(message);
+    }
+
+    public void broadcast(final Message message) {
+        this.connectionManager.broadcast(message);
     }
 
     public long getOwnId() {

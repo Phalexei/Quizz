@@ -4,22 +4,26 @@ import imag.quizz.common.protocol.Command;
 
 public class LogoutMessage extends Message {
 
-    private final long playerId;
+    private final String playerLogin;
 
-    public LogoutMessage(final long senderId, final long playerId) {
+    public LogoutMessage(final long senderId, final String playerLogin) {
         super(Command.LOGOUT, senderId);
-        this.playerId = playerId;
+        this.playerLogin = playerLogin;
     }
 
-    /* package */ LogoutMessage(String[] messageSplit) {
+    /* package */ LogoutMessage(final String[] messageSplit) {
         super(Command.LOGOUT, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
 
-        this.playerId = Long.parseLong(messageSplit[2]);
+        this.playerLogin = messageSplit[2];
+    }
+
+    public String getPlayerLogin() {
+        return this.playerLogin;
     }
 
     @Override
     protected String getParametersString() {
-        return Long.toString(playerId);
+        return this.playerLogin;
     }
 }

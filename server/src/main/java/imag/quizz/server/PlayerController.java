@@ -75,6 +75,11 @@ public class PlayerController extends MessageHandler implements Controller {
                 case LOGIN:
                     this.login(localPort, socketHandler, message);
                     break;
+                case LOGOUT:
+                    this.serverController.leaderBroadcast(message);
+                    player.setLoggedIn(false);
+                    player.setPort(-1);
+                    break;
                 case NEW:
                     final NewMessage newMessage = (NewMessage) message;
                     final String opponentLogin = newMessage.getOpponent();
@@ -138,7 +143,8 @@ public class PlayerController extends MessageHandler implements Controller {
     }
 
     /**
-     * TODO
+     * Builds a data String representing Games of a Player.
+     *
      * Each game is represented by:
      * - Opponent login
      * - Player has to wait for opponent (true/false)
