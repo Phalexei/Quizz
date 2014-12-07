@@ -4,9 +4,7 @@ import imag.quizz.client.game.ClientController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +53,10 @@ public class GamesPanel extends Panel {
 
             return s.toString();
         }
+
+        public long getId() {
+            return this.id;
+        }
     }
 
     private class GameCellRenderer extends JLabel implements ListCellRenderer<Object> {
@@ -78,6 +80,7 @@ public class GamesPanel extends Panel {
     private final JScrollPane            scrollPane;
     private final JList<Game>            gamesList;
     private final JButton                playButton;
+    private final JButton                newGameButton;
     private final DefaultListModel<Game> listModel;
     private       int                    listCounter;
     // game ID; index in list;
@@ -86,10 +89,29 @@ public class GamesPanel extends Panel {
     public GamesPanel(final ClientController clientController) {
         super(new BorderLayout());
 
-        this.playButton = new JButton("JOUER");
+        this.playButton = new JButton("JOUER !");
+        this.newGameButton = new JButton("Nouvelle Partie");
+
         this.listModel = new DefaultListModel<>();
         this.gamesList = new JList<>(this.listModel);
         this.listCounter = 0;
+
+        this.newGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clientController.newGame();
+            }
+        });
+
+        this.playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final int index = GamesPanel.this.gamesList.getSelectedIndex();
+                if (index != -1) { // something is selected
+                    clientController.play(GamesPanel.this.listModel.get(index).getId());
+                }
+            }
+        });
 
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -108,8 +130,9 @@ public class GamesPanel extends Panel {
         this.scrollPane = new JScrollPane();
         this.scrollPane.getViewport().setView(this.gamesList);
 
-        this.add(this.scrollPane);
-        this.add(this.playButton);
+        this.add(this.newGameButton, BorderLayout.NORTH);
+        this.add(this.scrollPane, BorderLayout.CENTER);
+        this.add(this.playButton, BorderLayout.SOUTH);
 
         this.gameIDs = new HashMap<>();
     }
@@ -117,6 +140,12 @@ public class GamesPanel extends Panel {
     @Override
     public void showError(String error) {
         //nothing
+    }
+
+    @Override
+    public boolean isReady() {
+        //TODO:  if a question is being answered, return false
+        return true;
     }
 
     public void addGame(long gameId, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {

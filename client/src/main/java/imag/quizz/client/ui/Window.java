@@ -61,6 +61,7 @@ public class Window {
         this.mainPanel = new JPanel();
         this.mainPanel.setLayout(new GridLayout(1, 2));
         this.mainPanel.add(this.welcomePanel);
+        this.currentPanel = this.welcomePanel;
         this.mainPanel.add(rightPanel);
 
         this.frame = new JFrame("Quizz");
@@ -80,7 +81,7 @@ public class Window {
     }
 
     public void setPanel(final PanelType panel) {
-        if (panel != this.currentPanelType) {
+        if (panel != this.currentPanelType && this.currentPanel.isReady()) {
             Panel newPanel = null;
             switch (panel) {
                 case WELCOME:
