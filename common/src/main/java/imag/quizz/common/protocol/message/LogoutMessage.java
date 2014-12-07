@@ -6,8 +6,8 @@ public class LogoutMessage extends Message {
 
     private final String playerLogin;
 
-    public LogoutMessage(final long senderId, final String playerLogin) {
-        super(Command.LOGOUT, senderId);
+    public LogoutMessage(final long sourceId, final String playerLogin) {
+        super(Command.LOGOUT, sourceId);
         this.playerLogin = playerLogin;
     }
 

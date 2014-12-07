@@ -93,23 +93,23 @@ public abstract class Message {
     }
 
     protected final Command command;
-    protected       long    senderId;
+    protected       long    sourceId;
 
-    protected Message(final Command command, final long senderId) {
+    protected Message(final Command command, final long sourceId) {
         this.command = command;
-        this.senderId = senderId;
+        this.sourceId = sourceId;
     }
 
     public final Command getCommand() {
         return this.command;
     }
 
-    public long getSenderId() {
-        return this.senderId;
+    public long getSourceId() {
+        return this.sourceId;
     }
 
-    public void setSenderId(final long senderId) {
-        this.senderId = senderId;
+    public void setSourceId(final long sourceId) {
+        this.sourceId = sourceId;
     }
 
     protected void checkCommandName(final String commandName) {
@@ -120,7 +120,7 @@ public abstract class Message {
 
     public final String toString() {
         final String parameters = this.getParametersString();
-        return this.command.name() + Separator.LEVEL_1 + this.senderId
+        return this.command.name() + Separator.LEVEL_1 + this.sourceId
                 + (parameters == null ? "" : Separator.LEVEL_1 + parameters) + '\n';
     }
 }

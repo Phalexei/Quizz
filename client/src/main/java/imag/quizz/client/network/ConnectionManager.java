@@ -21,8 +21,8 @@ public class ConnectionManager {
     public class NoServerException extends Exception {
     }
 
-    private final Config config;
-    private SocketHandler socketHandler;
+    private final Config         config;
+    private       SocketHandler  socketHandler;
     private final MessageHandler messageHandler;
 
     public ConnectionManager(final Config config, final MessageHandler messageHandler) {
@@ -59,7 +59,7 @@ public class ConnectionManager {
         return this.socketHandler != null; //TODO other checks
     }
 
-    public void send(Message message) {
+    public void send(final Message message) {
         if (this.isConnected()) {
             this.socketHandler.write(message.toString());
         }

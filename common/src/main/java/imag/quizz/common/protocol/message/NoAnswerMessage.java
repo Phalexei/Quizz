@@ -4,8 +4,8 @@ import imag.quizz.common.protocol.Command;
 
 public class NoAnswerMessage extends Message {
 
-    public NoAnswerMessage(final long senderId) {
-        super(Command.NOANSWER, senderId);
+    public NoAnswerMessage(final long sourceId) {
+        super(Command.NOANSWER, sourceId);
     }
 
     /* package */ NoAnswerMessage(final String[] messageSplit) {

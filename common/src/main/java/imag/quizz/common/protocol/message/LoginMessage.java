@@ -4,8 +4,8 @@ import imag.quizz.common.protocol.Command;
 
 public class LoginMessage extends AccountingMessage {
 
-    public LoginMessage(final long senderId, final String login, final String password) {
-        super(Command.LOGIN, senderId, login, password);
+    public LoginMessage(final long sourceId, final String login, final String password) {
+        super(Command.LOGIN, sourceId, login, password);
     }
 
     /* package */ LoginMessage(final String[] messageSplit) {

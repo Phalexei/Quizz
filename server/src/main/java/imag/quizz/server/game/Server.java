@@ -7,8 +7,8 @@ public final class Server extends Peer {
 
     private boolean isLeader;
 
-    public Server(final long id, final int port) {
-        super(id, port);
+    public Server(final long id, final String uri) {
+        super(id, uri);
     }
 
     public boolean isLeader() {

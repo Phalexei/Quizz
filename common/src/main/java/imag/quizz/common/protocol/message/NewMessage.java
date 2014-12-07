@@ -6,12 +6,12 @@ public class NewMessage extends Message {
 
     private final String opponent;
 
-    public NewMessage(final long senderId) {
-        this(senderId, null);
+    public NewMessage(final long sourceId) {
+        this(sourceId, null);
     }
 
-    public NewMessage(final long senderId, final String opponent) {
-        super(Command.NEW, senderId);
+    public NewMessage(final long sourceId, final String opponent) {
+        super(Command.NEW, sourceId);
         this.opponent = opponent;
     }
 

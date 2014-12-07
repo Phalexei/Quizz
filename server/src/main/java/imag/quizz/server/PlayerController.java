@@ -6,6 +6,7 @@ import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
+import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.Game;
 import imag.quizz.server.game.Game.PlayerStatus;
 import imag.quizz.server.game.Player;
@@ -47,22 +48,22 @@ public class PlayerController extends MessageHandler implements Controller {
     }
 
     @Override
-    public void pingTimeout(final int port) {
-        this.pingPongTask.removePort(port);
+    public void pingTimeout(final String uri) {
+        this.pingPongTask.removeUri(uri);
         // TODO Kill SocketHandler without recalling #lostConnection
     }
 
     @Override
-    public void ping(final int port) {
-        this.connectionManager.send(port, new PingMessage(this.ownId));
+    public void ping(final String uri) {
+        this.connectionManager.send(uri, new PingMessage(this.ownId));
     }
 
     @Override
     public void handleMessage(final SocketHandler socketHandler, final Message message) {
-        final int localPort = socketHandler.getSocket().getLocalPort();
-        if (this.connectionManager.linksToPeer(localPort)) {
+        final String uri = SockUri.from(socketHandler.getSocket());
+        if (this.connectionManager.linksToPeer(uri)) {
             // Known and logged in Player
-            final Player player = (Player) this.connectionManager.getLinkedPeer(localPort);
+            final Player player = (Player) this.connectionManager.getLinkedPeer(uri);
 
             // Variables used multiple times in the following switch
             final Game game;
@@ -74,7 +75,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.ANSWER_QUESTION || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.ANSWER_QUESTION) {
-                        this.connectionManager.send(localPort, new NokMessage(this.ownId, "Player doesn't have a question to answer", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have a question to answer", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             final boolean correct = game.playerSelectAnswer(player, answerMessage.getChosenAnswer());
@@ -90,7 +91,7 @@ public class PlayerController extends MessageHandler implements Controller {
                                     final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                                     this.connectionManager.send(player, new EndMessage(this.ownId, playerScore, opponentScore));
                                     final Player opponent = game.getOpponent(player);
-                                    if (opponent.getPort() != -1) {
+                                    if (opponent.getUri() != null) {
                                         this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                                     }
                                 } else if ((isPlayerA ? game.getCurrentQuestionB() : game.getCurrentQuestionA()) == 0) {
@@ -115,22 +116,22 @@ public class PlayerController extends MessageHandler implements Controller {
                         final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                         this.connectionManager.send(player, new EndMessage(this.ownId, playerScore, opponentScore));
                         final Player opponent = game.getOpponent(player);
-                        if (opponent.getPort() != -1) {
+                        if (opponent.getUri() != null) {
                             this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                         }
                     }
                     this.serverController.leaderBroadcast(message);
                     break;
                 case GAMES:
-                    this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                    this.connectionManager.send(player, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                     break;
                 case LOGIN:
-                    this.login(localPort, socketHandler, message);
+                    this.login(uri, socketHandler, message);
                     break;
                 case LOGOUT:
                     this.serverController.leaderBroadcast(message);
                     player.setLoggedIn(false);
-                    player.setPort(-1);
+                    player.setUri(null);
                     break;
                 case NEW:
                     final NewMessage newMessage = (NewMessage) message;
@@ -158,7 +159,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.ANSWER_QUESTION || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.ANSWER_QUESTION) {
-                        this.connectionManager.send(localPort, new NokMessage(this.ownId, "Player doesn't have a question to noanswer", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have a question to noanswer", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             game.playerDoesntAnswer(player);
@@ -170,7 +171,7 @@ public class PlayerController extends MessageHandler implements Controller {
                                     final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
                                     this.connectionManager.send(player, new EndMessage(this.ownId, playerScore, opponentScore));
                                     final Player opponent = game.getOpponent(player);
-                                    if (opponent.getPort() != -1) {
+                                    if (opponent.getUri() != null) {
                                         this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                                     }
                                 } else if ((isPlayerA ? game.getCurrentQuestionB() : game.getCurrentQuestionA()) == 0) {
@@ -191,7 +192,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     break;
                 case PLAY:
                     final PlayMessage playMessage = (PlayMessage) message;
-                    game = this.serverController.getGames().getGames().get(playMessage.getId());
+                    game = this.serverController.getGames().getGames().get(playMessage.getGameId());
                     if (game == null) {
                         this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown Game", message));
                     } else if (game.getPlayerA() != player && game.getPlayerB() != player) {
@@ -225,22 +226,22 @@ public class PlayerController extends MessageHandler implements Controller {
                     }
                     break;
                 case PONG:
-                    this.pingPongTask.pong(localPort);
+                    this.pingPongTask.pong(uri);
                     break;
                 case REGISTER:
-                    this.register(localPort, socketHandler, message);
+                    this.register(uri, socketHandler, message);
                     break;
                 case THEME:
                     final ThemeMessage themeMessage = (ThemeMessage) message;
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.SELECT_THEME || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.SELECT_THEME) {
-                        this.connectionManager.send(localPort, new NokMessage(this.ownId, "Player doesn't have to choose a theme", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have to choose a theme", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
                             final Player opponent = game.getOpponent(player);
-                            if (opponentUnlocked && opponent.getPort() != -1) {
+                            if (opponentUnlocked && opponent.getUri() != null) {
                                 final Question question = game.getCurrentQuestion(opponent);
                                 this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
                             }
@@ -251,20 +252,20 @@ public class PlayerController extends MessageHandler implements Controller {
                     }
                     break;
                 default:
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
+                    this.connectionManager.send(player, new NokMessage(this.ownId, "Unexpected message", message));
                     break;
             }
         } else {
             // Unknown Player new connection or logged out client
             switch (message.getCommand()) {
                 case LOGIN:
-                    this.login(localPort, socketHandler, message);
+                    this.login(uri, socketHandler, message);
                     break;
                 case REGISTER:
-                    this.register(localPort, socketHandler, message);
+                    this.register(uri, socketHandler, message);
                     break;
                 default:
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
+                    this.connectionManager.send(uri, new NokMessage(this.ownId, "Unexpected message", message));
                     break;
             }
         }
@@ -313,39 +314,39 @@ public class PlayerController extends MessageHandler implements Controller {
         return builder.toString();
     }
 
-    private void login(final int localPort, final SocketHandler socketHandler, final Message message) {
+    private void login(final String uri, final SocketHandler socketHandler, final Message message) {
         final LoginMessage loginMessage = (LoginMessage) message;
         final String loginMessageLogin = loginMessage.getLogin();
         final String hashedPassword = loginMessage.getHashedPassword();
         if (!this.serverController.getPlayers().containsKey(loginMessageLogin)) {
-            this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unknown login", message));
+            this.connectionManager.send(uri, new NokMessage(this.ownId, "Unknown login", message));
         } else {
             final Player player = this.serverController.getPlayers().get(loginMessageLogin);
             if (player.getPasswordHash().equals(hashedPassword)) {
                 player.setLoggedIn(true);
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
-                this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
-                message.setSenderId(player.getId());
+                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                message.setSourceId(player.getId());
                 this.serverController.leaderBroadcast(message);
             } else {
-                this.connectionManager.send(localPort, new NokMessage(this.ownId, "Invalid password", message));
+                this.connectionManager.send(uri, new NokMessage(this.ownId, "Invalid password", message));
             }
         }
     }
 
-    private void register(final int localPort, final SocketHandler socketHandler, final Message message) {
+    private void register(final String uri, final SocketHandler socketHandler, final Message message) {
         final RegisterMessage registerMessage = (RegisterMessage) message;
         final String registerMessageLogin = registerMessage.getLogin();
         if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
-            this.connectionManager.send(localPort, new NokMessage(this.ownId, "Login already taken", message));
+            this.connectionManager.send(uri, new NokMessage(this.ownId, "Login already taken", message));
         } else {
             if (this.serverController.isLeader()) {
                 final long id = IdGenerator.nextPlayer();
-                final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
+                final Player player = new Player(id, uri, registerMessageLogin, registerMessage.getHashedPassword());
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 this.serverController.getPlayers().put(registerMessageLogin, player);
                 this.connectionManager.send(player, new OkMessage(this.ownId, message));
-                message.setSenderId(id);
+                message.setSourceId(id);
             }
             this.serverController.leaderBroadcast(message);
         }
@@ -354,7 +355,7 @@ public class PlayerController extends MessageHandler implements Controller {
     private void newGame(final Player player, final Player opponent) {
         final Game game = this.serverController.getGames().newGame(player, opponent);
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
-        if (opponent.getPort() != -1) {
+        if (opponent.getUri() != null) {
             this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesB()));
         }
         this.serverController.leaderBroadcast(new GameMessage(this.ownId, game.toMessageData()));
@@ -362,9 +363,9 @@ public class PlayerController extends MessageHandler implements Controller {
 
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
-        final int port = socketHandler.getSocket().getLocalPort();
-        final Player player = (Player) this.connectionManager.getLinkedPeer(port);
+        final String uri = SockUri.from(socketHandler.getSocket());
+        final Player player = (Player) this.connectionManager.getLinkedPeer(uri);
         this.serverController.leaderBroadcast(new LogoutMessage(this.ownId, player.getLogin()));
-        this.connectionManager.forgetConnection(port);
+        this.connectionManager.forgetConnection(uri);
     }
 }

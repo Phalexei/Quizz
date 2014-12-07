@@ -21,7 +21,7 @@ import java.util.TreeMap;
 public class Config {
 
     public final class ServerInfo {
-        private final long    id;
+        private final long   id;
         private final String host;
         private final int    serverPort;
         private final int    playerPort;

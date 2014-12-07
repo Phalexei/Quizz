@@ -10,13 +10,12 @@ public class QuestionMessage extends Message {
 
     private final String[] answers;
 
-    public QuestionMessage(final long senderId, final String question, final String[] answers) {
-        super(Command.QUESTION, senderId);
+    public QuestionMessage(final long sourceId, final String question, final String[] answers) {
+        super(Command.QUESTION, sourceId);
         Validate.isTrue(answers.length == 4);
         this.question = question;
         this.answers = answers;
     }
-
 
     /* package */ QuestionMessage(final String[] messageSplit) {
         super(Command.QUESTION, Long.parseLong(messageSplit[1]));

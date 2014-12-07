@@ -6,8 +6,8 @@ public class ThemeMessage extends Message {
 
     private final int chosenTheme;
 
-    public ThemeMessage(final long senderId, final int chosenTheme) {
-        super(Command.THEME, senderId);
+    public ThemeMessage(final long sourceId, final int chosenTheme) {
+        super(Command.THEME, sourceId);
         this.chosenTheme = chosenTheme;
     }
 

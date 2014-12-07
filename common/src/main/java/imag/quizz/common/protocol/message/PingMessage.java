@@ -6,8 +6,8 @@ public class PingMessage extends Message {
 
     private final String data;
 
-    public PingMessage(final long senderId) {
-        super(Command.PING, senderId);
+    public PingMessage(final long sourceId) {
+        super(Command.PING, sourceId);
         this.data = Long.toString(System.nanoTime());
     }
 

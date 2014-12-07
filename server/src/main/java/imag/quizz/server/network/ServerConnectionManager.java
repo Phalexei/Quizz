@@ -6,6 +6,7 @@ import imag.quizz.common.protocol.message.InitMessage;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.Pair;
+import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.ServerController;
 import imag.quizz.server.game.Server;
 
@@ -39,9 +40,9 @@ public class ServerConnectionManager extends ConnectionManager {
      * Connects to other servers then select the current leader.
      */
     private void initialize() {
-        final Integer port = this.connectLeader();
+        final String uri = this.connectLeader();
 
-        if (port == null) {
+        if (uri == null) {
             this.controller.setLeader(true);
             this.controller.setCurrentLeaderId(this.controller.getOwnId());
             Log.info("Server started alone.");
@@ -51,7 +52,7 @@ public class ServerConnectionManager extends ConnectionManager {
                 Log.info("Server started as future new leader, waiting for INIT from current leader");
             } else {
                 this.controller.setLeader(false);
-                this.controller.setCurrentLeaderLocalPort(port);
+                this.controller.setCurrentLeaderUri(uri);
                 Log.info("Server started as lambda server, waiting for INIT from current leader");
             }
         }
@@ -60,11 +61,10 @@ public class ServerConnectionManager extends ConnectionManager {
     /**
      * Attempts to find an existing leader.
      *
-     * @return the local port of the connection to leader or null if there's
-     * none
+     * @return the uri of the connection to leader or null if there's none
      */
-    private Integer connectLeader() {
-        final List<Future<Pair<Long, Integer>>> futures = new LinkedList<>();
+    private String connectLeader() {
+        final List<Future<Pair<Long, String>>> futures = new LinkedList<>();
         for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
             final long id = entry.getKey();
             if (id == this.getOwnId()) {
@@ -72,15 +72,16 @@ public class ServerConnectionManager extends ConnectionManager {
                 continue;
             }
             final ServerInfo info = entry.getValue();
-            futures.add(this.executor.submit(new Callable<Pair<Long, Integer>>() {
+            futures.add(this.executor.submit(new Callable<Pair<Long, String>>() {
                 @Override
-                public Pair<Long, Integer> call() throws Exception {
+                public Pair<Long, String> call() throws Exception {
                     final Socket s = new Socket();
                     try {
                         s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
                         try {
-                            ServerConnectionManager.this.newConnection(new Server(id, s.getLocalPort()), s);
-                            return new Pair<>(id, s.getLocalPort());
+                            final String uri = SockUri.from(s);
+                            ServerConnectionManager.this.newConnection(new Server(id, uri), s);
+                            return new Pair<>(id, uri);
                         } catch (final IOException e) {
                             Log.error("Failed to create SocketHandler for server " + id, e);
                         }
@@ -92,12 +93,12 @@ public class ServerConnectionManager extends ConnectionManager {
                 }
             }));
         }
-        Integer result = null;
-        final Iterator<Future<Pair<Long, Integer>>> it = futures.iterator();
+        String result = null;
+        final Iterator<Future<Pair<Long, String>>> it = futures.iterator();
         while (it.hasNext()) {
-            final Future<Pair<Long, Integer>> future = it.next();
+            final Future<Pair<Long, String>> future = it.next();
             try {
-                final Pair<Long, Integer> res = future.get();
+                final Pair<Long, String> res = future.get();
                 if (res != null) {
                     this.controller.setCurrentLeaderId(res.getA());
                     this.executor.submit(new Runnable() {
@@ -130,7 +131,7 @@ public class ServerConnectionManager extends ConnectionManager {
     public void newIncomingConnection(final Socket socket) throws IOException {
         super.newIncomingConnection(socket);
         if (this.controller.isLeader()) {
-            final SocketHandler socketHandler = this.connections.get(socket.getLocalPort());
+            final SocketHandler socketHandler = this.connections.get(SockUri.from(socket));
             socketHandler.write(new InitMessage(this.controller.getOwnId(), this.controller.buildInitData()).toString());
         }
     }
@@ -144,11 +145,11 @@ public class ServerConnectionManager extends ConnectionManager {
      */
     public void leaderBroadcast(final Message message) {
         if (this.controller.isLeader()) {
-            for (final int port : this.connectedPeers.keySet()) {
-                this.connections.get(port).write(message.toString());
+            for (final String uri : this.connectedPeers.keySet()) {
+                this.connections.get(uri).write(message.toString());
             }
         } else {
-            this.connections.get(this.controller.getCurrentLeaderLocalPort()).write(message.toString());
+            this.connections.get(this.controller.getCurrentLeaderUri()).write(message.toString());
         }
     }
 
@@ -164,8 +165,8 @@ public class ServerConnectionManager extends ConnectionManager {
     }
 
     @Override
-    public void forgetConnection(int port) {
-        super.forgetConnection(port);
+    public void forgetConnection(final String uri) {
+        super.forgetConnection(uri);
         //TODO : devenir leader ? plus aucun server ? autre ?
     }
 }

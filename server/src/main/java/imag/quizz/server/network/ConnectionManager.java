@@ -3,6 +3,7 @@ package imag.quizz.server.network;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.message.Message;
+import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.Peer;
 import org.apache.commons.lang3.Validate;
 
@@ -16,11 +17,11 @@ import java.util.Map;
  */
 public abstract class ConnectionManager {
 
-    protected final Map<Integer, Peer>          connectedPeers;
-    protected final Map<Integer, SocketHandler> connections;
-    protected final MessageHandler              messageHandler;
-    protected final ServerSocketChecker         serverSocketChecker;
-    protected final long                        ownId;
+    protected final Map<String, Peer>          connectedPeers;
+    protected final Map<String, SocketHandler> connections;
+    protected final MessageHandler             messageHandler;
+    protected final ServerSocketChecker        serverSocketChecker;
+    protected final long                       ownId;
 
     protected ConnectionManager(final MessageHandler messageHandler, final boolean isPlayer, final int localPort, final long ownId) {
         this.connectedPeers = new HashMap<>();
@@ -33,27 +34,27 @@ public abstract class ConnectionManager {
     }
 
     /**
-     * Checks if the connection on given port, if any, is a connection
+     * Checks if the connection for given uri, if any, is a connection
      * to a known peer.
      *
-     * @param port the port
+     * @param uri the uri
      *
      * @return true if the connection exists and links to a peer, false
      * otherwise
      */
-    public boolean linksToPeer(final int port) {
-        return this.connectedPeers.containsKey(port);
+    public boolean linksToPeer(final String uri) {
+        return this.connectedPeers.containsKey(uri);
     }
 
     /**
-     * Gets the Peer associated to a local port.
+     * Gets the Peer associated to an uri.
      *
-     * @param port the port
+     * @param uri the uri
      *
-     * @return the peer is any
+     * @return the peer if any
      */
-    public Peer getLinkedPeer(final int port) {
-        return this.connectedPeers.get(port);
+    public Peer getLinkedPeer(final String uri) {
+        return this.connectedPeers.get(uri);
     }
 
     /**
@@ -64,18 +65,18 @@ public abstract class ConnectionManager {
      */
     public void send(final Peer peer, final Message message) {
         Validate.isTrue(this.connectedPeers.containsValue(peer), "Invalid Peer!");
-        this.send(peer.getPort(), message);
+        this.send(peer.getUri(), message);
     }
 
     /**
-     * Sends a message to the Peer connected on the provided port.
+     * Sends a message to the Peer connected with the given uri.
      *
-     * @param port the port
+     * @param uri the uri
      * @param message the message
      */
-    public void send(final int port, final Message message) {
-        Validate.isTrue(this.connections.containsKey(port), "Invalid port!");
-        this.connections.get(port).write(message.toString());
+    public void send(final String uri, final Message message) {
+        Validate.isTrue(this.connections.containsKey(uri), "Invalid port!");
+        this.connections.get(uri).write(message.toString());
     }
 
     /**
@@ -84,30 +85,32 @@ public abstract class ConnectionManager {
      * @param socket the socket
      */
     public void newIncomingConnection(final Socket socket) throws IOException {
-        this.connections.put(socket.getLocalPort(), new SocketHandler(socket, this.messageHandler));
+        this.connections.put(SockUri.from(socket), new SocketHandler(socket, this.messageHandler));
     }
 
     /**
      * Registers a new connection.
      */
     public void newConnection(final Peer peer, final Socket socket) throws IOException {
-        this.connections.put(socket.getLocalPort(), new SocketHandler(socket, this.messageHandler));
-        this.connectedPeers.put(socket.getLocalPort(), peer);
+        final String uri = SockUri.from(socket);
+        this.connections.put(uri, new SocketHandler(socket, this.messageHandler));
+        this.connectedPeers.put(uri, peer);
     }
 
     public void learnConnectionPeerIdentity(final Peer peer, final SocketHandler socketHandler) {
-        final int port = socketHandler.getSocket().getLocalPort();
-        final Peer oldPeer = this.connectedPeers.get(port);
+        final Socket socket = socketHandler.getSocket();
+        final String uri = SockUri.from(socket);
+        final Peer oldPeer = this.connectedPeers.get(uri);
         if (oldPeer != null) {
-            oldPeer.setPort(-1);
+            oldPeer.setUri(null);
         }
-        this.connectedPeers.put(port, peer);
-        peer.setPort(port);
+        this.connectedPeers.put(uri, peer);
+        peer.setUri(uri);
     }
 
-    public void forgetConnection(final int port) {
-        this.connectedPeers.remove(port);
-        this.connections.remove(port);
+    public void forgetConnection(final String uri) {
+        this.connectedPeers.remove(uri);
+        this.connections.remove(uri);
     }
 
     public long getOwnId() {

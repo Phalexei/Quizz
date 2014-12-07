@@ -1,7 +1,7 @@
 package imag.quizz.client.ui.panel;
 
 import imag.quizz.client.game.ClientController;
-import imag.quizz.client.ui.*;
+import imag.quizz.client.ui.CenteredTextPaneHandler;
 
 import javax.swing.*;
 import javax.swing.text.SimpleAttributeSet;

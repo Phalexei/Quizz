@@ -44,8 +44,8 @@ public final class Player extends Peer {
      */
     private int drawGames;
 
-    public Player(final long id, final int port, final String login, final String passwordHash) {
-        super(id, port);
+    public Player(final long id, final String uri, final String login, final String passwordHash) {
+        super(id, uri);
         this.login = login;
         this.passwordHash = passwordHash;
         this.isLoggedIn = true;
@@ -56,7 +56,7 @@ public final class Player extends Peer {
     }
 
     private Player(final long id) {
-        super(id, -1);
+        super(id, null);
     }
 
     public String toMessageData(final int separatorLevel) {

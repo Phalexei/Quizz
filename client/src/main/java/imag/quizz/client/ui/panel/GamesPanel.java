@@ -9,18 +9,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 public class GamesPanel extends Panel {
 
     private class Game {
-        private final long id;
-        private final String opponent;
+        private final long    id;
+        private final String  opponent;
         private final boolean wait;
-        private final int myScore;
-        private final int myCurrentQuestion;
-        private final int oppScore;
-        private final int oppCurrentQuestion;
+        private final int     myScore;
+        private final int     myCurrentQuestion;
+        private final int     oppScore;
+        private final int     oppCurrentQuestion;
 
         private Game(long id, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {
             this.id = id;

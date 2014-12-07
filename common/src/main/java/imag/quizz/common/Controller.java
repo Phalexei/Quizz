@@ -8,13 +8,13 @@ public interface Controller {
     /**
      * Used by {@link imag.quizz.common.protocol.PingPongTask} when a Peer times out.
      *
-     * @param port the local port the Peer was connected to
+     * @param uri the uri to the Peer
      */
-    public void pingTimeout(final int port);
+    public void pingTimeout(final String uri);
 
     /**
      * TODO
-     * @param port
+     * @param uri
      */
-    public void ping(final int port);
+    public void ping(final String uri);
 }
