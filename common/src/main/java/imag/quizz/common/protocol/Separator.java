@@ -105,8 +105,9 @@ public final class Separator {
      */
     public static String clean(final String string) {
         String result = string;
+        int i = 1;
         for (final String separator : Separator.SEPARATORS) {
-            result = result.replace(separator, " ");
+            result = result.replace(separator, " |" + i++ + "| ");
         }
         return result;
     }
