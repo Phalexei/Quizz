@@ -18,7 +18,11 @@ public class NewMessage extends Message {
     /* package */ NewMessage(final String[] messageSplit) {
         super(Command.NEW, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
-        this.opponent = messageSplit[2];
+        if (messageSplit.length > 2) {
+            this.opponent = messageSplit[2];
+        } else {
+            this.opponent = null;
+        }
     }
 
     public String getOpponent() {
