@@ -245,6 +245,35 @@ public final class Game {
         }
     }
 
+    public void playerDoesntAnswer(final Player player) {
+        if (this.playerA == player) {
+            this.currentQuestionA++;
+            if (this.currentQuestionA > 8 || this.currentQuestionA > 4 && this.playerBStatus == PlayerStatus.SELECT_THEME) {
+                this.playerAStatus = PlayerStatus.WAIT;
+            }
+        } else if (this.playerB == player) {
+            if (this.currentQuestionB > 8 || this.currentQuestionB > 4 && this.playerAStatus == PlayerStatus.SELECT_THEME) {
+                this.playerAStatus = PlayerStatus.WAIT;
+            }
+        } else {
+            throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
+        }
+    }
+
+    public void playerDrop(final Player player) {
+        if (this.playerA == player || this.playerB == player) {
+            this.currentQuestionA = this.currentQuestionB = 9;
+            this.playerAStatus = this.playerBStatus = PlayerStatus.WAIT;
+            if (this.playerA == player) {
+                this.playerAScore = 0;
+            } else {
+                this.playerBScore = 0;
+            }
+        } else {
+            throw new IllegalArgumentException("Player " + player.getLogin() + " isn't part of this Game!");
+        }
+    }
+
     public Question getCurrentQuestion(final Player player) {
         final Question question;
         if (this.playerA == player) {
@@ -253,7 +282,7 @@ public final class Game {
                 final String theme = this.themesA[this.chosenThemeA];
                 question = this.questionsA.get(theme)[currentQuestion - 1];
             } else {
-                final String theme =this.themesB[this.chosenThemeB];
+                final String theme = this.themesB[this.chosenThemeB];
                 question = this.questionsB.get(theme)[currentQuestion - 1 - 4];
             }
         } else {
@@ -263,7 +292,7 @@ public final class Game {
                 question = this.questionsB.get(theme)[currentQuestion - 1];
             } else {
                 final String theme = this.themesA[this.chosenThemeA];
-                question =this.questionsA.get(theme)[currentQuestion - 1 - 4];
+                question = this.questionsA.get(theme)[currentQuestion - 1 - 4];
             }
         }
         return question;

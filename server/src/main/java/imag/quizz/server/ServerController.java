@@ -9,6 +9,7 @@ import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.game.*;
+import imag.quizz.server.game.Game.PlayerStatus;
 import imag.quizz.server.game.QuestionBase.Question;
 import imag.quizz.server.network.ServerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
@@ -75,8 +76,13 @@ public class ServerController extends MessageHandler implements Controller {
             this.connectionManager.learnConnectionPeerIdentity(server, socketHandler);
         }
 
+        // Variables used multiple times in the following switch
+        final Player player, opponent;
+        final Game game;
+        final boolean isPlayerA;
+        final PlayerStatus status;
+
         switch (message.getCommand()) {
-            // TODO Remove useless stuff and implement all the things
             case PING:
                 socketHandler.write(new PongMessage(this.ownId, message).toString());
                 break;
@@ -112,34 +118,34 @@ public class ServerController extends MessageHandler implements Controller {
                 final RegisterMessage registerMessage = (RegisterMessage) message;
                 if (this.isLeader) {
                     final long id = IdGenerator.nextPlayer();
-                    final Player player = new Player(id, -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    player = new Player(id, -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
                     this.players.put(player.getLogin(), player);
                     registerMessage.setSenderId(id);
                     this.leaderBroadcast(registerMessage);
                 } else {
-                    final Player player = new Player(message.getSenderId(), -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    player = new Player(message.getSenderId(), -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
                     this.players.put(player.getLogin(), player);
                 }
                 break;
             case LOGIN:
                 final LoginMessage loginMessage = (LoginMessage) message;
-                final Player playerLogin = this.players.get(loginMessage.getLogin());
-                playerLogin.setLoggedIn(true);
+                player = this.players.get(loginMessage.getLogin());
+                player.setLoggedIn(true);
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
             case LOGOUT:
                 final LogoutMessage logoutMessage = (LogoutMessage) message;
-                final Player playerLogout = this.players.get(logoutMessage.getPlayerLogin());
-                playerLogout.setLoggedIn(false);
+                player = this.players.get(logoutMessage.getPlayerLogin());
+                player.setLoggedIn(false);
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
             case GAME:
                 final GameMessage gameMessage = (GameMessage) message;
-                final Game game = Game.fromMessageData(this.players, gameMessage.getGameData());
+                game = Game.fromMessageData(this.players, gameMessage.getGameData());
                 this.games.getGames().put(game.getId(), game);
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
@@ -147,43 +153,83 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case PLAY:
                 final PlayMessage playMessage = (PlayMessage) message;
-                for (final Player player : this.players.values()) {
-                    if (player.getId() == playMessage.getSenderId()) {
-                        player.setCurrentGameId(playMessage.getId());
-                        break;
-                    }
-                }
+                player = this.getPlayer(playMessage.getSenderId());
+                player.setCurrentGameId(playMessage.getId());
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
             case THEME:
                 final ThemeMessage themeMessage = (ThemeMessage) message;
-                for (final Player player : this.players.values()) {
-                    if (player.getId() == themeMessage.getSenderId()) {
-                        final Game currentGame = this.games.getGames().get(themeMessage.getGameId());
-                        final boolean opponentUnlocked = currentGame.playerSelectTheme(player, themeMessage.getChosenTheme());
-                        final Player opponent = currentGame.getOpponent(player);
-                        if (opponentUnlocked && opponent.getPort() != -1) {
-                            final Question question = currentGame.getCurrentQuestion(opponent);
-                            this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                player = this.getPlayer(themeMessage.getSenderId());
+                game = this.games.getGames().get(player.getCurrentGameId());
+                final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
+                opponent = game.getOpponent(player);
+                if (opponentUnlocked && opponent.getPort() != -1) {
+                    final Question question = game.getCurrentQuestion(opponent);
+                    this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                }
+                final Question question = game.getCurrentQuestion(player);
+                this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
+                break;
+            case ANSWER:
+                final AnswerMessage answerMessage = (AnswerMessage) message;
+                player = this.getPlayer(answerMessage.getSenderId());
+                game = this.getGames().getGames().get(player.getCurrentGameId());
+                isPlayerA = game.getPlayerA() == player;
+                game.playerSelectAnswer(player, answerMessage.getChosenAnswer());
+                status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
+                if (status == PlayerStatus.WAIT) {
+                    if (game.getCurrentQuestionA() == 9 && game.getCurrentQuestionB() == 9) {
+                        final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                        final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                        opponent = game.getOpponent(player);
+                        if (opponent.getPort() != -1) {
+                            this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                         }
-                        final Question question = currentGame.getCurrentQuestion(player);
-                        this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
-                        break;
                     }
                 }
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
-            case ANSWER:
-                break;
             case NOANSWER:
+                player = this.getPlayer(message.getSenderId());
+                game = this.getGames().getGames().get(player.getCurrentGameId());
+                isPlayerA = game.getPlayerA() == player;
+                game.playerDoesntAnswer(player);
+                status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
+                if (status == PlayerStatus.WAIT) {
+                    if (game.getCurrentQuestionA() == 9 && game.getCurrentQuestionB() == 9) {
+                        final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                        final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                        opponent = game.getOpponent(player);
+                        if (opponent.getPort() != -1) {
+                            this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
+                        }
+                    }
+                }
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case DROP:
-                break;
-            case END:
+                player = this.getPlayer(message.getSenderId());
+                game = this.getGames().getGames().get(player.getCurrentGameId());
+                isPlayerA = game.getPlayerA() == player;
+                game.playerDrop(player);
+                final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                opponent = game.getOpponent(player);
+                if (opponent.getPort() != -1) {
+                    this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
+                }
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             default:
                 this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
@@ -265,6 +311,15 @@ public class ServerController extends MessageHandler implements Controller {
 
     public void broadcast(final Message message) {
         this.connectionManager.broadcast(message);
+    }
+
+    public Player getPlayer(final long id) {
+        for (final Player player : this.players.values()) {
+            if (player.getId() == id) {
+                return player;
+            }
+        }
+        return null;
     }
 
     public long getOwnId() {
