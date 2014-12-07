@@ -23,7 +23,7 @@ public class ServerConnectionManager extends ConnectionManager {
 
     private boolean isConnectedToLambdas;
 
-    public ServerConnectionManager(final ServerController controller, final int ownId) {
+    public ServerConnectionManager(final ServerController controller, final long ownId) {
         super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort(), ownId);
         this.controller = controller;
         this.isConnectedToLambdas = false;
@@ -94,7 +94,7 @@ public class ServerConnectionManager extends ConnectionManager {
      */
     public int connectServers() {
         Validate.isTrue(!this.isConnectedToLambdas, "Illegal State: already connected to servers once");
-        final int oldLeaderId = this.controller.getCurrentLeaderId();
+        final long oldLeaderId = this.controller.getCurrentLeaderId();
         if (this.controller.getCurrentLeaderId() > this.getOwnId()) {
             this.controller.setLeader(true);
             this.controller.setCurrentLeaderId(this.getOwnId());

@@ -21,7 +21,7 @@ public class PlayerController extends MessageHandler implements Controller {
     private final ServerController        serverController;
     private final PlayerConnectionManager connectionManager;
 
-    private final int ownId;
+    private final long ownId;
 
     private final PingPongTask pingPongTask;
 
@@ -31,7 +31,7 @@ public class PlayerController extends MessageHandler implements Controller {
      * @param serverController the Server controller
      * @param ownId this server's identifier
      */
-    public PlayerController(final ServerController serverController, final int localPlayerPort, final int ownId) {
+    public PlayerController(final ServerController serverController, final int localPlayerPort, final long ownId) {
         super("PlayerController");
         this.serverController = serverController;
         this.connectionManager = new PlayerConnectionManager(this, localPlayerPort, ownId);

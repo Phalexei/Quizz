@@ -21,19 +21,19 @@ import java.util.TreeMap;
 public class Config {
 
     public final class ServerInfo {
-        private final int    id;
+        private final long    id;
         private final String host;
         private final int    serverPort;
         private final int    playerPort;
 
-        public ServerInfo(final int id, final String host, final int serverPort, final int playerPort) {
+        public ServerInfo(final long id, final String host, final int serverPort, final int playerPort) {
             this.id = id;
             this.host = host;
             this.serverPort = serverPort;
             this.playerPort = playerPort;
         }
 
-        public int getId() {
+        public long getId() {
             return this.id;
         }
 
@@ -52,7 +52,7 @@ public class Config {
 
     private static final URL configUrl = Config.class.getResource("/config.json");
 
-    private final SortedMap<Integer, ServerInfo> servers;
+    private final SortedMap<Long, ServerInfo> servers;
 
     public Config() throws IOException {
         this.servers = new TreeMap<>();
@@ -65,7 +65,7 @@ public class Config {
         }
         if (Log.isEnabledFor(Level.DEBUG)) {
             Log.debug("Configuration file parsed. " + this.servers.size() + " servers found:");
-            for (final Entry<Integer, ServerInfo> e : this.servers.entrySet()) {
+            for (final Entry<Long, ServerInfo> e : this.servers.entrySet()) {
                 final ServerInfo info = e.getValue();
                 Log.debug("Server n°" + e.getKey() + " : " + info.getHost() + " - " + info.getServerPort() + "/" + info.getPlayerPort());
             }
@@ -78,7 +78,7 @@ public class Config {
             final JsonArray serversArray = root.getAsJsonArray("servers");
             for (final JsonElement server : serversArray) {
                 final JsonObject serverObject = (JsonObject) server;
-                final int serverId = serverObject.get("id").getAsInt();
+                final long serverId = serverObject.get("id").getAsLong();
                 final String serverHost = serverObject.get("host").getAsString();
                 final int serverPort = serverObject.get("serverPort").getAsInt();
                 final int playerPort = serverObject.get("playerPort").getAsInt();
@@ -89,7 +89,7 @@ public class Config {
         }
     }
 
-    public SortedMap<Integer, ServerInfo> getServers() {
+    public SortedMap<Long, ServerInfo> getServers() {
         return this.servers;
     }
 }

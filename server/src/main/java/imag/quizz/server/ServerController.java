@@ -17,11 +17,11 @@ public class ServerController extends MessageHandler implements Controller {
 
     private final ServerConnectionManager connectionManager;
 
-    private final int    ownId;
+    private final long   ownId;
     private final Config config;
 
     private boolean isLeader;
-    private int     currentLeaderId;
+    private long    currentLeaderId;
     private Integer currentLeaderLocalPort;
 
     private final PingPongTask pingPongTask;
@@ -34,7 +34,7 @@ public class ServerController extends MessageHandler implements Controller {
     /**
      * Constructor.
      */
-    protected ServerController(final int ownId, final Config config, final QuestionBase questionBase) {
+    protected ServerController(final long ownId, final Config config, final QuestionBase questionBase) {
         super("ServerController");
         this.ownId = ownId;
         this.config = config;
@@ -92,7 +92,7 @@ public class ServerController extends MessageHandler implements Controller {
             case INIT:
                 // TODO Check INIT origin and current state
                 Log.info("Received INIT from current leader with ID " + message.getSenderId());
-                this.loadInitData(((InitMessage)message).getData());
+                this.loadInitData(((InitMessage) message).getData());
                 this.connectionManager.connectServers();
                 this.connectionManager.broadcast(new OkMessage(this.ownId));
                 break;
@@ -154,6 +154,10 @@ public class ServerController extends MessageHandler implements Controller {
         // TODO
     }
 
+    public String buildGamesData(final Player player) {
+        return null; // TODO
+    }
+
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
@@ -161,7 +165,7 @@ public class ServerController extends MessageHandler implements Controller {
         // TODO Maybe other things
     }
 
-    public int getOwnId() {
+    public long getOwnId() {
         return this.ownId;
     }
 
@@ -173,7 +177,7 @@ public class ServerController extends MessageHandler implements Controller {
         return this.isLeader;
     }
 
-    public int getCurrentLeaderId() {
+    public long getCurrentLeaderId() {
         return this.currentLeaderId;
     }
 
@@ -193,7 +197,7 @@ public class ServerController extends MessageHandler implements Controller {
         this.isLeader = isLeader;
     }
 
-    public void setCurrentLeaderId(final int currentLeaderId) {
+    public void setCurrentLeaderId(final long currentLeaderId) {
         this.currentLeaderId = currentLeaderId;
     }
 
