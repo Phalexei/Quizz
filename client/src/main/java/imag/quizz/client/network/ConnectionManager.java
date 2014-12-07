@@ -31,15 +31,15 @@ public class ConnectionManager {
     }
 
     public void tryConnect() throws NoServerException {
-        final List<Integer> serverInfos = new LinkedList<>();
-        for (final int i : this.config.getServers().keySet()) {
+        final List<Long> serverInfos = new LinkedList<>();
+        for (final long i : this.config.getServers().keySet()) {
             serverInfos.add(i);
         }
 
         Collections.shuffle(serverInfos);
 
         this.socketHandler = null;
-        for (final int id : serverInfos) {
+        for (final long id : serverInfos) {
             final ServerInfo info = this.config.getServers().get(id);
             try {
                 this.socketHandler = new SocketHandler(new Socket(info.getHost(), info.getPlayerPort()), this.messageHandler);

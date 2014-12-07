@@ -61,8 +61,8 @@ public class ServerConnectionManager extends ConnectionManager {
      * none
      */
     private Integer connectLeader() {
-        for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
-            final int id = entry.getKey();
+        for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
+            final long id = entry.getKey();
             if (id == this.getOwnId()) {
                 // This server's configuration entry, ignore
                 continue;
@@ -102,7 +102,7 @@ public class ServerConnectionManager extends ConnectionManager {
             Log.info("We are now Leader");
         }
         int successCount = 0;
-        for (final Entry<Integer, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
+        for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
             if (entry.getKey() == this.getOwnId() || entry.getKey() == oldLeaderId) {
                 // Ignore
                 continue;
