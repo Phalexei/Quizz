@@ -138,17 +138,35 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case GAME:
                 final GameMessage gameMessage = (GameMessage) message;
-                final Game game = Game.fromMessageData(this.players, gameMessage.getGameData(), 1);
+                final Game game = Game.fromMessageData(this.players, gameMessage.getGameData());
                 this.games.getGames().put(game.getId(), game);
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
                 break;
             case PLAY:
+                final PlayMessage playMessage = (PlayMessage) message;
+                for (final Player player : this.players.values()) {
+                    if (player.getId() == playMessage.getSenderId()) {
+                        player.setCurrentGameId(playMessage.getId());
+                        break;
+                    }
+                }
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case THEME:
-                break;
-            case QUESTION:
+                final ThemeMessage themeMessage = (ThemeMessage) message;
+                for (final Player player : this.players.values()) {
+                    if (player.getId() == themeMessage.getSenderId()) {
+                        this.games.getGames().get(themeMessage.getGameId()).playerSelectTheme(player, themeMessage.getChosenTheme());
+                        break;
+                    }
+                }
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case ANSWER:
                 break;

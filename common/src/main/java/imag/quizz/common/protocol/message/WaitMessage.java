@@ -8,7 +8,7 @@ public class WaitMessage extends Message {
         super(Command.WAIT, senderId);
     }
 
-    /* package */ WaitMessage(String[] messageSplit) {
+    /* package */ WaitMessage(final String[] messageSplit) {
         super(Command.WAIT, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
     }

@@ -7,7 +7,9 @@ import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.server.game.Game;
+import imag.quizz.server.game.Game.PlayerStatus;
 import imag.quizz.server.game.Player;
+import imag.quizz.server.game.QuestionBase.Question;
 import imag.quizz.server.network.PlayerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 
@@ -91,14 +93,14 @@ public class PlayerController extends MessageHandler implements Controller {
                             final ArrayList<Player> potentialOpponents = new ArrayList<>(this.serverController.getPlayers().values());
                             potentialOpponents.remove(player);
                             final Player opponent = potentialOpponents.get(PlayerController.RANDOM.nextInt(potentialOpponents.size()));
-                            this.newGame(player, opponent);
+                            this.newGame(message, player, opponent);
                         }
                     } else {
                         final Player opponent = this.serverController.getPlayers().get(opponentLogin);
                         if (opponent == null) {
                             this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown opponent", message));
                         } else {
-                            this.newGame(player, opponent);
+                            this.newGame(message, player, opponent);
                         }
                     }
                     break;
@@ -110,7 +112,54 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.connectionManager.send(player, new PongMessage(this.ownId, message));
                     break;
                 case PLAY:
-                    // TODO Check Game id, send THEMES, QUESTION or WAIT to Player
+                    final PlayMessage playMessage = (PlayMessage) message;
+                    final Game game = this.serverController.getGames().getGames().get(playMessage.getId());
+                    if (game == null) {
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown Game", message));
+                    } else if (game.getPlayerA() != player && game.getPlayerB() != player) {
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player not part of this Game", message));
+                    } else {
+                        final PlayerStatus status;
+                        final boolean isPlayerA = game.getPlayerA() == player;
+                        if (isPlayerA) {
+                            status = game.getPlayerAStatus();
+                        } else {
+                            status = game.getPlayerBStatus();
+                        }
+                        switch (status) {
+                            case SELECT_THEME:
+                                this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), isPlayerA ? game.getThemesA() : game.getThemesB()));
+                                break;
+                            case ANSWER_QUESTION:
+                                final Question question;
+                                if (isPlayerA) {
+                                    final int currentQuestion = game.getCurrentQuestionA();
+                                    if (currentQuestion < 5) {
+                                        final String theme = game.getThemesA()[game.getChosenThemeA()];
+                                        question = game.getQuestionsA().get(theme)[currentQuestion - 1];
+                                    } else {
+                                        final String theme = game.getThemesB()[game.getChosenThemeB()];
+                                        question = game.getQuestionsB().get(theme)[currentQuestion - 1 - 4];
+                                    }
+                                } else {
+                                    final int currentQuestion = game.getCurrentQuestionB();
+                                    if (currentQuestion < 5) {
+                                        final String theme = game.getThemesB()[game.getChosenThemeB()];
+                                        question = game.getQuestionsB().get(theme)[currentQuestion - 1];
+                                    } else {
+                                        final String theme = game.getThemesA()[game.getChosenThemeA()];
+                                        question = game.getQuestionsA().get(theme)[currentQuestion - 1 - 4];
+                                    }
+                                }
+                                this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                                break;
+                            case WAIT:
+                                this.connectionManager.send(player, new WaitMessage(this.ownId));
+                                break;
+                        }
+                        player.setCurrentGameId(game.getId());
+                        this.serverController.leaderBroadcast(message);
+                    }
                     break;
                 case PONG:
                     this.pingPongTask.pong(localPort);
@@ -170,8 +219,9 @@ public class PlayerController extends MessageHandler implements Controller {
         while (it.hasNext()) {
             final Game game = it.next();
             final boolean isPlayerA = game.getPlayerA() == player;
+            builder.append(game.getId()).append(Separator.LEVEL_2);
             builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
-            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == Game.PlayerStatus.WAIT).append(Separator.LEVEL_2);
+            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == PlayerStatus.WAIT).append(Separator.LEVEL_2);
             builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
             builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
             builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
@@ -222,13 +272,13 @@ public class PlayerController extends MessageHandler implements Controller {
         }
     }
 
-    private void newGame(final Player player, final Player opponent) {
+    private void newGame(final Message message, final Player player, final Player opponent) {
         final Game game = this.serverController.getGames().newGame(player, opponent);
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
         if (opponent.getPort() != -1) {
             this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesB()));
         }
-        // TODO Broadcast GAME Message
+        this.serverController.leaderBroadcast(new GameMessage(this.ownId, game.toMessageData()));
     }
 
     @Override

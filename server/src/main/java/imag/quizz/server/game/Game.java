@@ -302,6 +302,10 @@ public final class Game {
         }
     }
 
+    public static Game fromMessageData(final Map<String, Player> players, final String gameData) {
+        return Game.fromMessageData(players, gameData, 1);
+    }
+
     public static Game fromMessageData(final Map<String, Player> players, final String gameData, final int baseSeparatorLevel) {
         Validate.inclusiveBetween(1, Separator.AMOUNT - 2, baseSeparatorLevel, "Invalid separator level");
 
