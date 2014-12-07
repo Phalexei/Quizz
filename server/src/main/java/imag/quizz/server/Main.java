@@ -19,7 +19,7 @@ public final class Main {
         new Main(args);
     }
 
-    private Integer      ownId;
+    private Long      ownId;
     private Config       config;
     private QuestionBase questionBase;
 
@@ -51,7 +51,7 @@ public final class Main {
                 switch (lowerCasedArg) {
                     case "--ownid":
                     case "-id":
-                        this.ownId = Integer.parseInt(args[++i]);
+                        this.ownId = Long.parseLong(args[++i]);
                         break;
                     default:
                         this.printUsage();
