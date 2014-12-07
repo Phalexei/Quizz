@@ -83,23 +83,14 @@ public class PlayerController extends MessageHandler implements Controller {
                             final ArrayList<Player> potentialOpponents = new ArrayList<>(this.serverController.getPlayers().values());
                             potentialOpponents.remove(player);
                             final Player opponent = potentialOpponents.get(PlayerController.RANDOM.nextInt(potentialOpponents.size()));
-                            // TODO Merge following code with code in next else block as it's the same thing
-                            final Game game = this.serverController.getGames().newGame(player, opponent);
-                            /* TODO
-                            this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
-                            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
-                            */
+                            this.newGame(player, opponent);
                         }
                     } else {
                         final Player opponent = this.serverController.getPlayers().get(opponentLogin);
                         if (opponent == null) {
                             this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
                         } else {
-                            final Game game = this.serverController.getGames().newGame(player, opponent);
-                            /* TODO
-                            this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
-                            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
-                            */
+                            this.newGame(player, opponent);
                         }
                     }
                     break;
@@ -203,6 +194,15 @@ public class PlayerController extends MessageHandler implements Controller {
         }
 
         return builder.toString();
+    }
+
+    private void newGame(final Player player, final Player opponent) {
+        final Game game = this.serverController.getGames().newGame(player, opponent);
+        this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
+        if (opponent.getPort() != -1) {
+            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesB()));
+        }
+        // TODO Broadcast GAME Message
     }
 
     @Override
