@@ -79,7 +79,7 @@ public class Window {
 
     public void setPanel(final PanelType panel) {
         if (panel != this.currentPanelType) {
-            JPanel newPanel = null;
+            Panel newPanel = null;
             switch (panel) {
                 case WELCOME:
                     newPanel = this.welcomePanel;
@@ -103,6 +103,7 @@ public class Window {
 
             if (newPanel != null && !newPanel.equals(this.mainPanel.getComponent(0))) {
                 this.currentPanelType = panel;
+                this.currentPanel = newPanel;
                 this.mainPanel.remove(0);
                 this.mainPanel.add(newPanel, 0);
                 final int width = this.frame.getWidth();
