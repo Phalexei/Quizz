@@ -98,12 +98,12 @@ public class ServerController extends MessageHandler implements Controller {
             case INIT:
                 if (this.initialized) {
                     Log.warn("Received INIT message from server " + message.getSenderId() + " while already being initialized");
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId, message));
                 } else {
                     Log.info("Received INIT from current leader with ID " + message.getSenderId());
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
-                    this.connectionManager.broadcast(new OkMessage(this.ownId));
+                    this.connectionManager.broadcast(new OkMessage(this.ownId, message));
                     Log.info("We are now leader");
                 }
                 break;
@@ -161,7 +161,7 @@ public class ServerController extends MessageHandler implements Controller {
             case END:
                 break;
             default:
-                this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
                 break;
         }
     }

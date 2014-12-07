@@ -86,7 +86,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     if (opponentLogin == null) {
                         if (this.serverController.getPlayers().size() == 1) {
                             // No opponent available
-                            this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
+                            this.connectionManager.send(player, new NokMessage(this.ownId, "No opponent available", message));
                         } else {
                             final ArrayList<Player> potentialOpponents = new ArrayList<>(this.serverController.getPlayers().values());
                             potentialOpponents.remove(player);
@@ -96,7 +96,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     } else {
                         final Player opponent = this.serverController.getPlayers().get(opponentLogin);
                         if (opponent == null) {
-                            this.connectionManager.send(player, new NokMessage(this.ownId)); // TODO Error code?
+                            this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown opponent", message));
                         } else {
                             this.newGame(player, opponent);
                         }
@@ -123,7 +123,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and continue game
                     break;
                 default:
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
                     break;
             }
         } else {
@@ -136,7 +136,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.register(localPort, socketHandler, message);
                     break;
                 default:
-                    this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                    this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unexpected message", message));
                     break;
             }
         }
@@ -189,7 +189,7 @@ public class PlayerController extends MessageHandler implements Controller {
         final String loginMessageLogin = loginMessage.getLogin();
         final String hashedPassword = loginMessage.getHashedPassword();
         if (!this.serverController.getPlayers().containsKey(loginMessageLogin)) {
-            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+            this.connectionManager.send(localPort, new NokMessage(this.ownId, "Unknown login", message));
         } else {
             final Player player = this.serverController.getPlayers().get(loginMessageLogin);
             if (player.getPasswordHash().equals(hashedPassword)) {
@@ -199,7 +199,7 @@ public class PlayerController extends MessageHandler implements Controller {
                 message.setSenderId(player.getId());
                 this.serverController.leaderBroadcast(message);
             } else {
-                this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+                this.connectionManager.send(localPort, new NokMessage(this.ownId, "Invalid password", message));
             }
         }
     }
@@ -208,14 +208,14 @@ public class PlayerController extends MessageHandler implements Controller {
         final RegisterMessage registerMessage = (RegisterMessage) message;
         final String registerMessageLogin = registerMessage.getLogin();
         if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
-            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+            this.connectionManager.send(localPort, new NokMessage(this.ownId, "Login already taken", message));
         } else {
             if (this.serverController.isLeader()) {
                 final long id = IdGenerator.nextPlayer();
                 final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 this.serverController.getPlayers().put(registerMessageLogin, player);
-                this.connectionManager.send(player, new OkMessage(this.ownId));
+                this.connectionManager.send(player, new OkMessage(this.ownId, message));
                 message.setSenderId(id);
             }
             this.serverController.leaderBroadcast(message);
