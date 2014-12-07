@@ -1,9 +1,10 @@
 package imag.quizz.common.tool;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 /**
  *
@@ -34,7 +35,7 @@ public final class Hash {
      * @return an base64 encoded version of the provided String
      */
     public static String encodeBase64(final String source) {
-        return Base64.getEncoder().encodeToString(source.getBytes());
+        return new String(Base64.encodeBase64(source.getBytes()));
     }
 
     /**
@@ -45,7 +46,7 @@ public final class Hash {
      * @return the original String
      */
     public static String decodeBase64(final String source) {
-        return new String(Base64.getDecoder().decode(source));
+        return new String(Base64.decodeBase64(source));
     }
 
     /**
