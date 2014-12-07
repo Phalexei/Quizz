@@ -42,6 +42,9 @@ public abstract class Message {
             case LOGIN:
                 newMessage = new LoginMessage(messageSplit);
                 break;
+            case LOGOUT:
+                newMessage = new LogoutMessage(messageSplit);
+                break;
             case GAMES:
                 newMessage = new GamesMessage(messageSplit);
                 break;

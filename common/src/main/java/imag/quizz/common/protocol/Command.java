@@ -83,6 +83,12 @@ public enum Command {
     LOGIN,
 
     /**
+     * [B] Notifiy servers of player logout
+     * Contains the player's ID
+     */
+    LOGOUT,
+
+    /**
      * [CS & SC]
      * <p>
      * Sent by Clients to request the list of games. Empty.
