@@ -4,15 +4,17 @@ import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
+import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.server.game.Game;
-import imag.quizz.server.game.Games;
 import imag.quizz.server.game.Player;
-import imag.quizz.server.game.QuestionBase;
 import imag.quizz.server.network.PlayerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Set;
 
 public class PlayerController extends MessageHandler implements Controller {
 
@@ -68,8 +70,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     // TODO Update and end game
                     break;
                 case GAMES:
-                    final Set<Game> playerGames = this.serverController.getGames().getByPlayer(player);
-                    // TODO this.connectionManager.send(localPort, new GamesMessage(playerGames /* TODO */));
+                    this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                     break;
                 case NEW:
                     final NewMessage newMessage = (NewMessage) message;
@@ -166,6 +167,47 @@ public class PlayerController extends MessageHandler implements Controller {
                     break;
             }
         }
+    }
+
+    /**
+     * TODO
+     * Each game is represented by:
+     * - Opponent login
+     * - Player has to wait for opponent (true/false)
+     * - Player own score
+     * - Player current question
+     * - Opponent own score
+     * - Opponent current question
+     *
+     * @param player the player
+     * @param games the player's games
+     *
+     * @return a String representation of this player's games dedicated to
+     * this player
+     */
+    public String buildGamesData(final Player player, final Set<Game> games) {
+        if (games == null) {
+            return null;
+        }
+
+        final StringBuilder builder = new StringBuilder();
+
+        final Iterator<Game> it = games.iterator();
+        while (it.hasNext()) {
+            final Game game = it.next();
+            final boolean isPlayerA = game.getPlayerA() == player;
+            builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
+            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == Game.PlayerStatus.WAIT).append(Separator.LEVEL_2);
+            builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+            builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+            builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+            builder.append(!isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+            if (it.hasNext()) {
+                builder.append(Separator.LEVEL_1);
+            }
+        }
+
+        return builder.toString();
     }
 
     @Override

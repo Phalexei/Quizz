@@ -154,10 +154,6 @@ public class ServerController extends MessageHandler implements Controller {
         // TODO
     }
 
-    public String buildGamesData(final Player player) {
-        return null; // TODO
-    }
-
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
         this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
