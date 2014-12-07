@@ -19,7 +19,7 @@ public abstract class AccountingMessage extends Message {
         super(command, Integer.parseInt(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.login = messageSplit[2];
-        this.hashedPassword = messageSplit[3];
+        this.hashedPassword = Hash.decodeBase64(messageSplit[3]);
     }
 
     public String getLogin() {
@@ -32,6 +32,6 @@ public abstract class AccountingMessage extends Message {
 
     @Override
     protected String getParametersString() {
-        return this.login + Separator.LEVEL_1 + this.hashedPassword;
+        return this.login + Separator.LEVEL_1 + Hash.encodeBase64(this.hashedPassword);
     }
 }

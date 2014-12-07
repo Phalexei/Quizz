@@ -3,9 +3,7 @@ package imag.quizz.client.ui;
 import imag.quizz.client.game.ClientController;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.Element;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,30 +24,34 @@ public class Window {
     final JPanel mainPanel;
     final JFrame frame;
 
-    private final JPanel    choicePanel;
-    private final JPanel    gamesPanel;
-    private final JPanel    infoPanel;
-    private final JPanel    loginPanel;
-    private final JPanel    noConnectionPanel;
-    private final JPanel    welcomePanel;
-    private Panel currentPanel;
+    private final JPanel choicePanel;
+    private final JPanel gamesPanel;
+    private final JPanel infoPanel;
+    private final JPanel loginPanel;
+    private final JPanel noConnectionPanel;
+    private final JPanel welcomePanel;
+    private       Panel  currentPanel;
+
+    private final ClientController clientController;
 
     public enum Panel {
         CHOICE,
         GAMES,
         INFO,
         LOGIN,
-        NOCONNECTION,
+        NO_CONNECTION,
         WELCOME
     }
 
     public Window(final ClientController clientController) {
+        this.clientController = clientController;
+
         this.topLeftButton = new JButton("Oui");
         this.topRightButton = new JButton("Non");
         this.bottomLeftButton = new JButton("Peut-être");
         this.bottomRightButton = new JButton("42");
 
-        final InputHandler inputHandler = new InputHandler(clientController);
+        final InputHandler inputHandler = new InputHandler(this.clientController);
         this.topLeftButton.addActionListener(inputHandler);
         this.topRightButton.addActionListener(inputHandler);
         this.bottomLeftButton.addActionListener(inputHandler);
@@ -66,19 +68,19 @@ public class Window {
         this.questionTextPane = CenteredTextPaneHandler.create(question);
         this.questionTextPane.setEditable(false);
 
-        this.choicePanel = new JPanel();
-        this.choicePanel.setLayout(new GridLayout(2, 1));
-        this.choicePanel.add(this.questionTextPane);
-        this.choicePanel.add(buttonsPanel);
+        this.welcomePanel = this.buildWelcomePanel();
 
-        this.loginPanel = buildLoginPanel(clientController);
+        this.noConnectionPanel = this.buildNoConnectionPanel();
 
-        this.noConnectionPanel = buildNoConnectionPanel(clientController);
+        this.loginPanel = this.buildLoginPanel();
 
         this.gamesPanel = null; // TODO
         this.infoPanel = null; // TODO
 
-        this.welcomePanel = buildWelcomePanel();
+        this.choicePanel = new JPanel();
+        this.choicePanel.setLayout(new GridLayout(2, 1));
+        this.choicePanel.add(this.questionTextPane);
+        this.choicePanel.add(buttonsPanel);
 
         this.logsTextArea = new JTextArea();
         this.logsTextArea.setEditable(false);
@@ -93,22 +95,21 @@ public class Window {
         this.mainPanel.add(this.choicePanel);
         this.mainPanel.add(rightPanel);
 
-        frame = new JFrame("Quizz");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setContentPane(this.mainPanel);
+        this.frame = new JFrame("Quizz");
+        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.frame.setContentPane(this.mainPanel);
 
         this.setPanel(Panel.WELCOME);
-        frame.pack();
-        frame.setVisible(true);
-        frame.setResizable(true);
-        frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        this.frame.pack();
+        this.frame.setVisible(true);
+        this.frame.setResizable(true);
+        this.frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         new Log4JAppender(this);
 
-
-        clientController.setWindow(this);
-        clientController.start();
-        clientController.connect();
+        this.clientController.setWindow(this);
+        this.clientController.start();
+        this.clientController.connect();
     }
 
     public void setPanel(final Panel panel) {
@@ -130,7 +131,7 @@ public class Window {
                 case LOGIN:
                     newPanel = this.loginPanel;
                     break;
-                case NOCONNECTION:
+                case NO_CONNECTION:
                     newPanel = this.noConnectionPanel;
                     break;
             }
@@ -139,80 +140,109 @@ public class Window {
                 this.currentPanel = panel;
                 this.mainPanel.remove(0);
                 this.mainPanel.add(newPanel, 0);
-                frame.pack();
-                frame.setVisible(true);
-                frame.setResizable(true);
-                frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+                final int width = this.frame.getWidth();
+                final int height = this.frame.getHeight();
+                this.frame.pack();
+                this.frame.setSize(width, height);
             }
         }
     }
 
-    private JPanel buildNoConnectionPanel(final ClientController clientController) {
-        final String noConnection = "Aucun serveur disponible.";
-        final JTextPane noConnectionText = CenteredTextPaneHandler.create(noConnection);
-        final JButton retryButton = new JButton("Réessayer la connexion");
-        retryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clientController.connect();
-            }
-        });
-
-        final JPanel noConnectionPanel = new JPanel();
-        noConnectionPanel.setLayout(new GridLayout(2, 1));
-        noConnectionPanel.add(noConnectionText);
-        noConnectionPanel.add(retryButton);
-
-        return noConnectionPanel;
-    }
-
     private JPanel buildWelcomePanel() {
-        final String welcome = "Bienvenue sur <Insert Quizz Name here>"; //TODO
-        final JTextPane welcomeText = CenteredTextPaneHandler.create(welcome);
+        final String welcome = "Bienvenue sur Quizz Duel\n\nConnexion en cours..."; // TODO
+        final JTextPane welcomeTextPane = CenteredTextPaneHandler.create(welcome);
+        welcomeTextPane.setEditable(false);
 
-        JPanel welcomePanel = new JPanel();
+        final JPanel welcomePanel = new JPanel();
         welcomePanel.setLayout(new GridLayout(1, 1));
-        welcomePanel.add(welcomeText);
+        welcomePanel.add(welcomeTextPane);
 
         return welcomePanel;
     }
 
-    private JPanel buildLoginPanel(final ClientController clientController) {
+    private JPanel buildNoConnectionPanel() {
+        final String noConnection = "Aucun serveur disponible.";
+
+        final JTextPane noConnectionTextPane = CenteredTextPaneHandler.create(noConnection);
+        noConnectionTextPane.setEditable(false);
+
+        final JButton retryButton = new JButton("Réessayer");
+        retryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Window.this.clientController.connect();
+            }
+        });
+
+        final JPanel noConnectionPanel = new JPanel();
+        final BorderLayout layout = new BorderLayout();
+        noConnectionPanel.setLayout(layout);
+        noConnectionPanel.add(noConnectionTextPane, BorderLayout.CENTER);
+        noConnectionPanel.add(retryButton, BorderLayout.SOUTH);
+
+        return noConnectionPanel;
+    }
+
+    private JPanel buildLoginPanel() {
         final String login = "Veuillez vous identifier.";
-        final JTextPane loginText = CenteredTextPaneHandler.create(login);
+
+        final JTextPane loginTextPane = CenteredTextPaneHandler.create(login);
+        loginTextPane.setEditable(false);
+
         final JButton loginButton = new JButton("Connexion");
         final JButton registerButton = new JButton("Inscription");
-        final JTextField username = new JTextField("Identifiant");
-        final JPasswordField password = new JPasswordField("Mot de passe");
+
+        final JTextField username = new JTextField("");
+        final JPasswordField password = new JPasswordField("");
 
         loginButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                clientController.login(username.getText(), password.getPassword());
+            public void actionPerformed(final ActionEvent e) {
+                Window.this.clientController.login(username.getText(), password.getPassword());
             }
         });
         registerButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                clientController.register(username.getText(), password.getPassword());
+            public void actionPerformed(final ActionEvent e) {
+                Window.this.clientController.register(username.getText(), password.getPassword());
             }
         });
 
-        final JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new GridLayout(3, 1));
-        loginPanel.add(loginText);
+        final JPanel loginPanel = new JPanel(new BorderLayout());
+        loginPanel.add(loginTextPane, BorderLayout.CENTER);
 
-        final JPanel loginInfo = new JPanel();
-        loginInfo.setLayout(new GridLayout(1, 2));
+        final JPanel loginSouthPanel = new JPanel(new BorderLayout());
+
+        final JPanel loginInfo = new JPanel(new GridLayout(2, 2));
+
+        final SimpleAttributeSet attributes = new SimpleAttributeSet();
+        StyleConstants.setAlignment(attributes, StyleConstants.ALIGN_RIGHT);
+
+        final JTextPane idTextPane = new JTextPane();
+        idTextPane.setText("Identifiant :");
+        idTextPane.setEditable(false);
+        idTextPane.setBackground(Color.LIGHT_GRAY);
+        idTextPane.setParagraphAttributes(attributes, true);
+
+        final JTextPane pwdTextPane = new JTextPane();
+        pwdTextPane.setText("Mot de passe :");
+        pwdTextPane.setEditable(false);
+        pwdTextPane.setBackground(Color.LIGHT_GRAY);
+        pwdTextPane.setParagraphAttributes(attributes, true);
+
+        loginInfo.add(idTextPane);
         loginInfo.add(username);
+        loginInfo.add(pwdTextPane);
         loginInfo.add(password);
-        loginPanel.add(loginInfo);
 
-        final JPanel loginButtons = new JPanel();
-        loginButtons.setLayout(new GridLayout(1, 2));
+        loginSouthPanel.add(loginInfo, BorderLayout.CENTER);
+
+        final JPanel loginButtons = new JPanel(new GridLayout(1, 2));
         loginButtons.add(loginButton);
         loginButtons.add(registerButton);
-        loginPanel.add(loginButtons);
+        loginSouthPanel.add(loginButtons, BorderLayout.SOUTH);
+
+        loginPanel.add(loginSouthPanel, BorderLayout.SOUTH);
 
         return loginPanel;
     }
@@ -272,10 +302,10 @@ public class Window {
     }
 
     public void noConnection() {
-        this.setPanel(Panel.NOCONNECTION);
+        this.setPanel(Panel.NO_CONNECTION);
     }
 
     public void connected() {
-        this.setPanel(Panel.GAMES);
+        this.setPanel(Panel.LOGIN);
     }
 }

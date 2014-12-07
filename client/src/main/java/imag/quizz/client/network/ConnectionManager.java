@@ -31,7 +31,6 @@ public class ConnectionManager {
     }
 
     public void tryConnect() throws NoServerException {
-
         final List<Integer> serverInfos = new LinkedList<>();
         for (final int i : this.config.getServers().keySet()) {
             serverInfos.add(i);
