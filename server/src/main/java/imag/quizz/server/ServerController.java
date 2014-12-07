@@ -112,7 +112,9 @@ public class ServerController extends MessageHandler implements Controller {
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
                     this.connectionManager.broadcast(new OkMessage(this.ownId, message));
-                    Log.info("We are now leader");
+                    if (message.getSourceId() > this.getOwnId()) {
+                        Log.info("We are now leader");
+                    }
                 }
                 break;
             case REGISTER:
