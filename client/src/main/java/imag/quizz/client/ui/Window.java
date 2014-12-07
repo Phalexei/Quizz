@@ -19,8 +19,7 @@ public class Window {
     final JFrame frame;
 
     private final ChoicePanel choicePanel;
-    private final Panel gamesPanel;
-    private final Panel infoPanel;
+    private final GamesPanel gamesPanel;
     private final LoginPanel loginPanel;
     private final NoConnectionPanel noConnectionPanel;
     private final WelcomePanel welcomePanel;
@@ -30,15 +29,9 @@ public class Window {
 
     private final ClientController clientController;
 
-    public void showError(String error) {
-        this.currentPanel.showError(error);
-    }
-
-
     public enum PanelType {
         CHOICE,
         GAMES,
-        INFO,
         LOGIN,
         NO_CONNECTION,
         WELCOME,
@@ -51,8 +44,7 @@ public class Window {
         this.welcomePanel = new WelcomePanel();
         this.noConnectionPanel = new NoConnectionPanel(clientController);
         this.loginPanel = new LoginPanel(clientController);
-        this.gamesPanel = null; // TODO
-        this.infoPanel = null; // TODO
+        this.gamesPanel = new GamesPanel(clientController);
         this.newGamePanel = new NewGamePanel(clientController);
         this.choicePanel = new ChoicePanel(clientController);
 
@@ -98,9 +90,6 @@ public class Window {
                 case GAMES:
                     newPanel = this.gamesPanel;
                     break;
-                case INFO:
-                    newPanel = this.infoPanel;
-                    break;
                 case LOGIN:
                     newPanel = this.loginPanel;
                     break;
@@ -124,12 +113,28 @@ public class Window {
         }
     }
 
+    public void showError(String error) {
+        this.currentPanel.showError(error);
+    }
+
+    public void clearGames() {
+        this.gamesPanel.clearGames();
+    }
+
+    public void addGame(final long gameId, final boolean wait, int myScore, final int myCurrentQuestion, final String opponent, final int oppScore, final int oppCurrentQuestion) {
+        this.gamesPanel.addGame(gameId, wait, myScore, myCurrentQuestion, opponent, oppScore, oppCurrentQuestion);
+    }
+
     public void setQuestion(final String question) {
         this.choicePanel.setQuestion(question);
     }
 
     public void setAnswer(final int num, final String answer) {
         this.choicePanel.setAnswer(num, answer);
+    }
+
+    public void questionTimeout() {
+        this.choicePanel.questionTimeout();
     }
 
     public void lockButtons() {

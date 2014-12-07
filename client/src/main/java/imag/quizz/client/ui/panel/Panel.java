@@ -8,6 +8,7 @@ public abstract class Panel extends JPanel {
     protected Panel() {
 
     }
+
     protected Panel(LayoutManager layoutManager) {
         super(layoutManager);
     }

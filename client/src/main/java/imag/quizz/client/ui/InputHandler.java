@@ -18,6 +18,6 @@ public class InputHandler implements ActionListener {
 
     @Override
     public void actionPerformed(final ActionEvent event) {
-        this.clientController.onButtonClick(event.getActionCommand());
+        this.clientController.answerSelected(event.getActionCommand());
     }
 }

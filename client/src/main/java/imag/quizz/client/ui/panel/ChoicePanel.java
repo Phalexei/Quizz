@@ -42,9 +42,9 @@ public class ChoicePanel extends Panel {
         this.add(this.questionTextPane);
         this.add(buttonsPanel);
     }
+
     @Override
     public void showError(final String error) {
-        this.toggleButtons(false);
         this.setQuestion(error);
     }
 
@@ -76,5 +76,10 @@ public class ChoicePanel extends Panel {
             default:
                 throw new IllegalArgumentException("Invalid number: " + num);
         }
+    }
+
+    public void questionTimeout() {
+        this.showError("Délai écoulé !");
+        this.toggleButtons(false);
     }
 }
