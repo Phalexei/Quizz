@@ -5,6 +5,7 @@ import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.message.InitMessage;
 import imag.quizz.common.protocol.message.Message;
 import imag.quizz.common.tool.Log;
+import imag.quizz.common.tool.Pair;
 import imag.quizz.server.ServerController;
 import imag.quizz.server.game.Server;
 import org.apache.commons.lang3.Validate;
@@ -12,7 +13,11 @@ import org.apache.commons.lang3.Validate;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.*;
 
 /**
  * Handles connections
@@ -20,12 +25,14 @@ import java.util.Map.Entry;
 public class ServerConnectionManager extends ConnectionManager {
 
     private final ServerController controller;
+    private       ExecutorService  executor;
 
     private boolean isConnectedToLambdas;
 
     public ServerConnectionManager(final ServerController controller, final long ownId) {
         super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort(), ownId);
         this.controller = controller;
+        this.executor = Executors.newCachedThreadPool();
         this.isConnectedToLambdas = false;
 
         // Attempt to join other servers
@@ -61,28 +68,52 @@ public class ServerConnectionManager extends ConnectionManager {
      * none
      */
     private Integer connectLeader() {
+        final List<Future<Pair<Long, Integer>>> futures = new LinkedList<>();
         for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
             final long id = entry.getKey();
             if (id == this.getOwnId()) {
-                // This server's configuration entry, ignore
+                // Ignore
                 continue;
             }
             final ServerInfo info = entry.getValue();
-            final Socket s = new Socket();
-            try {
-                s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
-                try {
-                    this.newConnection(new Server(id, s.getLocalPort()), s);
-                    this.controller.setCurrentLeaderId(id);
-                    return s.getLocalPort();
-                } catch (final IOException e) {
-                    Log.error("Failed to create SocketHandler for server " + id, e);
+            futures.add(this.executor.submit(new Callable<Pair<Long, Integer>>() {
+                @Override
+                public Pair<Long, Integer> call() throws Exception {
+                    final Socket s = new Socket();
+                    try {
+                        s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
+                        try {
+                            ServerConnectionManager.this.newConnection(new Server(id, s.getLocalPort()), s);
+                            return new Pair<>(id, s.getLocalPort());
+                        } catch (final IOException e) {
+                            Log.error("Failed to create SocketHandler for server " + id, e);
+                        }
+                    } catch (final IOException e) {
+                        Log.debug("Failed to connect to server " + id + ", ignoring");
+                        Log.trace("Error was:", e);
+                    }
+                    return null;
                 }
-            } catch (final IOException e) {
-                Log.info("Failed to connect to server " + id + ", ignoring");
-                Log.trace("Error was:", e);
+            }));
+        }
+        final Iterator<Future<Pair<Long, Integer>>> it = futures.iterator();
+        while (it.hasNext()) {
+            final Future<Pair<Long, Integer>> future = it.next();
+            try {
+                final Pair<Long, Integer> res = future.get();
+                if (res != null) {
+                    this.controller.setCurrentLeaderId(res.getA());
+                    while (it.hasNext()) {
+                        it.next().get();
+                    }
+                    return res.getB();
+                }
+            } catch (final InterruptedException | ExecutionException e) {
+                Log.fatal("Fatal error while connecting to server", e);
+                System.exit(2549);
             }
         }
+
         return null;
     }
 
@@ -101,28 +132,51 @@ public class ServerConnectionManager extends ConnectionManager {
             this.controller.setCurrentLeaderLocalPort(null);
             Log.info("We are now Leader");
         }
-        int successCount = 0;
+        final List<Future<Boolean>> futures = new LinkedList<>();
         for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
-            if (entry.getKey() == this.getOwnId() || entry.getKey() == oldLeaderId) {
+            final long id = entry.getKey();
+            if (id == this.getOwnId() || id == oldLeaderId) {
                 // Ignore
                 continue;
             }
             final ServerInfo info = entry.getValue();
-            final Socket s = new Socket();
-            try {
-                s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
-                try {
-                    this.newConnection(new Server(entry.getKey(), s.getLocalPort()), s);
-                    successCount++;
-                } catch (final IOException e) {
-                    Log.error("Failed to create SocketHandler for server " + info.getId(), e);
+            futures.add(this.executor.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    final Socket s = new Socket();
+                    boolean success = false;
+                    try {
+                        s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
+                        try {
+                            ServerConnectionManager.this.newConnection(new Server(id, s.getLocalPort()), s);
+                            success = true;
+                        } catch (final IOException e) {
+                            Log.error("Failed to create SocketHandler for server " + info.getId(), e);
+                        }
+                    } catch (final IOException e) {
+                        Log.info("Failed to connect to server " + info.getId() + ", ignoring");
+                        Log.trace("Error was:", e);
+                    }
+                    return success;
                 }
-            } catch (final IOException e) {
-                Log.info("Failed to connect to server " + info.getId() + ", ignoring");
-                Log.trace("Error was:", e);
+            }));
+        }
+        int successCount = 0;
+        for (final Future<Boolean> future : futures) {
+            try {
+                if (future.get()) {
+                    successCount++;
+                }
+            } catch (final InterruptedException | ExecutionException e) {
+                Log.fatal("Fatal error while connecting to server", e);
+                System.exit(784);
             }
         }
         this.isConnectedToLambdas = true;
+
+        this.executor.shutdown();
+        this.executor = null;
+
         return successCount;
     }
 
