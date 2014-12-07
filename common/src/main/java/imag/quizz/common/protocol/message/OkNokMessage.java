@@ -8,6 +8,7 @@ import java.util.Arrays;
 public abstract class OkNokMessage extends Message {
 
     private final String  text;
+
     private final Message source;
 
     protected OkNokMessage(final Command command, final long senderId, final String text, final Message source) {
@@ -29,6 +30,14 @@ public abstract class OkNokMessage extends Message {
             }
         }
         this.source = Message.fromString(builder.toString());
+    }
+
+    public Message getSource() {
+        return source;
+    }
+
+    public String getText() {
+        return text;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate;
 public class QuestionMessage extends Message {
 
     private final String question;
+
     private final String[] answers;
 
     public QuestionMessage(final long senderId, final String question, final String[] answers) {
@@ -37,5 +38,13 @@ public class QuestionMessage extends Message {
         s.append(this.answers[this.answers.length - 1]);
 
         return s.toString();
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String[] getAnswers() {
+        return answers;
     }
 }

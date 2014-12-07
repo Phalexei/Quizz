@@ -37,4 +37,8 @@ public class ThemesMessage extends Message {
 
         return s.toString();
     }
+
+    public String[] getThemes() {
+        return this.themes;
+    }
 }
