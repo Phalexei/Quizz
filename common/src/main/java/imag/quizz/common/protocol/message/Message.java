@@ -93,7 +93,7 @@ public abstract class Message {
     }
 
     protected final Command command;
-    protected final long    senderId;
+    protected       long    senderId;
 
     protected Message(final Command command, final long senderId) {
         this.command = command;
@@ -106,6 +106,10 @@ public abstract class Message {
 
     public long getSenderId() {
         return this.senderId;
+    }
+
+    public void setSenderId(final long senderId) {
+        this.senderId = senderId;
     }
 
     protected void checkCommandName(final String commandName) {

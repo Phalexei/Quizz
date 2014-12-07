@@ -10,6 +10,7 @@ import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.game.*;
 import imag.quizz.server.network.ServerConnectionManager;
+import imag.quizz.server.tool.IdGenerator;
 import org.apache.commons.lang3.Validate;
 
 import java.util.*;
@@ -107,13 +108,33 @@ public class ServerController extends MessageHandler implements Controller {
                 }
                 break;
             case REGISTER:
+                final RegisterMessage registerMessage = (RegisterMessage) message;
+                if (this.isLeader) {
+                    final long id = IdGenerator.nextPlayer();
+                    final Player player = new Player(id, -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    this.players.put(player.getLogin(), player);
+                    registerMessage.setSenderId(id);
+                    this.leaderBroadcast(registerMessage);
+                } else {
+                    final Player player = new Player(message.getSenderId(), -1, registerMessage.getLogin(), registerMessage.getHashedPassword());
+                    this.players.put(player.getLogin(), player);
+                }
                 break;
             case LOGIN:
+                final LoginMessage loginMessage = (LoginMessage) message;
+                final Player playerLogin = this.players.get(loginMessage.getLogin());
+                playerLogin.setLoggedIn(true);
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case LOGOUT:
                 final LogoutMessage logoutMessage = (LogoutMessage) message;
-                final Player player = this.players.get(logoutMessage.getPlayerLogin());
-                player.setLoggedIn(false);
+                final Player playerLogout = this.players.get(logoutMessage.getPlayerLogin());
+                playerLogout.setLoggedIn(false);
+                if (this.isLeader) {
+                    this.leaderBroadcast(message);
+                }
                 break;
             case GAMES:
                 break;

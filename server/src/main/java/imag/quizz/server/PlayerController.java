@@ -196,6 +196,8 @@ public class PlayerController extends MessageHandler implements Controller {
                 player.setLoggedIn(true);
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                message.setSenderId(player.getId());
+                this.serverController.leaderBroadcast(message);
             } else {
                 this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
             }
@@ -208,11 +210,15 @@ public class PlayerController extends MessageHandler implements Controller {
         if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
             this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
         } else {
-            final long id = IdGenerator.nextPlayer(); // TODO Globalize that, ask leader
-            final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
-            this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
-            this.serverController.getPlayers().put(registerMessageLogin, player);
-            this.connectionManager.send(player, new OkMessage(this.ownId));
+            if (this.serverController.isLeader()) {
+                final long id = IdGenerator.nextPlayer();
+                final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
+                this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
+                this.serverController.getPlayers().put(registerMessageLogin, player);
+                this.connectionManager.send(player, new OkMessage(this.ownId));
+                message.setSenderId(id);
+            }
+            this.serverController.leaderBroadcast(message);
         }
     }
 

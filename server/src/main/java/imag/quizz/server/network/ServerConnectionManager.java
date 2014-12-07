@@ -148,7 +148,7 @@ public class ServerConnectionManager extends ConnectionManager {
                 this.connections.get(port).write(message.toString());
             }
         } else {
-            this.connections.get(this.controller.getCurrentLeaderLocalPort()).write(message.toString() + '\n');
+            this.connections.get(this.controller.getCurrentLeaderLocalPort()).write(message.toString());
         }
     }
 
