@@ -90,8 +90,8 @@ public class ServerController extends MessageHandler implements Controller {
             case NOK:
                 break;
             case INIT:
-                Log.info("Received INIT from current leader with ID " + message.getSenderId());
                 // TODO Check INIT origin and current state
+                Log.info("Received INIT from current leader with ID " + message.getSenderId());
                 this.loadInitData(((InitMessage)message).getData());
                 this.connectionManager.connectServers();
                 this.connectionManager.broadcast(new OkMessage(this.ownId));
