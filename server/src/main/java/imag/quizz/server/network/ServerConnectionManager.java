@@ -8,7 +8,6 @@ import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.Pair;
 import imag.quizz.server.ServerController;
 import imag.quizz.server.game.Server;
-import org.apache.commons.lang3.Validate;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,13 +26,10 @@ public class ServerConnectionManager extends ConnectionManager {
     private final ServerController controller;
     private       ExecutorService  executor;
 
-    private boolean isConnectedToLambdas;
-
     public ServerConnectionManager(final ServerController controller, final long ownId) {
         super(controller, false, controller.getConfig().getServers().get(controller.getOwnId()).getServerPort(), ownId);
         this.controller = controller;
         this.executor = Executors.newCachedThreadPool();
-        this.isConnectedToLambdas = false;
 
         // Attempt to join other servers
         this.initialize();
@@ -96,6 +92,7 @@ public class ServerConnectionManager extends ConnectionManager {
                 }
             }));
         }
+        Integer result = null;
         final Iterator<Future<Pair<Long, Integer>>> it = futures.iterator();
         while (it.hasNext()) {
             final Future<Pair<Long, Integer>> future = it.next();
@@ -103,10 +100,19 @@ public class ServerConnectionManager extends ConnectionManager {
                 final Pair<Long, Integer> res = future.get();
                 if (res != null) {
                     this.controller.setCurrentLeaderId(res.getA());
-                    while (it.hasNext()) {
-                        it.next().get();
-                    }
-                    return res.getB();
+                    this.executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (it.hasNext()) {
+                                try {
+                                    it.next().get();
+                                } catch (final Exception ignored) {
+                                }
+                            }
+                        }
+                    });
+                    result = res.getB();
+                    break;
                 }
             } catch (final InterruptedException | ExecutionException e) {
                 Log.fatal("Fatal error while connecting to server", e);
@@ -114,70 +120,10 @@ public class ServerConnectionManager extends ConnectionManager {
             }
         }
 
-        return null;
-    }
-
-    /**
-     * Attempts connections to all servers listed in the configuration file
-     * except current leader and registers online servers.
-     *
-     * @return the amount of successful connections
-     */
-    public int connectServers() {
-        Validate.isTrue(!this.isConnectedToLambdas, "Illegal State: already connected to servers once");
-        final long oldLeaderId = this.controller.getCurrentLeaderId();
-        if (this.controller.getCurrentLeaderId() > this.getOwnId()) {
-            this.controller.setLeader(true);
-            this.controller.setCurrentLeaderId(this.getOwnId());
-            this.controller.setCurrentLeaderLocalPort(null);
-            Log.info("We are now Leader");
-        }
-        final List<Future<Boolean>> futures = new LinkedList<>();
-        for (final Entry<Long, ServerInfo> entry : this.controller.getConfig().getServers().entrySet()) {
-            final long id = entry.getKey();
-            if (id == this.getOwnId() || id == oldLeaderId) {
-                // Ignore
-                continue;
-            }
-            final ServerInfo info = entry.getValue();
-            futures.add(this.executor.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    final Socket s = new Socket();
-                    boolean success = false;
-                    try {
-                        s.connect(new InetSocketAddress(info.getHost(), info.getServerPort()));
-                        try {
-                            ServerConnectionManager.this.newConnection(new Server(id, s.getLocalPort()), s);
-                            success = true;
-                        } catch (final IOException e) {
-                            Log.error("Failed to create SocketHandler for server " + info.getId(), e);
-                        }
-                    } catch (final IOException e) {
-                        Log.info("Failed to connect to server " + info.getId() + ", ignoring");
-                        Log.trace("Error was:", e);
-                    }
-                    return success;
-                }
-            }));
-        }
-        int successCount = 0;
-        for (final Future<Boolean> future : futures) {
-            try {
-                if (future.get()) {
-                    successCount++;
-                }
-            } catch (final InterruptedException | ExecutionException e) {
-                Log.fatal("Fatal error while connecting to server", e);
-                System.exit(784);
-            }
-        }
-        this.isConnectedToLambdas = true;
-
         this.executor.shutdown();
         this.executor = null;
 
-        return successCount;
+        return result;
     }
 
     @Override

@@ -102,8 +102,8 @@ public class ServerController extends MessageHandler implements Controller {
                     Log.info("Received INIT from current leader with ID " + message.getSenderId());
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
-                    this.connectionManager.connectServers();
                     this.connectionManager.broadcast(new OkMessage(this.ownId));
+                    Log.info("We are now leader");
                 }
                 break;
             case REGISTER:
