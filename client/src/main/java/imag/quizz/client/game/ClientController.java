@@ -145,17 +145,19 @@ public class ClientController extends MessageHandler implements Controller {
         final String data = message.getGamesData();
         this.window.clearGames();
         for (String game : data.split(Separator.LEVEL_1)) {
-            final String[] split = game.split(Separator.LEVEL_2);
+            if (!game.isEmpty()) {
+                final String[] split = game.split(Separator.LEVEL_2);
 
-            final long gameId = Long.parseLong(split[0]);
-            final String opponent = split[1];
-            final boolean wait = Boolean.parseBoolean(split[2]);
-            final int myScore = Integer.parseInt(split[3]);
-            final int myCurrentQuestion = Integer.parseInt(split[4]);
-            final int oppScore = Integer.parseInt(split[5]);
-            final int oppCurrentQuestion = Integer.parseInt(split[6]);
+                final long gameId = Long.parseLong(split[0]);
+                final String opponent = split[1];
+                final boolean wait = Boolean.parseBoolean(split[2]);
+                final int myScore = Integer.parseInt(split[3]);
+                final int myCurrentQuestion = Integer.parseInt(split[4]);
+                final int oppScore = Integer.parseInt(split[5]);
+                final int oppCurrentQuestion = Integer.parseInt(split[6]);
 
-            this.window.addGame(gameId, wait, myScore, myCurrentQuestion, opponent, oppScore, oppCurrentQuestion);
+                this.window.addGame(gameId, wait, myScore, myCurrentQuestion, opponent, oppScore, oppCurrentQuestion);
+            }
         }
         if (!this.isPlaying()) {
             this.window.setPanel(Window.PanelType.GAMES);
