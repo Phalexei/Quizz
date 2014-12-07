@@ -44,6 +44,7 @@ public class ClientController extends MessageHandler implements Controller {
 
     @Override
     public void handleMessage(final SocketHandler socketHandler, final Message message) {
+        final String uri = SockUri.from(socketHandler.getSocket());
 
         switch (message.getCommand()) {
             // all valid messages
@@ -51,7 +52,7 @@ public class ClientController extends MessageHandler implements Controller {
                 this.connectionManager.send(new PongMessage(this.playerId, message));
                 break;
             case PONG:
-                this.pingPongTask.pong(SockUri.from(socketHandler.getSocket()));
+                this.pingPongTask.pong(uri);
                 break;
             case GAMES:
                 this.updateAvailableGames((GamesMessage) message);
