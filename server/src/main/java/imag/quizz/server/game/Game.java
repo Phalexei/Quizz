@@ -135,7 +135,7 @@ public final class Game {
             for (final String theme : Game.this.themesA) {
                 final LinkedList<Question> availableQuestions = new LinkedList<>(base.getThemes().get(theme));
                 Collections.shuffle(availableQuestions);
-                Game.this.questionsA.put(theme, new Question[]{
+                this.put(theme, new Question[]{
                         availableQuestions.poll(),
                         availableQuestions.poll(),
                         availableQuestions.poll(),
@@ -147,7 +147,7 @@ public final class Game {
             for (final String theme : Game.this.themesB) {
                 final LinkedList<Question> availableQuestions = new LinkedList<>(base.getThemes().get(theme));
                 Collections.shuffle(availableQuestions);
-                Game.this.questionsB.put(theme, new Question[]{
+                this.put(theme, new Question[]{
                         availableQuestions.poll(),
                         availableQuestions.poll(),
                         availableQuestions.poll(),
