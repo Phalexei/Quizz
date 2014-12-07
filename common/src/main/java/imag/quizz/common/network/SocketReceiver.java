@@ -28,9 +28,8 @@ public class SocketReceiver extends AbstractRepeatingThread {
         } catch (final SocketTimeoutException ignored) {
             // readLine() Timeout)
         } catch (final SocketException e) {
-            Log.error("Socket broken, interrupting", e);
+            Log.debug("Socket broken, interrupting", e);
             this.handler.kill();
-            // TODO stop handling what we're connected to (Server/Client) and do appropriate things
         } catch (final IOException e) {
             Log.error("Failed to read from socket", e);
         }
