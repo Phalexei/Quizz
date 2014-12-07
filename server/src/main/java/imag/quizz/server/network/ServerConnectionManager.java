@@ -81,6 +81,7 @@ public class ServerConnectionManager extends ConnectionManager {
                         try {
                             final String uri = SockUri.from(s);
                             ServerConnectionManager.this.newConnection(new Server(id, uri), s);
+                            ServerConnectionManager.this.controller.getPingPongTask().addUri(uri);
                             return new Pair<>(id, uri);
                         } catch (final IOException e) {
                             Log.error("Failed to create SocketHandler for server " + id, e);
@@ -129,11 +130,13 @@ public class ServerConnectionManager extends ConnectionManager {
 
     @Override
     public void newIncomingConnection(final Socket socket) throws IOException {
+        final String uri = SockUri.from(socket);
         super.newIncomingConnection(socket);
         if (this.controller.isLeader()) {
-            final SocketHandler socketHandler = this.connections.get(SockUri.from(socket));
+            final SocketHandler socketHandler = this.connections.get(uri);
             socketHandler.write(new InitMessage(this.controller.getOwnId(), this.controller.buildInitData()).toString());
         }
+        ServerConnectionManager.this.controller.getPingPongTask().addUri(uri);
     }
 
     /**
