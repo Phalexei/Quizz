@@ -8,14 +8,14 @@ public class DropMessage extends Message {
     private final String userLogin;
     private final long   gameId;
 
-    public DropMessage(final int senderId, final String userLogin, final long gameId) {
+    public DropMessage(final long senderId, final String userLogin, final long gameId) {
         super(Command.DROP, senderId);
         this.userLogin = userLogin;
         this.gameId = gameId;
     }
 
     /* package */ DropMessage(final String[] messageSplit) {
-        super(Command.DROP, Integer.parseInt(messageSplit[1]));
+        super(Command.DROP, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.userLogin = messageSplit[2];
         this.gameId = Long.parseLong(messageSplit[3]);

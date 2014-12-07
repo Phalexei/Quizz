@@ -6,13 +6,13 @@ public class NokMessage extends Message {
 
     private final String errorMessage;
 
-    public NokMessage(final int senderId) {
+    public NokMessage(final long senderId) {
         super(Command.NOK, senderId);
         this.errorMessage = Long.toString(System.nanoTime());
     }
 
     /* package */ NokMessage(final String[] messageSplit) {
-        super(Command.NOK, Integer.parseInt(messageSplit[1]));
+        super(Command.NOK, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.errorMessage = messageSplit[2];
     }

@@ -7,14 +7,14 @@ public class PongMessage extends Message {
 
     private final String data;
 
-    public PongMessage(final int senderId, final Message ping) {
+    public PongMessage(final long senderId, final Message ping) {
         super(Command.PONG, senderId);
         Validate.isInstanceOf(PingMessage.class, ping, "Argument isn't a PingMessage");
         this.data = ((PingMessage) ping).getData();
     }
 
     /* package */ PongMessage(final String[] messageSplit) {
-        super(Command.PONG, Integer.parseInt(messageSplit[1]));
+        super(Command.PONG, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.data = messageSplit[1];
     }

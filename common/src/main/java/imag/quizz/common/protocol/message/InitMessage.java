@@ -7,13 +7,13 @@ public class InitMessage extends Message {
 
     private final String data;
 
-    public InitMessage(final int senderId, final String data) {
+    public InitMessage(final long senderId, final String data) {
         super(Command.INIT, senderId);
         this.data = data;
     }
 
     /* package */ InitMessage(final String[] messageSplit) {
-        super(Command.INIT, Integer.parseInt(messageSplit[1]));
+        super(Command.INIT, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
 
         final StringBuilder builder = new StringBuilder();

@@ -6,13 +6,13 @@ public class PingMessage extends Message {
 
     private final String data;
 
-    public PingMessage(final int senderId) {
+    public PingMessage(final long senderId) {
         super(Command.PING, senderId);
         this.data = Long.toString(System.nanoTime());
     }
 
     /* package */ PingMessage(final String[] messageSplit) {
-        super(Command.PING, Integer.parseInt(messageSplit[1]));
+        super(Command.PING, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.data = messageSplit[2];
     }

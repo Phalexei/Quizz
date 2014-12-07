@@ -4,12 +4,12 @@ import imag.quizz.common.protocol.Command;
 
 public class OkMessage extends Message {
 
-    public OkMessage(final int senderId) {
+    public OkMessage(final long senderId) {
         super(Command.OK, senderId);
     }
 
     /* package */ OkMessage(final String[] messageSplit) {
-        super(Command.OK, Integer.parseInt(messageSplit[1]));
+        super(Command.OK, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
     }
 

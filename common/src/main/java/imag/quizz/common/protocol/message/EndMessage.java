@@ -7,14 +7,14 @@ public class EndMessage extends Message {
     private final int userScore;
     private final int opponentScore;
 
-    public EndMessage(final int senderId, final int userScore, final int opponentScore) {
+    public EndMessage(final long senderId, final int userScore, final int opponentScore) {
         super(Command.END, senderId);
         this.userScore = userScore;
         this.opponentScore = opponentScore;
     }
 
     /* package */ EndMessage(final String[] messageSplit) {
-        super(Command.END, Integer.parseInt(messageSplit[1]));
+        super(Command.END, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
         this.userScore = Integer.parseInt(messageSplit[2]);
         this.opponentScore = Integer.parseInt(messageSplit[3]);

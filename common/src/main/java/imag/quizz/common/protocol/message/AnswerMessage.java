@@ -6,13 +6,13 @@ public class AnswerMessage extends Message {
 
     private final int chosenAnswer;
 
-    protected AnswerMessage(final int senderId, final int chosenAnswer) {
+    protected AnswerMessage(final long senderId, final int chosenAnswer) {
         super(Command.ANSWER, senderId);
         this.chosenAnswer = chosenAnswer;
     }
 
     /* package */ AnswerMessage(final String[] messageSplit) {
-        super(Command.ANSWER, Integer.parseInt(messageSplit[1]));
+        super(Command.ANSWER, Long.parseLong(messageSplit[1]));
         this.chosenAnswer = Integer.parseInt(messageSplit[2]);
     }
 

@@ -7,13 +7,13 @@ public class GameMessage extends Message {
 
     private final String gameData;
 
-    public GameMessage(final int senderId, final String gameData) {
+    public GameMessage(final long senderId, final String gameData) {
         super(Command.GAME, senderId);
         this.gameData = gameData;
     }
 
     /* package */ GameMessage(final String[] messageSplit) {
-        super(Command.GAME, Integer.parseInt(messageSplit[1]));
+        super(Command.GAME, Long.parseLong(messageSplit[1]));
         this.checkCommandName(messageSplit[0]);
 
         final StringBuilder builder = new StringBuilder();
