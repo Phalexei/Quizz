@@ -138,12 +138,7 @@ public class PlayerController extends MessageHandler implements Controller {
                         if (player.getPasswordHash().equals(hashedPassword)) {
                             player.setLoggedIn(true);
                             player.setPort(localPort);
-                            final Set<Game> playerGames = this.serverController.getGames().getByPlayer(player);
-                            // TODO if (playerGames == null) {
-                            this.connectionManager.send(localPort, new OkMessage(this.ownId));
-                            // TODO } else {
-                            // TODO     this.connectionManager.send(localPort, new GamesMessage(playerGames /* TODO */));
-                            // TODO }
+                            this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                         } else {
                             this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
                         }
