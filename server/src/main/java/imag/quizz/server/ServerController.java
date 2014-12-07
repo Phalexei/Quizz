@@ -10,6 +10,7 @@ import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.server.game.*;
 import imag.quizz.server.network.ServerConnectionManager;
+import org.apache.commons.lang3.Validate;
 
 import java.util.*;
 
@@ -151,11 +152,26 @@ public class ServerController extends MessageHandler implements Controller {
     }
 
     public void loadInitData(final String data) {
-        // TODO
+        final String[] split = data.split(Separator.LEVEL_1);
+        Validate.isTrue(split.length == 2);
+        this.loadInitPlayers(split[0]);
+        this.loadInitGames(split[1]);
     }
 
-    public String buildGamesData(final Player player) {
-        return null; // TODO
+    private void loadInitPlayers(final String playersData) {
+        final String[] split = playersData.split(Separator.LEVEL_2);
+        for (final String playerString : split) {
+            final Player player = Player.fromMessageData(playerString, 3);
+            this.players.put(player.getLogin(), player);
+        }
+    }
+
+    private void loadInitGames(final String gamesData) {
+        final String[] split = gamesData.split(Separator.LEVEL_2);
+        for (final String gameString : split) {
+            final Game game = Game.fromMessageData(this.players, gameString, 3);
+            this.games.getGames().put(game.getId(), game);
+        }
     }
 
     @Override

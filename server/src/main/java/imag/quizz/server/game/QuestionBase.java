@@ -23,8 +23,6 @@ public final class QuestionBase {
 
     public static final class Question {
 
-        private static final Random RANDOM = new Random();
-
         private final String   question;
         private final String[] answers;
         private final int      correctAnswerIndex;
@@ -34,7 +32,7 @@ public final class QuestionBase {
             this.question = question;
 
             // Create an array with the 4 answers
-            this.correctAnswerIndex = Math.abs((this.question + Question.RANDOM.nextLong()).hashCode()) % 4;
+            this.correctAnswerIndex = Math.abs(this.question.hashCode()) % 4;
             this.answers = new String[4];
             int j = 0;
             for (int i = 0; i < 4; i++) {
