@@ -18,7 +18,7 @@ public final class Games {
     }
 
     public Game newGame(final Player a, final Player b) {
-        final long id = IdGenerator.nextGame();
+        final long id = IdGenerator.nextGame(); // TODO Globalize that, ask leader
         final Game game = new Game(this.base, a, b);
         this.games.put(id, game);
         this.addPlayerGame(a, game);

@@ -72,6 +72,9 @@ public class PlayerController extends MessageHandler implements Controller {
                 case GAMES:
                     this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                     break;
+                case LOGIN:
+                    this.login(localPort, socketHandler, message);
+                    break;
                 case NEW:
                     final NewMessage newMessage = (NewMessage) message;
                     final String opponentLogin = newMessage.getOpponent();
@@ -107,6 +110,9 @@ public class PlayerController extends MessageHandler implements Controller {
                 case PONG:
                     this.pingPongTask.pong(localPort);
                     break;
+                case REGISTER:
+                    this.register(localPort, socketHandler, message);
+                    break;
                 case THEME:
                     // TODO Check current game and theme status
                     // TODO Update and continue game
@@ -119,34 +125,10 @@ public class PlayerController extends MessageHandler implements Controller {
             // Unknown Player new connection or logged out client
             switch (message.getCommand()) {
                 case LOGIN:
-                    final LoginMessage loginMessage = (LoginMessage) message;
-                    final String loginMessageLogin = loginMessage.getLogin();
-                    final String hashedPassword = loginMessage.getHashedPassword();
-                    if (!this.serverController.getPlayers().containsKey(loginMessageLogin)) {
-                        this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
-                    } else {
-                        final Player player = this.serverController.getPlayers().get(loginMessageLogin);
-                        if (player.getPasswordHash().equals(hashedPassword)) {
-                            player.setLoggedIn(true);
-                            player.setPort(localPort);
-                            this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
-                        } else {
-                            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
-                        }
-                    }
+                    this.login(localPort, socketHandler, message);
                     break;
                 case REGISTER:
-                    final RegisterMessage registerMessage = (RegisterMessage) message;
-                    final String registerMessageLogin = registerMessage.getLogin();
-                    if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
-                        this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
-                    } else {
-                        final long id = IdGenerator.nextPlayer();
-                        final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
-                        this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
-                        this.serverController.getPlayers().put(registerMessageLogin, player);
-                        this.connectionManager.send(player, new OkMessage(this.ownId));
-                    }
+                    this.register(localPort, socketHandler, message);
                     break;
                 default:
                     this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
@@ -194,6 +176,38 @@ public class PlayerController extends MessageHandler implements Controller {
         }
 
         return builder.toString();
+    }
+
+    private void login(final int localPort, final SocketHandler socketHandler, final Message message) {
+        final LoginMessage loginMessage = (LoginMessage) message;
+        final String loginMessageLogin = loginMessage.getLogin();
+        final String hashedPassword = loginMessage.getHashedPassword();
+        if (!this.serverController.getPlayers().containsKey(loginMessageLogin)) {
+            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+        } else {
+            final Player player = this.serverController.getPlayers().get(loginMessageLogin);
+            if (player.getPasswordHash().equals(hashedPassword)) {
+                player.setLoggedIn(true);
+                this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
+                this.connectionManager.send(localPort, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+            } else {
+                this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+            }
+        }
+    }
+
+    private void register(final int localPort, final SocketHandler socketHandler, final Message message) {
+        final RegisterMessage registerMessage = (RegisterMessage) message;
+        final String registerMessageLogin = registerMessage.getLogin();
+        if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
+            this.connectionManager.send(localPort, new NokMessage(this.ownId)); // TODO Error code?
+        } else {
+            final long id = IdGenerator.nextPlayer(); // TODO Globalize that, ask leader
+            final Player player = new Player(id, localPort, registerMessageLogin, registerMessage.getHashedPassword());
+            this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
+            this.serverController.getPlayers().put(registerMessageLogin, player);
+            this.connectionManager.send(player, new OkMessage(this.ownId));
+        }
     }
 
     private void newGame(final Player player, final Player opponent) {

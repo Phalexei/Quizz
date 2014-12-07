@@ -96,7 +96,13 @@ public abstract class ConnectionManager {
     }
 
     public void learnConnectionPeerIdentity(final Peer peer, final SocketHandler socketHandler) {
-        this.connectedPeers.put(socketHandler.getSocket().getLocalPort(), peer);
+        final int port = socketHandler.getSocket().getLocalPort();
+        final Peer oldPeer = this.connectedPeers.get(port);
+        if (oldPeer != null) {
+            oldPeer.setPort(-1);
+        }
+        this.connectedPeers.put(port, peer);
+        peer.setPort(port);
     }
 
     public void forgetConnection(final int port) {
