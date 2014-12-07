@@ -179,7 +179,7 @@ public class ClientController extends MessageHandler implements Controller {
     @Override
     public void pingTimeout(final String uri) {
         if (this.isLoggedIn()) {
-            this.lostConnection(null);
+            this.lostConnection(this.connectionManager.getSocketHandler());
         }
     }
 
