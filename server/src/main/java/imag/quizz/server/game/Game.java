@@ -312,6 +312,7 @@ public final class Game {
         };
 
         final String[] firstLevelSplit = gameData.split(separators[0]);
+        Validate.isTrue(firstLevelSplit.length == 11, "Invalid data String");
         final long id = Long.parseLong(firstLevelSplit[0]);
         final String loginA = firstLevelSplit[1];
         final String loginB = firstLevelSplit[2];

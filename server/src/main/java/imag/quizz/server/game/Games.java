@@ -48,4 +48,8 @@ public final class Games {
     public Set<Game> getByPlayer(final Player player) {
         return this.playerGames.get(player);
     }
+
+    public SortedMap<Long, Game> getGames() {
+        return this.games;
+    }
 }

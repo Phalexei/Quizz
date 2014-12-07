@@ -5,15 +5,13 @@ import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
+import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
-import imag.quizz.server.game.Games;
-import imag.quizz.server.game.QuestionBase;
-import imag.quizz.server.game.Server;
+import imag.quizz.server.game.*;
 import imag.quizz.server.network.ServerConnectionManager;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ServerController extends MessageHandler implements Controller {
 
@@ -30,8 +28,8 @@ public class ServerController extends MessageHandler implements Controller {
 
     // Server ID ; Server
     private final SortedMap<Integer, Server> servers;
-
-    private final Games games;
+    private final Map<String, Player>        players;
+    private final Games                      games;
 
     /**
      * Constructor.
@@ -41,6 +39,7 @@ public class ServerController extends MessageHandler implements Controller {
         this.ownId = ownId;
         this.config = config;
         this.servers = new TreeMap<>();
+        this.players = new HashMap<>();
         this.games = new Games(questionBase);
 
         this.connectionManager = new ServerConnectionManager(this, ownId);
@@ -93,7 +92,7 @@ public class ServerController extends MessageHandler implements Controller {
             case INIT:
                 Log.info("Received INIT from current leader with ID " + message.getSenderId());
                 // TODO Check INIT origin and current state
-                // TODO Load data
+                this.loadInitData(((InitMessage)message).getData());
                 this.connectionManager.connectServers();
                 this.connectionManager.broadcast(new OkMessage(this.ownId));
                 break;
@@ -133,9 +132,26 @@ public class ServerController extends MessageHandler implements Controller {
 
     public String buildInitData() {
         final StringBuilder builder = new StringBuilder();
-        // TODO Append Player data
+        final Iterator<Player> itPlayer = this.players.values().iterator();
+        while (itPlayer.hasNext()) {
+            builder.append(itPlayer.next().toMessageData(3));
+            if (itPlayer.hasNext()) {
+                builder.append(Separator.LEVEL_2);
+            }
+        }
+        builder.append(Separator.LEVEL_1);
+        final Iterator<Game> itGame = this.games.getGames().values().iterator();
+        while (itGame.hasNext()) {
+            builder.append(itGame.next().toMessageData(3));
+            if (itGame.hasNext()) {
+                builder.append(Separator.LEVEL_2);
+            }
+        }
+        return builder.toString();
+    }
+
+    public void loadInitData(final String data) {
         // TODO
-        return null;
     }
 
     @Override
@@ -163,6 +179,10 @@ public class ServerController extends MessageHandler implements Controller {
 
     public Integer getCurrentLeaderLocalPort() {
         return this.currentLeaderLocalPort;
+    }
+
+    public Map<String, Player> getPlayers() {
+        return this.players;
     }
 
     public Games getGames() {

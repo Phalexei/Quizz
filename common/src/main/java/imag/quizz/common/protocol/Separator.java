@@ -36,22 +36,37 @@ public final class Separator {
     /**
      * Level 2 separator
      */
-    public static final String LEVEL_2 = "" + Separator.FILE_SEPARATOR;
+    public static final String LEVEL_2 = "" + Separator.GROUP_SEPARATOR + Separator.GROUP_SEPARATOR;
 
     /**
      * Level 3 separator
      */
-    public static final String LEVEL_3 = "" + Separator.GROUP_SEPARATOR;
+    public static final String LEVEL_3 = "" + Separator.RECORD_SEPARATOR + Separator.RECORD_SEPARATOR;
 
     /**
      * Level 4 separator
      */
-    public static final String LEVEL_4 = "" + Separator.RECORD_SEPARATOR;
+    public static final String LEVEL_4 = "" + Separator.UNIT_SEPARATOR + Separator.UNIT_SEPARATOR;
 
     /**
      * Level 5 separator
      */
-    public static final String LEVEL_5 = "" + Separator.UNIT_SEPARATOR;
+    public static final String LEVEL_5 = "" + Separator.FILE_SEPARATOR;
+
+    /**
+     * Level 6 separator
+     */
+    public static final String LEVEL_6 = "" + Separator.GROUP_SEPARATOR;
+
+    /**
+     * Level 7 separator
+     */
+    public static final String LEVEL_7 = "" + Separator.RECORD_SEPARATOR;
+
+    /**
+     * Level 8 separator
+     */
+    public static final String LEVEL_8 = "" + Separator.UNIT_SEPARATOR;
 
     /**
      * All separators
@@ -61,7 +76,10 @@ public final class Separator {
             Separator.LEVEL_2,
             Separator.LEVEL_3,
             Separator.LEVEL_4,
-            Separator.LEVEL_5
+            Separator.LEVEL_5,
+            Separator.LEVEL_6,
+            Separator.LEVEL_7,
+            Separator.LEVEL_8
     };
 
     public static final int AMOUNT = Separator.SEPARATORS.length;
