@@ -48,12 +48,13 @@ public class PlayerController extends MessageHandler implements Controller {
 
     @Override
     public void pingTimeout(final int port) {
-        // TODO
+        this.pingPongTask.removePort(port);
+        // TODO Kill SocketHandler without recalling #lostConnection
     }
 
     @Override
     public void ping(final int port) {
-        // TODO
+        this.connectionManager.send(port, new PingMessage(this.ownId));
     }
 
     @Override
@@ -142,14 +143,14 @@ public class PlayerController extends MessageHandler implements Controller {
                             final ArrayList<Player> potentialOpponents = new ArrayList<>(this.serverController.getPlayers().values());
                             potentialOpponents.remove(player);
                             final Player opponent = potentialOpponents.get(PlayerController.RANDOM.nextInt(potentialOpponents.size()));
-                            this.newGame(message, player, opponent);
+                            this.newGame(player, opponent);
                         }
                     } else {
                         final Player opponent = this.serverController.getPlayers().get(opponentLogin);
                         if (opponent == null) {
                             this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown opponent", message));
                         } else {
-                            this.newGame(message, player, opponent);
+                            this.newGame(player, opponent);
                         }
                     }
                     break;
@@ -350,7 +351,7 @@ public class PlayerController extends MessageHandler implements Controller {
         }
     }
 
-    private void newGame(final Message message, final Player player, final Player opponent) {
+    private void newGame(final Player player, final Player opponent) {
         final Game game = this.serverController.getGames().newGame(player, opponent);
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
         if (opponent.getPort() != -1) {
@@ -361,8 +362,9 @@ public class PlayerController extends MessageHandler implements Controller {
 
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
-        this.connectionManager.forgetConnection(socketHandler.getSocket().getLocalPort());
-        // TODO Broadcast logout
-        // TODO Maybe other things
+        final int port = socketHandler.getSocket().getLocalPort();
+        final Player player = (Player) this.connectionManager.getLinkedPeer(port);
+        this.serverController.leaderBroadcast(new LogoutMessage(this.ownId, player.getLogin()));
+        this.connectionManager.forgetConnection(port);
     }
 }
