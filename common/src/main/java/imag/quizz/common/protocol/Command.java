@@ -15,7 +15,7 @@ public enum Command {
 
     /**
      * [GP] Obvious.
-     * Sent every 5 seconds. Requires a {@link #PONG} answer under 3 seconds
+     * Sent every 10 seconds. Requires a {@link #PONG} answer under 3 seconds
      * for an SS connection and under 5 seconds for a CS connection.
      */
     PING,
@@ -38,33 +38,6 @@ public enum Command {
     /**
      * [SS] Used by the leader to initialize a new Server with existing games
      * and users.
-     * This message is composed of 2*2 parts separated by 3
-     * {@link Separator#LEVEL_4}s.
-     * <p>
-     * The first part is the Games part. It's composed of different games
-     * separated by {@link Separator#LEVEL_3}s.
-     * A game is composed of the 2 user names and the 2 sets of themes IDs
-     * with their associated sets of questions IDs, separated by
-     * {@link Separator#LEVEL_2}s.
-     * Each set of question IDs is separated by
-     * {@link Separator#LEVEL_1}s.
-     *
-     * Example Games part with separators used:
-     * <ul>
-     * <li> Lvl 3 => [game]{n}
-     * <li> Lvl 2 => [game]: [[userLogin] [userHash]]{2} [[x][y] [themes]]{2}
-     * <li> Lvl 1 => <ul>
-     * <li> [x]: Number of chosen theme among following themeIds. 0 (not
-     * chosen yet) to 4.
-     * <li> [y]: Number of next question to answer. 0 (theme not chosen) to
-     * 9.
-     * <li> [themes]: [[themeId][questionId]{4}]{4}
-     * </ul></ul>
-     * <p>
-     * The second part is the Users part. It's composed of different users
-     * separated by {@link Separator#LEVEL_2}s, each user being his
-     * login and password hash separated by a {@link Separator#LEVEL_1}.
-     *
      */
     INIT,
 
@@ -96,7 +69,7 @@ public enum Command {
      * Sent by Servers to transmit the list of games.
      * Contains the list of games as a set of {@link Separator#LEVEL_2}
      * separated games.
-     * A game is composed of an ID, the opponent name and the current score,
+     * A game is composed of an ID, the opponent name and the current scores,
      * separated by {@link Separator#LEVEL_1}s.
      */
     GAMES,
