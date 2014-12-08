@@ -22,6 +22,7 @@ public class ClientController extends MessageHandler implements Controller {
     private final PingPongTask      pingPongTask;
     private       long              playerId;
     private       long              currentGameId;
+    private       String            userLogin, userPassHash;
 
     public ClientController(final Config config) {
         super("Controller");
@@ -31,6 +32,8 @@ public class ClientController extends MessageHandler implements Controller {
         this.currentGameId = -1; // -1 is invalid : not yet playing
         this.pingPongTask = new PingPongTask(this, 5_000);
         this.pingPongTask.start();
+        this.userPassHash = "";
+        this.userLogin = "";
     }
 
     public void setWindow(final Window window) {
@@ -226,6 +229,9 @@ public class ClientController extends MessageHandler implements Controller {
     public void connect() {
         try {
             this.connectionManager.tryConnect();
+            if (!this.userLogin.isEmpty() && !this.userPassHash.isEmpty()) {
+                this.login(this.userLogin, this.userPassHash.toCharArray());
+            }
             this.window.connected();
         } catch (final ConnectionManager.NoServerException e) {
             this.window.noConnection();
@@ -233,11 +239,15 @@ public class ClientController extends MessageHandler implements Controller {
     }
 
     public void login(final String username, final char[] password) {
-        this.connectionManager.send(new LoginMessage(this.playerId, username, new String(password)));
+        this.userLogin = username;
+        this.userPassHash = new String(password);
+        this.connectionManager.send(new LoginMessage(this.playerId, this.userLogin, this.userPassHash));
     }
 
     public void register(final String username, final char[] password) {
-        this.connectionManager.send(new RegisterMessage(this.playerId, username, new String(password)));
+        this.userLogin = username;
+        this.userPassHash = new String(password);
+        this.connectionManager.send(new RegisterMessage(this.playerId, this.userLogin, this.userPassHash));
     }
 
     public boolean isLoggedIn() {

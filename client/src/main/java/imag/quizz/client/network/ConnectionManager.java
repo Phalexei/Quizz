@@ -56,7 +56,7 @@ public class ConnectionManager {
     }
 
     public boolean isConnected() {
-        return this.socketHandler != null; //TODO other checks
+        return this.socketHandler != null;
     }
 
     public void send(final Message message) {

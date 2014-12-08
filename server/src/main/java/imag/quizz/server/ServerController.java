@@ -122,6 +122,9 @@ public class ServerController extends MessageHandler implements Controller {
                     this.initialized = true;
                     this.connectionManager.broadcast(new OkMessage(this.ownId, message));
                     if (message.getSourceId() > this.getOwnId()) {
+                        this.isLeader = true;
+                        this.currentLeaderId = this.ownId;
+                        this.currentLeaderUri = null;
                         Log.info("Nous sommes maintenant leader");
                     }
                 }
