@@ -42,17 +42,26 @@ public class NewGamePanel extends Panel {
 
         newGameSouthPanel.add(newGameInfo, BorderLayout.CENTER);
 
-        final JPanel newGameButton = new JPanel(new GridLayout(1, 2));
-        final JButton button = new JButton("Nouvelle partie");
-        button.addActionListener(new ActionListener() {
+        final JPanel buttons = new JPanel(new GridLayout(1, 2));
+        final JButton newButton = new JButton("Nouvelle partie");
+        newButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clientController.newGame(username.getText());
             }
         });
-        newGameButton.add(button);
+        buttons.add(newButton);
 
-        newGameSouthPanel.add(newGameButton, BorderLayout.SOUTH);
+        final JButton gamesButton = new JButton("Parties en cours");
+        gamesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clientController.askGames();
+            }
+        });
+        buttons.add(gamesButton);
+
+        newGameSouthPanel.add(buttons, BorderLayout.SOUTH);
 
         this.add(newGameSouthPanel, BorderLayout.SOUTH);
     }

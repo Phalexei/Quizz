@@ -131,7 +131,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.serverController.leaderBroadcast(message);
                     break;
                 case GAMES:
-                    this.connectionManager.send(player, new GamesMessage(this.ownId, this.serverController.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                    this.connectionManager.send(player, new GamesMessage(this.ownId, this.serverController.buildGamesData(player)));
                     break;
                 case LOGIN:
                     this.login(uri, socketHandler, message);
@@ -251,7 +251,7 @@ public class PlayerController extends MessageHandler implements Controller {
                             final Player opponent = game.getOpponent(player);
                             if (opponentUnlocked && opponent.getUri() != null) {
                                 final Question question = game.getCurrentQuestion(opponent);
-                                this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                                this.connectionManager.send(opponent, new GamesMessage(this.ownId, this.serverController.buildGamesData(opponent)));
                             }
                             final Question question = game.getCurrentQuestion(player);
                             this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
@@ -292,7 +292,7 @@ public class PlayerController extends MessageHandler implements Controller {
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 message.setSourceId(player.getId());
                 this.connectionManager.send(uri, new OkMessage(this.ownId, "Connexion réussie", message));
-                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.serverController.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.serverController.buildGamesData(player)));
                 this.serverController.leaderBroadcast(message);
             } else {
                 this.connectionManager.send(uri, new NokMessage(this.ownId, "Mot de passe incorrect", message));
@@ -323,7 +323,7 @@ public class PlayerController extends MessageHandler implements Controller {
         player.setCurrentGameId(game.getId());
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
         if (opponent.getUri() != null) {
-            final String gameData = this.serverController.buildGamesData(opponent, this.serverController.getGames().getByPlayer(opponent));
+            final String gameData = this.serverController.buildGamesData(opponent);
             this.connectionManager.send(opponent, new GamesMessage(this.ownId, gameData));
         }
         this.serverController.leaderBroadcast(new GameMessage(this.ownId, game.toMessageData()));

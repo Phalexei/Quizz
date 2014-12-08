@@ -29,6 +29,10 @@ public class GamesPanel extends Panel {
             this.oppCurrentQuestion = oppCurrentQuestion;
         }
 
+        public boolean readyToPlay() {
+            return !this.wait && this.myCurrentQuestion < 9;
+        }
+
         @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
@@ -105,19 +109,25 @@ public class GamesPanel extends Panel {
             public void actionPerformed(ActionEvent e) {
                 final int index = GamesPanel.this.gamesList.getSelectedIndex();
                 if (index != -1) { // something is selected
-                    clientController.play(GamesPanel.this.listModel.get(index).getId());
+                    Game game = GamesPanel.this.listModel.get(index);
+                    if (game.readyToPlay()) {
+                        clientController.play(game.getId());
+                    }
                 }
             }
         });
+
+        final JPanel buttons = new JPanel(new GridLayout(1, 2));
+        buttons.add(playButton);
+        buttons.add(newGameButton);
 
         this.gamesList.setCellRenderer(new GameCellRenderer());
 
         final JScrollPane scrollPane = new JScrollPane();
         scrollPane.getViewport().setView(this.gamesList);
 
-        this.add(newGameButton, BorderLayout.NORTH);
         this.add(scrollPane, BorderLayout.CENTER);
-        this.add(playButton, BorderLayout.SOUTH);
+        this.add(buttons, BorderLayout.SOUTH);
 
         this.gameIDs = new HashMap<>();
     }

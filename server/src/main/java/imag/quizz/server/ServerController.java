@@ -179,7 +179,7 @@ public class ServerController extends MessageHandler implements Controller {
                 final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
                 opponent = game.getOpponent(player);
                 if (opponentUnlocked && opponent.getUri() != null) {
-                    final String gamesData = this.buildGamesData(opponent, this.getGames().getByPlayer(opponent));
+                    final String gamesData = this.buildGamesData(opponent);
                     this.playerConnectionManager.send(opponent, new GamesMessage(this.ownId, gamesData));
                 }
                 final Question question = game.getCurrentQuestion(player);
@@ -294,31 +294,30 @@ public class ServerController extends MessageHandler implements Controller {
      * - Opponent current question
      *
      * @param player the player
-     * @param games the player's games
      *
      * @return a String representation of this player's games dedicated to
      * this player
      */
-    public String buildGamesData(final Player player, final Set<Game> games) {
-        if (games == null) {
-            return null;
-        }
+    public String buildGamesData(final Player player) {
+        final Set<Game> games = this.getGames().getByPlayer(player);
 
         final StringBuilder builder = new StringBuilder();
 
-        final Iterator<Game> it = games.iterator();
-        while (it.hasNext()) {
-            final Game game = it.next();
-            final boolean isPlayerA = game.getPlayerA() == player;
-            builder.append(game.getId()).append(Separator.LEVEL_2);
-            builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
-            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == PlayerStatus.WAIT).append(Separator.LEVEL_2);
-            builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
-            builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
-            builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
-            builder.append(!isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
-            if (it.hasNext()) {
-                builder.append(Separator.LEVEL_1);
+        if (games != null) {
+            final Iterator<Game> it = games.iterator();
+            while (it.hasNext()) {
+                final Game game = it.next();
+                final boolean isPlayerA = game.getPlayerA() == player;
+                builder.append(game.getId()).append(Separator.LEVEL_2);
+                builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
+                builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == PlayerStatus.WAIT).append(Separator.LEVEL_2);
+                builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+                builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+                builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+                builder.append(!isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+                if (it.hasNext()) {
+                    builder.append(Separator.LEVEL_1);
+                }
             }
         }
 
