@@ -77,10 +77,7 @@ public class GamesPanel extends Panel {
         }
     }
 
-    private final JScrollPane            scrollPane;
     private final JList<Game>            gamesList;
-    private final JButton                playButton;
-    private final JButton                newGameButton;
     private final DefaultListModel<Game> listModel;
     private       int                    listCounter;
     // game ID; index in list;
@@ -89,21 +86,21 @@ public class GamesPanel extends Panel {
     public GamesPanel(final ClientController clientController) {
         super(new BorderLayout());
 
-        this.playButton = new JButton("JOUER !");
-        this.newGameButton = new JButton("Nouvelle Partie");
+        final JButton playButton = new JButton("JOUER !");
+        final JButton newGameButton = new JButton("Nouvelle Partie");
 
         this.listModel = new DefaultListModel<>();
         this.gamesList = new JList<>(this.listModel);
         this.listCounter = 0;
 
-        this.newGameButton.addActionListener(new ActionListener() {
+        newGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clientController.newGame();
             }
         });
 
-        this.playButton.addActionListener(new ActionListener() {
+        playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 final int index = GamesPanel.this.gamesList.getSelectedIndex();
@@ -127,12 +124,12 @@ public class GamesPanel extends Panel {
 
         this.gamesList.setCellRenderer(new GameCellRenderer());
 
-        this.scrollPane = new JScrollPane();
-        this.scrollPane.getViewport().setView(this.gamesList);
+        final JScrollPane scrollPane = new JScrollPane();
+        scrollPane.getViewport().setView(this.gamesList);
 
-        this.add(this.newGameButton, BorderLayout.NORTH);
-        this.add(this.scrollPane, BorderLayout.CENTER);
-        this.add(this.playButton, BorderLayout.SOUTH);
+        this.add(newGameButton, BorderLayout.NORTH);
+        this.add(scrollPane, BorderLayout.CENTER);
+        this.add(playButton, BorderLayout.SOUTH);
 
         this.gameIDs = new HashMap<>();
     }
@@ -140,12 +137,6 @@ public class GamesPanel extends Panel {
     @Override
     public void showError(String error) {
         //nothing
-    }
-
-    @Override
-    public boolean isReady() {
-        //TODO:  if a question is being answered, return false
-        return true;
     }
 
     public void addGame(long gameId, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {

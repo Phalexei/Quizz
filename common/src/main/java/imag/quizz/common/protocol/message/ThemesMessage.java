@@ -29,6 +29,7 @@ public class ThemesMessage extends Message {
     protected String getParametersString() {
         final StringBuilder s = new StringBuilder();
 
+        s.append(gameId).append(Separator.LEVEL_1);
         for (int i = 0; i < this.themes.length - 1; i++) {
             s.append(this.themes[i]);
             s.append(Separator.LEVEL_1);

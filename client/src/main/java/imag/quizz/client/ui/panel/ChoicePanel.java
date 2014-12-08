@@ -2,10 +2,11 @@ package imag.quizz.client.ui.panel;
 
 import imag.quizz.client.game.ClientController;
 import imag.quizz.client.ui.CenteredTextPaneHandler;
-import imag.quizz.client.ui.InputHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ChoicePanel extends Panel {
 
@@ -15,6 +16,8 @@ public class ChoicePanel extends Panel {
     private final JButton bottomRightButton;
 
     private final JTextPane questionTextPane;
+    private boolean busy;
+    private boolean question;
 
     public ChoicePanel(final ClientController clientController) {
         this.topLeftButton = new JButton();
@@ -22,11 +25,16 @@ public class ChoicePanel extends Panel {
         this.bottomLeftButton = new JButton();
         this.bottomRightButton = new JButton();
 
-        final InputHandler inputHandler = new InputHandler(clientController);
-        this.topLeftButton.addActionListener(inputHandler);
-        this.topRightButton.addActionListener(inputHandler);
-        this.bottomLeftButton.addActionListener(inputHandler);
-        this.bottomRightButton.addActionListener(inputHandler);
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(e.getSource());
+            }
+        };
+        this.topLeftButton.addActionListener(actionListener);
+        this.topRightButton.addActionListener(actionListener);
+        this.bottomLeftButton.addActionListener(actionListener);
+        this.bottomRightButton.addActionListener(actionListener);
 
         final JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new GridLayout(2, 2));
@@ -41,11 +49,18 @@ public class ChoicePanel extends Panel {
         this.setLayout(new GridLayout(2, 1));
         this.add(this.questionTextPane);
         this.add(buttonsPanel);
+
+        this.busy = false;
+    }
+
+    @Override
+    public boolean isReady() {
+        return !this.busy;
     }
 
     @Override
     public void showError(final String error) {
-        this.setQuestion(error);
+        CenteredTextPaneHandler.setText(this.questionTextPane, error);
     }
 
     public void toggleButtons(final boolean enabled) {
@@ -57,6 +72,7 @@ public class ChoicePanel extends Panel {
 
     public void setQuestion(final String question) {
         CenteredTextPaneHandler.setText(this.questionTextPane, question);
+        this.busy = true;
     }
 
     public void setAnswer(final int num, final String answer) {
@@ -81,5 +97,6 @@ public class ChoicePanel extends Panel {
     public void questionTimeout() {
         this.showError("Délai écoulé !");
         this.toggleButtons(false);
+        this.busy = false;
     }
 }

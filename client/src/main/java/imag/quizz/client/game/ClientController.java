@@ -37,9 +37,11 @@ public class ClientController extends MessageHandler implements Controller {
         this.window = window;
     }
 
-    public void answerSelected(final String textClicked) {
+    public void answerSelected(final boolean question, final String textClicked) {
         Log.info("Réponse sélectionnée : \"" + textClicked + '"');
         this.window.lockButtons();
+
+      //  this.connectionManager.send(new AnswerMessage(this.playerId, ));
     }
 
     @Override
