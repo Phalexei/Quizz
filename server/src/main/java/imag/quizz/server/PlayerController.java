@@ -325,8 +325,9 @@ public class PlayerController extends MessageHandler implements Controller {
             if (player.getPasswordHash().equals(hashedPassword)) {
                 player.setLoggedIn(true);
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
-                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                 message.setSourceId(player.getId());
+                this.connectionManager.send(uri, new OkMessage(this.ownId, "Login successful", message));
+                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                 this.serverController.leaderBroadcast(message);
             } else {
                 this.connectionManager.send(uri, new NokMessage(this.ownId, "Invalid password", message));
@@ -345,8 +346,8 @@ public class PlayerController extends MessageHandler implements Controller {
                 final Player player = new Player(id, uri, registerMessageLogin, registerMessage.getHashedPassword());
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 this.serverController.getPlayers().put(registerMessageLogin, player);
-                this.connectionManager.send(player, new OkMessage(this.ownId, message));
                 message.setSourceId(id);
+                this.connectionManager.send(player, new OkMessage(this.ownId, message));
             }
             this.serverController.leaderBroadcast(message);
         }
