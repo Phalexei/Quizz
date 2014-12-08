@@ -319,6 +319,8 @@ public class ServerController extends MessageHandler implements Controller {
                     builder.append(Separator.LEVEL_1);
                 }
             }
+        } else {
+            builder.append("null");
         }
 
         return builder.toString();

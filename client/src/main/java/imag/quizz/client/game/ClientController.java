@@ -178,8 +178,8 @@ public class ClientController extends MessageHandler implements Controller {
     private void updateAvailableGames(final GamesMessage message) {
         final String data = message.getGamesData();
         this.window.clearGames();
-        for (final String game : data.split(Separator.LEVEL_1)) {
-            if (!game.isEmpty()) {
+        if (!data.equals("null")) {
+            for (final String game : data.split(Separator.LEVEL_1)) {
                 final String[] split = game.split(Separator.LEVEL_2);
 
                 final long gameId = Long.parseLong(split[0]);
