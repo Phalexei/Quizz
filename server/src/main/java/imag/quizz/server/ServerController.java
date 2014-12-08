@@ -150,6 +150,7 @@ public class ServerController extends MessageHandler implements Controller {
                 final GameMessage gameMessage = (GameMessage) message;
                 game = Game.fromMessageData(this.players, gameMessage.getGameData());
                 this.games.getGames().put(game.getId(), game);
+                game.getPlayerA().setCurrentGameId(game.getId());
                 if (this.isLeader) {
                     this.leaderBroadcast(message);
                 }
