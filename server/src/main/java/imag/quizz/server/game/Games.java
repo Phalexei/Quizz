@@ -1,7 +1,5 @@
 package imag.quizz.server.game;
 
-import imag.quizz.server.tool.IdGenerator;
-
 import java.util.*;
 
 public final class Games {
@@ -18,9 +16,8 @@ public final class Games {
     }
 
     public Game newGame(final Player a, final Player b) {
-        final long id = IdGenerator.nextGame(); // TODO Globalize that, ask leader
         final Game game = new Game(this.base, a, b);
-        this.games.put(id, game);
+        this.games.put(game.getId(), game);
         this.addPlayerGame(a, game);
         this.addPlayerGame(b, game);
         return game;

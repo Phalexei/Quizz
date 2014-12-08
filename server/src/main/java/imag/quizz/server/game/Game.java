@@ -31,7 +31,7 @@ public final class Game {
     private static final Random RANDOM = new Random();
 
     private static long randomId() {
-        return Game.RANDOM.nextLong();
+        return Math.abs(Game.RANDOM.nextLong());
     }
 
     /**
