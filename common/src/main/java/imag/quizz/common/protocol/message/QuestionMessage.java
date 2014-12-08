@@ -23,12 +23,14 @@ public class QuestionMessage extends Message {
         this.question = messageSplit[2];
 
         this.answers = new String[4];
-        System.arraycopy(messageSplit, 2, this.answers, 0, 4);
+        System.arraycopy(messageSplit, 3, this.answers, 0, 4);
     }
 
     @Override
     protected String getParametersString() {
         final StringBuilder s = new StringBuilder();
+
+        s.append(this.question);
 
         for (int i = 0; i < this.answers.length - 1; i++) {
             s.append(this.answers[i]);
@@ -40,10 +42,10 @@ public class QuestionMessage extends Message {
     }
 
     public String getQuestion() {
-        return question;
+        return this.question;
     }
 
     public String[] getAnswers() {
-        return answers;
+        return this.answers;
     }
 }
