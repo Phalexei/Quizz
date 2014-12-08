@@ -102,7 +102,13 @@ public class PlayerController extends MessageHandler implements Controller {
                                 }
                             } else {
                                 final Question question = game.getCurrentQuestion(player);
-                                this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                                if (question != null) {
+                                    this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                                } else {
+                                    final int playerScore = isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                                    final int opponentScore = !isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore();
+                                    this.connectionManager.send(player, new EndMessage(this.ownId, playerScore, opponentScore));
+                                }
                             }
                         }
                         this.serverController.leaderBroadcast(message);
