@@ -1,6 +1,5 @@
 package imag.quizz.client;
 
-import imag.quizz.client.game.ClientController;
 import imag.quizz.client.ui.Window;
 import imag.quizz.common.Config;
 import imag.quizz.common.tool.Log;

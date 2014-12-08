@@ -1,6 +1,6 @@
 package imag.quizz.client.ui.panel;
 
-import imag.quizz.client.game.ClientController;
+import imag.quizz.client.ClientController;
 import imag.quizz.client.ui.CenteredTextPaneHandler;
 
 import javax.swing.*;
@@ -27,8 +27,8 @@ public class ChoicePanel extends Panel {
             this.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    clientController.answerSelected(ChoicePanel.this.question, Button.this.id);
                     ChoicePanel.this.busy = false;
+                    clientController.answerSelected(ChoicePanel.this.question, Button.this.id);
                 }
             });
         }

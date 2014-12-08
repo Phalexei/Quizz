@@ -171,7 +171,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     } else {
                         if (this.serverController.isLeader()) {
                             game.playerDoesntAnswer(player);
-                            this.connectionManager.send(player, new NokMessage(this.ownId, "Réponse incorrecte", message));
+                            this.connectionManager.send(player, new OkMessage(this.ownId, "Trop tard", message));
                             final PlayerStatus status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
                             if (status == PlayerStatus.WAIT) {
                                 if (game.getCurrentQuestionA() == 9 && game.getCurrentQuestionB() == 9) {

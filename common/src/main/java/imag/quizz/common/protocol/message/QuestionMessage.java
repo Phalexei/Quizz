@@ -30,7 +30,7 @@ public class QuestionMessage extends Message {
     protected String getParametersString() {
         final StringBuilder s = new StringBuilder();
 
-        s.append(this.question);
+        s.append(this.question).append(Separator.LEVEL_1);
 
         for (int i = 0; i < this.answers.length - 1; i++) {
             s.append(this.answers[i]);
