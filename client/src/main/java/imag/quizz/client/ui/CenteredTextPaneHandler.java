@@ -42,6 +42,7 @@ public class CenteredTextPaneHandler {
         StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
         final StyledDocument doc = (StyledDocument) textPane.getDocument();
         try {
+            doc.remove(0, doc.getLength());
             doc.insertString(0, newContent, attrs);
         } catch (final BadLocationException ignored) {
         }
