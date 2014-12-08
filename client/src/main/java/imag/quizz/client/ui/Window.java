@@ -133,6 +133,10 @@ public class Window {
         this.choicePanel.setQuestion(question);
     }
 
+    public void setTheme() {
+        this.choicePanel.setTheme();
+    }
+
     public void setAnswer(final int num, final String answer) {
         this.choicePanel.setAnswer(num, answer);
     }

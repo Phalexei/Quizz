@@ -20,8 +20,6 @@ public class NoConnectionPanel extends Panel {
         retryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                retryButton.setEnabled(false);
-
                 // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.connect();
             }
@@ -30,9 +28,5 @@ public class NoConnectionPanel extends Panel {
         this.setLayout(new BorderLayout());
         this.add(noConnectionTextPane, BorderLayout.CENTER);
         this.add(retryButton, BorderLayout.SOUTH);
-    }
-
-    @Override
-    public void showError(String error) {
     }
 }

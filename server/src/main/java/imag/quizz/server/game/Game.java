@@ -218,7 +218,7 @@ public final class Game {
         if (this.playerA == player) {
             final Question question;
             if (this.currentQuestionA < 5) {
-                question = this.questionsA.get(this.getThemesA()[this.chosenThemeA])[this.currentQuestionA - 1 - 4];
+                question = this.questionsA.get(this.getThemesA()[this.chosenThemeA])[this.currentQuestionA - 1];
             } else {
                 question = this.questionsB.get(this.getThemesB()[this.chosenThemeB])[this.currentQuestionA - 1 - 4];
             }
@@ -309,9 +309,11 @@ public final class Game {
             if (currentQuestion < 5) {
                 final String theme = this.themesB[this.chosenThemeB];
                 question = this.questionsB.get(theme)[currentQuestion - 1];
-            } else {
+            } else if (currentQuestion < 9) {
                 final String theme = this.themesA[this.chosenThemeA];
                 question = this.questionsA.get(theme)[currentQuestion - 1 - 4];
+            } else {
+                question = null;
             }
         }
         return question;

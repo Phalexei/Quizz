@@ -19,22 +19,26 @@ public class ChoicePanel extends Panel {
     private boolean busy;
     private boolean question;
 
-    public ChoicePanel(final ClientController clientController) {
-        this.topLeftButton = new JButton();
-        this.topRightButton = new JButton();
-        this.bottomLeftButton = new JButton();
-        this.bottomRightButton = new JButton();
+    public class Button extends JButton {
+        private final int id;
 
-        ActionListener actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(e.getSource());
-            }
-        };
-        this.topLeftButton.addActionListener(actionListener);
-        this.topRightButton.addActionListener(actionListener);
-        this.bottomLeftButton.addActionListener(actionListener);
-        this.bottomRightButton.addActionListener(actionListener);
+        public Button(final int id, final ClientController clientController) {
+            this.id = id;
+            this.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    clientController.answerSelected(ChoicePanel.this.question, Button.this.id);
+                    ChoicePanel.this.busy = false;
+                }
+            });
+        }
+    }
+
+    public ChoicePanel(final ClientController clientController) {
+        this.topLeftButton = new Button(0, clientController);
+        this.topRightButton = new Button(1, clientController);
+        this.bottomLeftButton = new Button(2, clientController);
+        this.bottomRightButton = new Button(3, clientController);
 
         final JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new GridLayout(2, 2));
@@ -72,6 +76,13 @@ public class ChoicePanel extends Panel {
 
     public void setQuestion(final String question) {
         CenteredTextPaneHandler.setText(this.questionTextPane, question);
+        this.busy = true;
+        this.question = true;
+    }
+
+    public void setTheme() {
+        CenteredTextPaneHandler.setText(this.questionTextPane, "Choisissez un thème");
+        this.question = false;
         this.busy = true;
     }
 

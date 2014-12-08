@@ -30,8 +30,6 @@ public class LoginPanel extends Panel {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                loginButton.setEnabled(false);
-
                 // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.login(username.getText(), password.getPassword());
             }
@@ -39,8 +37,6 @@ public class LoginPanel extends Panel {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                registerButton.setEnabled(false);
-
                 // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.register(username.getText(), password.getPassword());
             }
