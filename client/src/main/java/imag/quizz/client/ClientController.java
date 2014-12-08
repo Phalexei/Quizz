@@ -12,9 +12,6 @@ import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.SockUri;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Created by Ribesg.
  */
