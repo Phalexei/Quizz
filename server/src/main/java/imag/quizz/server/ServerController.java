@@ -51,9 +51,9 @@ public class ServerController extends MessageHandler implements Controller {
 
         this.initialized = false;
 
-        this.connectionManager = new ServerConnectionManager(this, ownId);
         this.pingPongTask = new PingPongTask(this, 3_000);
         this.pingPongTask.start();
+        this.connectionManager = new ServerConnectionManager(this, ownId);
     }
 
     @Override
@@ -351,6 +351,10 @@ public class ServerController extends MessageHandler implements Controller {
 
     public Games getGames() {
         return this.games;
+    }
+
+    public PingPongTask getPingPongTask() {
+        return this.pingPongTask;
     }
 
     public void setLeader(final boolean isLeader) {

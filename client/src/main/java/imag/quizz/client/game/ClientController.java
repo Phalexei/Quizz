@@ -83,6 +83,7 @@ public class ClientController extends MessageHandler implements Controller {
                     case LOGIN:
                         this.setPlayerId(message.getSourceId());
                         this.window.loggedIn();
+                        this.pingPongTask.addUri(SockUri.from(this.connectionManager.getSocketHandler().getSocket()));
                         break;
                 }
                 break;
@@ -153,14 +154,14 @@ public class ClientController extends MessageHandler implements Controller {
      * Displays the NewGamePanel
      */
     public void newGame() {
-        window.setPanel(Window.PanelType.NEW_GAME);
+        this.window.setPanel(Window.PanelType.NEW_GAME);
     }
 
     /**
      * Asks server to play a game
      * @param gameId the ID of the game
      */
-    public void play(long gameId) {
+    public void play(final long gameId) {
         this.connectionManager.send(new PlayMessage(this.playerId, gameId));
     }
 
@@ -224,7 +225,6 @@ public class ClientController extends MessageHandler implements Controller {
     public void connect() {
         try {
             this.connectionManager.tryConnect();
-            this.pingPongTask.addUri(SockUri.from(this.connectionManager.getSocketHandler().getSocket()));
             this.window.connected();
         } catch (final ConnectionManager.NoServerException e) {
             this.window.noConnection();

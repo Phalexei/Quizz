@@ -174,11 +174,12 @@ public final class Game {
     }
 
     /**
+     * Called when a Player selects a theme.
      *
-     * @param player
-     * @param themeIndex
+     * @param player the player
+     * @param themeIndex the selected theme index
      *
-     * @return true if the opponent no long has to wait
+     * @return true if the opponent no longer has to wait, false otherwise
      */
     public boolean playerSelectTheme(final Player player, final int themeIndex) {
         Validate.isTrue(themeIndex < 4, "Invalid themeIndex value (" + themeIndex + ")");
@@ -204,6 +205,14 @@ public final class Game {
         return false;
     }
 
+    /**
+     * Called when a Player selects an answer.
+     *
+     * @param player the player
+     * @param answerIndex the selected answer index
+     *
+     * @return true if the answer is correct, false otherwise
+     */
     public boolean playerSelectAnswer(final Player player, final int answerIndex) {
         Validate.isTrue(answerIndex < 4, "Invalid answerIndex value (" + answerIndex + ")");
         if (this.playerA == player) {
@@ -245,6 +254,11 @@ public final class Game {
         }
     }
 
+    /**
+     * Called when a Player didn't answer in time.
+     *
+     * @param player the Player
+     */
     public void playerDoesntAnswer(final Player player) {
         if (this.playerA == player) {
             this.currentQuestionA++;
@@ -260,6 +274,11 @@ public final class Game {
         }
     }
 
+    /**
+     * Called when a Player drops the game.
+     *
+     * @param player the player
+     */
     public void playerDrop(final Player player) {
         if (this.playerA == player || this.playerB == player) {
             this.currentQuestionA = this.currentQuestionB = 9;
