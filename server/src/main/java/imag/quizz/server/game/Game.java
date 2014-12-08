@@ -300,9 +300,11 @@ public final class Game {
             if (currentQuestion < 5) {
                 final String theme = this.themesA[this.chosenThemeA];
                 question = this.questionsA.get(theme)[currentQuestion - 1];
-            } else {
+            } else if (currentQuestion < 9) {
                 final String theme = this.themesB[this.chosenThemeB];
                 question = this.questionsB.get(theme)[currentQuestion - 1 - 4];
+            }  else {
+                question = null;
             }
         } else {
             final int currentQuestion = this.currentQuestionB;

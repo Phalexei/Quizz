@@ -110,18 +110,6 @@ public class GamesPanel extends Panel {
             }
         });
 
-        MouseListener mouseListener = new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int index = GamesPanel.this.gamesList.locationToIndex(e.getPoint());
-                    System.out.println("Double clicked on Item " + index);
-                    //TODO: find ID of game based on click
-                    //clientController.play();
-                }
-            }
-        };
-        this.gamesList.addMouseListener(mouseListener);
-
         this.gamesList.setCellRenderer(new GameCellRenderer());
 
         final JScrollPane scrollPane = new JScrollPane();
