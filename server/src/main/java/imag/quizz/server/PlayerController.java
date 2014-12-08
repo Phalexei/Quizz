@@ -82,7 +82,7 @@ public class PlayerController extends MessageHandler implements Controller {
                             if (correct) {
                                 this.connectionManager.send(player, new OkMessage(this.ownId, "Correct Answer", message));
                             } else {
-                                this.connectionManager.send(player, new NokMessage(this.ownId, "Incorrect Answer", message));
+                                this.connectionManager.send(player, new OkMessage(this.ownId, "Incorrect Answer", message));
                             }
                             final PlayerStatus status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
                             if (status == PlayerStatus.WAIT) {
