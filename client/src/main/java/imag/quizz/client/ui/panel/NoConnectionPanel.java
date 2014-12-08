@@ -20,7 +20,6 @@ public class NoConnectionPanel extends Panel {
         retryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.connect();
             }
         });

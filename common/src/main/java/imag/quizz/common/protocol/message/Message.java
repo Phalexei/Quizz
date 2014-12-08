@@ -34,7 +34,7 @@ public abstract class Message {
                 newMessage = new NokMessage(messageSplit);
                 break;
             case INIT:
-                newMessage = new InitMessage(messageSplit); // TODO Add Data
+                newMessage = new InitMessage(messageSplit);
                 break;
             case REGISTER:
                 newMessage = new RegisterMessage(messageSplit);
@@ -83,10 +83,6 @@ public abstract class Message {
                 break;
             default:
                 throw new UnsupportedOperationException("Missing handler for Command '" + commandString + '\'');
-        }
-
-        if (newMessage == null) {
-            throw new UnsupportedOperationException("Not implemented yet: " + commandString); // TODO
         }
 
         return newMessage;

@@ -108,7 +108,6 @@ public class ServerController extends MessageHandler implements Controller {
                     this.currentLeaderUri = uri;
                     server.setLeader(true);
                 }
-                // TODO Other things
                 break;
             case NOK:
                 break;
@@ -384,15 +383,10 @@ public class ServerController extends MessageHandler implements Controller {
             this.currentLeaderUri = null;
             Log.info("Nous sommes maintenant leader");
         }
-        // TODO Maybe other things
     }
 
     public void leaderBroadcast(final Message message) {
         this.connectionManager.leaderBroadcast(message);
-    }
-
-    public void broadcast(final Message message) {
-        this.connectionManager.broadcast(message);
     }
 
     public Player getPlayer(final long id) {

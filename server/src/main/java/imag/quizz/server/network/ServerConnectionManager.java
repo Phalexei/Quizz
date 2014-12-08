@@ -177,6 +177,5 @@ public class ServerConnectionManager extends ConnectionManager {
     @Override
     public void forgetConnection(final String uri) {
         super.forgetConnection(uri);
-        //TODO : devenir leader ? plus aucun server ? autre ?
     }
 }

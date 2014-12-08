@@ -99,7 +99,6 @@ public final class Main {
     private void initializeServerConnection() {
         this.serverController = new ServerController(this.ownId, this.config, this.questionBase);
         this.serverController.start();
-        // TODO Maybe something? Maybe not...
     }
 
     private void initializePlayerConnection() {
@@ -107,10 +106,9 @@ public final class Main {
         this.playerController = new PlayerController(this.serverController, playerPort, this.ownId);
         this.playerController.start();
         this.serverController.setPlayerConnectionManager(this.playerController.getConnectionManager());
-        // TODO Maybe something? Maybe not...
     }
 
     private void printUsage() {
-        Log.info("Usage: TODO"); // TODO
+        Log.info("Usage: -id <Id du serveur>");
     }
 }

@@ -13,8 +13,8 @@ public interface Controller {
     public void pingTimeout(final String uri);
 
     /**
-     * TODO
-     * @param uri
+     * Send a {@link imag.quizz.common.protocol.message.PingMessage} to the Peer
+     * @param uri the uri to the Peer
      */
     public void ping(final String uri);
 }

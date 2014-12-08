@@ -32,15 +32,11 @@ public final class Games {
         playerGames.add(game);
     }
 
-    public Game getById(final long gameId) {
-        return this.games.get(gameId);
-    }
-
     /**
-     * TODO Doc
+     * Get the games of the specified player
      * Note: Should never return an empty set.
-     * @param player
-     * @return
+     * @param player the player
+     * @return the player's games
      */
     public Set<Game> getByPlayer(final Player player) {
         return this.playerGames.get(player);

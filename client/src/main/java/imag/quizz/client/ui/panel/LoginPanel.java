@@ -30,14 +30,12 @@ public class LoginPanel extends Panel {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.login(username.getText(), password.getPassword());
             }
         });
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                // TODO Don't do this here. Needs to be done by the main thread!
                 clientController.register(username.getText(), password.getPassword());
             }
         });

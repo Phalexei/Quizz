@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 
 /**
  * Logging class.
- * TODO Javadocs
  *
  * @author Ribesg
  */

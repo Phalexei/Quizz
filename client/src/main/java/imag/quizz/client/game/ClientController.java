@@ -62,13 +62,13 @@ public class ClientController extends MessageHandler implements Controller {
                 this.showQuestion((QuestionMessage) message);
                 break;
             case NOANSWER:
-                this.questionTimeout((NoAnswerMessage) message);
+                this.questionTimeout();
                 break;
             case WAIT:
-                this.waitForOpponent((WaitMessage) message);
+                this.waitForOpponent();
                 break;
             case END:
-                this.gameEnded((EndMessage) message);
+                this.gameEnded();
                 break;
 
             // ack messages
@@ -111,13 +111,12 @@ public class ClientController extends MessageHandler implements Controller {
         this.connectionManager.send(new GamesMessage(this.playerId, null));
     }
 
-    private void waitForOpponent(final WaitMessage message) {
+    private void waitForOpponent() {
         this.askGames();
     }
 
-    private void questionTimeout(final NoAnswerMessage message) {
+    private void questionTimeout() {
         this.window.questionTimeout();
-        //TODO : ask for next question
     }
 
     public void answerSelected(final boolean question, final int answer) {
@@ -201,7 +200,7 @@ public class ClientController extends MessageHandler implements Controller {
         }
     }
 
-    private void gameEnded(final EndMessage message) {
+    private void gameEnded() {
         this.askGames();
     }
 

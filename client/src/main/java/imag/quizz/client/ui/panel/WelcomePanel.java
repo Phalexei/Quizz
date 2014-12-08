@@ -8,7 +8,7 @@ import java.awt.*;
 public class WelcomePanel extends Panel {
 
     public WelcomePanel() {
-        final String welcome = "Bienvenue sur Quizz Duel\n\nConnexion en cours..."; // TODO
+        final String welcome = "Bienvenue sur Quizz Duel\n\nConnexion en cours...";
         final JTextPane welcomeTextPane = CenteredTextPaneHandler.create(welcome);
         welcomeTextPane.setEditable(false);
 
