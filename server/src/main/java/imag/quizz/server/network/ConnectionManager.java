@@ -113,6 +113,13 @@ public abstract class ConnectionManager {
         this.connections.remove(uri);
     }
 
+    public void killConnection(final String uri) {
+        final SocketHandler handler = this.connections.get(uri);
+        if (handler != null) {
+            handler.kill();
+        }
+    }
+
     public long getOwnId() {
         return this.ownId;
     }

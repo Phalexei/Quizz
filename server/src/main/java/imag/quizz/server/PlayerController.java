@@ -5,6 +5,7 @@ import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
 import imag.quizz.common.protocol.message.*;
+import imag.quizz.common.tool.Log;
 import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.Game;
 import imag.quizz.server.game.Game.PlayerStatus;
@@ -50,8 +51,8 @@ public class PlayerController extends MessageHandler implements Controller {
 
     @Override
     public void pingTimeout(final String uri) {
-        this.pingPongTask.removeUri(uri);
-        // TODO Kill SocketHandler without recalling #lostConnection
+        Log.warn(uri + " ping timeout!");
+        this.connectionManager.killConnection(uri);
     }
 
     @Override
@@ -332,6 +333,7 @@ public class PlayerController extends MessageHandler implements Controller {
     public void lostConnection(final SocketHandler socketHandler) {
         final String uri = SockUri.from(socketHandler.getSocket());
         final Player player = (Player) this.connectionManager.getLinkedPeer(uri);
+        this.pingPongTask.removeUri(uri);
         this.serverController.leaderBroadcast(new LogoutMessage(this.ownId, player.getLogin()));
         this.connectionManager.forgetConnection(uri);
     }

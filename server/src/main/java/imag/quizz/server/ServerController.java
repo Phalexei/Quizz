@@ -54,8 +54,8 @@ public class ServerController extends MessageHandler implements Controller {
         this.initialized = false;
 
         this.pingPongTask = new PingPongTask(this, 3_000);
-        this.pingPongTask.start();
         this.connectionManager = new ServerConnectionManager(this, ownId);
+        this.pingPongTask.start();
     }
 
     public void setPlayerConnectionManager(final PlayerConnectionManager playerConnectionManager) {
@@ -64,7 +64,8 @@ public class ServerController extends MessageHandler implements Controller {
 
     @Override
     public void pingTimeout(final String uri) {
-        Log.warn("Ping timeout!"); // TODO
+        Log.warn(uri + " ping timeout!");
+        this.connectionManager.killConnection(uri);
     }
 
     @Override
@@ -80,6 +81,7 @@ public class ServerController extends MessageHandler implements Controller {
 
         if (server == null) { //server unknown for now, get his ID and register him to the connection manager
             server = new Server(message.getSourceId(), uri);
+            this.servers.put(server.getId(), server);
             this.connectionManager.learnConnectionPeerIdentity(server, socketHandler);
         }
 
@@ -104,6 +106,7 @@ public class ServerController extends MessageHandler implements Controller {
                     this.isLeader = false;
                     this.currentLeaderId = message.getSourceId();
                     this.currentLeaderUri = uri;
+                    server.setLeader(true);
                 }
                 // TODO Other things
                 break;
@@ -114,12 +117,12 @@ public class ServerController extends MessageHandler implements Controller {
                     Log.warn("Reçu un message INIT du serveur " + message.getSourceId() + " alors qu'on est déjà initializé");
                     this.connectionManager.send(uri, new NokMessage(this.ownId, message));
                 } else {
-                    Log.info("Reçu un message INIT du leader actual avec l'ID " + message.getSourceId());
+                    Log.info("Reçu un message INIT du leader actuel avec l'ID " + message.getSourceId());
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
                     this.connectionManager.broadcast(new OkMessage(this.ownId, message));
                     if (message.getSourceId() > this.getOwnId()) {
-                        Log.info("Nous somme maintenant leader");
+                        Log.info("Nous sommes maintenant leader");
                     }
                 }
                 break;
@@ -353,8 +356,30 @@ public class ServerController extends MessageHandler implements Controller {
 
     @Override
     public void lostConnection(final SocketHandler socketHandler) {
-        this.connectionManager.forgetConnection(SockUri.from(socketHandler.getSocket()));
-        // TODO Update leader eventually
+        final String uri = SockUri.from(socketHandler.getSocket());
+        this.pingPongTask.removeUri(uri);
+        this.connectionManager.forgetConnection(uri);
+        boolean newLeaderIsSomebodyElse = false;
+        for (final Map.Entry<Long, Server> e : this.servers.entrySet()) {
+            final long id = e.getKey();
+            final Server server = e.getValue();
+            if (uri.equals(server.getUri())) {
+                server.setUri(null);
+                server.setLeader(false);
+                Log.info("Connexion au server " + server.getId() + " perdue");
+            } else if (server.getUri() != null) {
+                server.setLeader(true);
+                newLeaderIsSomebodyElse = true;
+                Log.info("Le serveur " + id + " est maintenant leader");
+                break;
+            }
+        }
+        if (!newLeaderIsSomebodyElse) {
+            this.isLeader = true;
+            this.currentLeaderId = this.ownId;
+            this.currentLeaderUri = null;
+            Log.info("Nous sommes maintenant leader");
+        }
         // TODO Maybe other things
     }
 
@@ -397,6 +422,10 @@ public class ServerController extends MessageHandler implements Controller {
 
     public Map<String, Player> getPlayers() {
         return this.players;
+    }
+
+    public SortedMap<Long, Server> getServers() {
+        return this.servers;
     }
 
     public Games getGames() {

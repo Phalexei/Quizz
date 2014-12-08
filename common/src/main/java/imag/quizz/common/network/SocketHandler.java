@@ -54,13 +54,15 @@ public class SocketHandler {
         this.socketSender.askStop();
 
         try {
-            this.socketReceiver.join();
+            this.socketReceiver.join(1_000);
+            this.socketReceiver.interrupt();
         } catch (final InterruptedException e) {
             Log.warn("SocketHandler interrupted!", e);
         }
 
         try {
-            this.socketSender.join();
+            this.socketSender.join(1_000);
+            this.socketSender.interrupt();
         } catch (final InterruptedException e) {
             Log.warn("SocketHandler interrupted!", e);
         }

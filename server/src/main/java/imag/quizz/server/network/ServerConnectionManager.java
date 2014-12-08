@@ -90,18 +90,26 @@ public class ServerConnectionManager extends ConnectionManager {
                         Log.debug("Failed to connect to server " + id + ", ignoring");
                         Log.trace("Error was:", e);
                     }
+                    if (!ServerConnectionManager.this.controller.getServers().containsKey(id)) {
+                        ServerConnectionManager.this.controller.getServers().put(id, new Server(id, null));
+                    }
                     return null;
                 }
             }));
         }
-        String result = null;
+        String uri = null;
         final Iterator<Future<Pair<Long, String>>> it = futures.iterator();
         while (it.hasNext()) {
             final Future<Pair<Long, String>> future = it.next();
             try {
                 final Pair<Long, String> res = future.get();
                 if (res != null) {
-                    this.controller.setCurrentLeaderId(res.getA());
+                    final long id = res.getA();
+                    uri = res.getB();
+                    final Server server = (Server) this.connectedPeers.get(uri);
+                    this.controller.getServers().put(server.getId(), server);
+                    this.controller.setCurrentLeaderId(id);
+                    this.controller.getServers().get(id).setLeader(true);
                     this.executor.submit(new Runnable() {
                         @Override
                         public void run() {
@@ -113,7 +121,6 @@ public class ServerConnectionManager extends ConnectionManager {
                             }
                         }
                     });
-                    result = res.getB();
                     break;
                 }
             } catch (final InterruptedException | ExecutionException e) {
@@ -125,7 +132,7 @@ public class ServerConnectionManager extends ConnectionManager {
         this.executor.shutdown();
         this.executor = null;
 
-        return result;
+        return uri;
     }
 
     @Override
