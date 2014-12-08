@@ -303,7 +303,7 @@ public final class Game {
             } else if (currentQuestion < 9) {
                 final String theme = this.themesB[this.chosenThemeB];
                 question = this.questionsB.get(theme)[currentQuestion - 1 - 4];
-            }  else {
+            } else {
                 question = null;
             }
         } else {
@@ -375,12 +375,16 @@ public final class Game {
         for (final String theme : themes) {
             builder.append(theme).append(separators[2]);
             final Question[] themeQuestions = questions.get(theme);
-            for (final Question question : themeQuestions) {
+            for (int i = 0; i < themeQuestions.length; i++) {
+                final Question question = themeQuestions[i];
                 builder.append(question.getQuestion()).append(separators[2]);
                 for (final String answer : question.getAnswers()) {
                     builder.append(answer).append(separators[2]);
                 }
                 builder.append(question.getCorrectAnswerIndex());
+                if (i != themeQuestions.length - 1) {
+                    builder.append(separators[2]);
+                }
             }
             builder.append(separators[1]);
         }

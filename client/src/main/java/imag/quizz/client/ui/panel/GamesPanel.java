@@ -4,13 +4,14 @@ import imag.quizz.client.game.ClientController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GamesPanel extends Panel {
 
-    private class Game {
+    private final class Game {
         private final long    id;
         private final String  opponent;
         private final boolean wait;
@@ -19,7 +20,7 @@ public class GamesPanel extends Panel {
         private final int     oppScore;
         private final int     oppCurrentQuestion;
 
-        private Game(long id, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {
+        private Game(final long id, final boolean wait, final int myScore, final int myCurrentQuestion, final String opponent, final int oppScore, final int oppCurrentQuestion) {
             this.id = id;
             this.opponent = opponent;
             this.wait = wait;
@@ -35,25 +36,25 @@ public class GamesPanel extends Panel {
 
         @Override
         public String toString() {
-            StringBuilder s = new StringBuilder();
+            final StringBuilder s = new StringBuilder();
 
-            s.append("Partie contre : ").append(this.opponent).append(".\n");
+            s.append("Partie contre : ").append(this.opponent).append(".\t");
 
             if (this.myCurrentQuestion == 9) { // we're done with questions
                 if (this.oppCurrentQuestion == 9) { // opponent is done too, Game is over
-                    s.append("Terminée.\n");
+                    s.append("Terminée.\t");
                 } else {
-                    s.append("En attente du thème de l'adversaire.\n");
+                    s.append("En attente du thème de l'adversaire.\t");
                 }
             } else { // we still may have questions to answer
                 if (!this.wait) {
-                    s.append("Nouvelles questions !\n");
+                    s.append("Nouvelles questions !\t");
                 } else {
-                    s.append("En attente de l'adversaire.\n");
+                    s.append("En attente de l'adversaire.\t");
                 }
             }
 
-            s.append("Score\n").append("Vous ").append(this.myScore).append(" : ").append(this.oppScore).append(" ").append(this.opponent);
+            s.append("Score\t").append("Vous ").append(this.myScore).append(" : ").append(this.oppScore).append(" ").append(this.opponent);
 
             return s.toString();
         }
@@ -64,19 +65,19 @@ public class GamesPanel extends Panel {
     }
 
     private class GameCellRenderer extends JLabel implements ListCellRenderer<Object> {
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            String s = value.toString();
-            setText(s);
+        public Component getListCellRendererComponent(final JList<?> list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
+            final String s = value.toString();
+            this.setText(s);
             if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
+                this.setBackground(list.getSelectionBackground());
+                this.setForeground(list.getSelectionForeground());
             } else {
-                setBackground(list.getBackground());
-                setForeground(list.getForeground());
+                this.setBackground(list.getBackground());
+                this.setForeground(list.getForeground());
             }
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            setOpaque(true);
+            this.setEnabled(list.isEnabled());
+            this.setFont(list.getFont());
+            this.setOpaque(true);
             return this;
         }
     }
@@ -99,17 +100,17 @@ public class GamesPanel extends Panel {
 
         newGameButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 clientController.newGame();
             }
         });
 
         playButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 final int index = GamesPanel.this.gamesList.getSelectedIndex();
                 if (index != -1) { // something is selected
-                    Game game = GamesPanel.this.listModel.get(index);
+                    final Game game = GamesPanel.this.listModel.get(index);
                     if (game.readyToPlay()) {
                         clientController.play(game.getId());
                     }
@@ -133,11 +134,11 @@ public class GamesPanel extends Panel {
     }
 
     @Override
-    public void showError(String error) {
+    public void showError(final String error) {
         //nothing
     }
 
-    public void addGame(long gameId, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {
+    public void addGame(final long gameId, final boolean wait, final int myScore, final int myCurrentQuestion, final String opponent, final int oppScore, final int oppCurrentQuestion) {
         this.gameIDs.put(gameId, this.listCounter);
         this.listModel.add(this.listCounter++, new Game(gameId, wait, myScore, myCurrentQuestion, opponent, oppScore, oppCurrentQuestion));
     }
@@ -148,8 +149,8 @@ public class GamesPanel extends Panel {
         this.gameIDs.clear();
     }
 
-    public void updateGame(long gameId, boolean wait, int myScore, int myCurrentQuestion, String opponent, int oppScore, int oppCurrentQuestion) {
-        Integer index = this.gameIDs.get(gameId);
+    public void updateGame(final long gameId, final boolean wait, final int myScore, final int myCurrentQuestion, final String opponent, final int oppScore, final int oppCurrentQuestion) {
+        final Integer index = this.gameIDs.get(gameId);
         if (index != null) {
             this.listModel.remove(index);
             this.listModel.add(index, new Game(gameId, wait, myScore, myCurrentQuestion, opponent, oppScore, oppCurrentQuestion));
