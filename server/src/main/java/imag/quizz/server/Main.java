@@ -106,6 +106,7 @@ public final class Main {
         final int playerPort = this.config.getServers().get(this.ownId).getPlayerPort();
         this.playerController = new PlayerController(this.serverController, playerPort, this.ownId);
         this.playerController.start();
+        this.serverController.setPlayerConnectionManager(this.playerController.getConnectionManager());
         // TODO Maybe something? Maybe not...
     }
 

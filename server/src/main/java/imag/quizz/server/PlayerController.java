@@ -4,7 +4,6 @@ import imag.quizz.common.Controller;
 import imag.quizz.common.network.MessageHandler;
 import imag.quizz.common.network.SocketHandler;
 import imag.quizz.common.protocol.PingPongTask;
-import imag.quizz.common.protocol.Separator;
 import imag.quizz.common.protocol.message.*;
 import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.Game;
@@ -15,9 +14,7 @@ import imag.quizz.server.network.PlayerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.Set;
 
 public class PlayerController extends MessageHandler implements Controller {
 
@@ -45,6 +42,10 @@ public class PlayerController extends MessageHandler implements Controller {
 
         this.pingPongTask = new PingPongTask(this, 3_000);
         this.pingPongTask.start();
+    }
+
+    public PlayerConnectionManager getConnectionManager() {
+        return this.connectionManager;
     }
 
     @Override
@@ -75,14 +76,14 @@ public class PlayerController extends MessageHandler implements Controller {
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.ANSWER_QUESTION || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.ANSWER_QUESTION) {
-                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have a question to answer", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Le joueur n'a aucune question en attente", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             final boolean correct = game.playerSelectAnswer(player, answerMessage.getChosenAnswer());
                             if (correct) {
-                                this.connectionManager.send(player, new OkMessage(this.ownId, "Correct Answer", message));
+                                this.connectionManager.send(player, new OkMessage(this.ownId, "Réponse correcte", message));
                             } else {
-                                this.connectionManager.send(player, new OkMessage(this.ownId, "Incorrect Answer", message));
+                                this.connectionManager.send(player, new OkMessage(this.ownId, "Réponse incorrecte", message));
                             }
                             final PlayerStatus status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
                             if (status == PlayerStatus.WAIT) {
@@ -95,9 +96,9 @@ public class PlayerController extends MessageHandler implements Controller {
                                         this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                                     }
                                 } else if ((isPlayerA ? game.getCurrentQuestionB() : game.getCurrentQuestionA()) == 0) {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to select a theme"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire choisisse un thème"));
                                 } else {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to finish answering questions"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire finisse de répondre"));
                                 }
                             } else {
                                 final Question question = game.getCurrentQuestion(player);
@@ -123,7 +124,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.serverController.leaderBroadcast(message);
                     break;
                 case GAMES:
-                    this.connectionManager.send(player, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                    this.connectionManager.send(player, new GamesMessage(this.ownId, this.serverController.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                     break;
                 case LOGIN:
                     this.login(uri, socketHandler, message);
@@ -139,7 +140,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     if (opponentLogin == null) {
                         if (this.serverController.getPlayers().size() == 1) {
                             // No opponent available
-                            this.connectionManager.send(player, new NokMessage(this.ownId, "No opponent available", message));
+                            this.connectionManager.send(player, new NokMessage(this.ownId, "Aucun adversaire trouvé", message));
                         } else {
                             final ArrayList<Player> potentialOpponents = new ArrayList<>(this.serverController.getPlayers().values());
                             potentialOpponents.remove(player);
@@ -149,7 +150,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     } else {
                         final Player opponent = this.serverController.getPlayers().get(opponentLogin);
                         if (opponent == null) {
-                            this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown opponent", message));
+                            this.connectionManager.send(player, new NokMessage(this.ownId, "Adversaire inconnu", message));
                         } else {
                             this.newGame(player, opponent);
                         }
@@ -159,11 +160,11 @@ public class PlayerController extends MessageHandler implements Controller {
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.ANSWER_QUESTION || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.ANSWER_QUESTION) {
-                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have a question to noanswer", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Le joueur n'a aucune question en attente", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             game.playerDoesntAnswer(player);
-                            this.connectionManager.send(player, new NokMessage(this.ownId, "Incorrect Answer", message));
+                            this.connectionManager.send(player, new NokMessage(this.ownId, "Réponse incorrecte", message));
                             final PlayerStatus status = isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus();
                             if (status == PlayerStatus.WAIT) {
                                 if (game.getCurrentQuestionA() == 9 && game.getCurrentQuestionB() == 9) {
@@ -175,9 +176,9 @@ public class PlayerController extends MessageHandler implements Controller {
                                         this.connectionManager.send(opponent, new EndMessage(this.ownId, opponentScore, playerScore));
                                     }
                                 } else if ((isPlayerA ? game.getCurrentQuestionB() : game.getCurrentQuestionA()) == 0) {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to select a theme"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire choisisse un thème"));
                                 } else {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to finish answering questions"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire finisse de répondre"));
                                 }
                             } else {
                                 final Question question = game.getCurrentQuestion(player);
@@ -194,9 +195,9 @@ public class PlayerController extends MessageHandler implements Controller {
                     final PlayMessage playMessage = (PlayMessage) message;
                     game = this.serverController.getGames().getGames().get(playMessage.getGameId());
                     if (game == null) {
-                        this.connectionManager.send(player, new NokMessage(this.ownId, "Unknown Game", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Partie inconnue", message));
                     } else if (game.getPlayerA() != player && game.getPlayerB() != player) {
-                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player not part of this Game", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Le joueur ne participe pas à cette partie", message));
                     } else {
                         player.setCurrentGameId(game.getId());
                         final PlayerStatus status;
@@ -216,9 +217,9 @@ public class PlayerController extends MessageHandler implements Controller {
                                 break;
                             case WAIT:
                                 if ((isPlayerA ? game.getCurrentQuestionB() : game.getCurrentQuestionA()) == 0) {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to select a theme"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire choisisse un thème"));
                                 } else {
-                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Wait for the opponent to finish answering questions"));
+                                    this.connectionManager.send(player, new WaitMessage(this.ownId, "Attendez que l'adversaire finisse de répondre"));
                                 }
                                 break;
                         }
@@ -236,7 +237,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     game = this.serverController.getGames().getGames().get(player.getCurrentGameId());
                     isPlayerA = game.getPlayerA() == player;
                     if (isPlayerA && game.getPlayerAStatus() != PlayerStatus.SELECT_THEME || !isPlayerA && game.getPlayerBStatus() != PlayerStatus.SELECT_THEME) {
-                        this.connectionManager.send(player, new NokMessage(this.ownId, "Player doesn't have to choose a theme", message));
+                        this.connectionManager.send(player, new NokMessage(this.ownId, "Le joueur n'a pas à choisir de thème", message));
                     } else {
                         if (this.serverController.isLeader()) {
                             final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
@@ -252,7 +253,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     }
                     break;
                 default:
-                    this.connectionManager.send(player, new NokMessage(this.ownId, "Unexpected message", message));
+                    this.connectionManager.send(player, new NokMessage(this.ownId, "Message inattendu", message));
                     break;
             }
         } else {
@@ -265,53 +266,10 @@ public class PlayerController extends MessageHandler implements Controller {
                     this.register(uri, socketHandler, message);
                     break;
                 default:
-                    this.connectionManager.send(uri, new NokMessage(this.ownId, "Unexpected message", message));
+                    this.connectionManager.send(uri, new NokMessage(this.ownId, "Message inattendu", message));
                     break;
             }
         }
-    }
-
-    /**
-     * Builds a data String representing Games of a Player.
-     *
-     * Each game is represented by:
-     * - Opponent login
-     * - Player has to wait for opponent (true/false)
-     * - Player own score
-     * - Player current question
-     * - Opponent own score
-     * - Opponent current question
-     *
-     * @param player the player
-     * @param games the player's games
-     *
-     * @return a String representation of this player's games dedicated to
-     * this player
-     */
-    public String buildGamesData(final Player player, final Set<Game> games) {
-        if (games == null) {
-            return null;
-        }
-
-        final StringBuilder builder = new StringBuilder();
-
-        final Iterator<Game> it = games.iterator();
-        while (it.hasNext()) {
-            final Game game = it.next();
-            final boolean isPlayerA = game.getPlayerA() == player;
-            builder.append(game.getId()).append(Separator.LEVEL_2);
-            builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
-            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == PlayerStatus.WAIT).append(Separator.LEVEL_2);
-            builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
-            builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
-            builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
-            builder.append(!isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
-            if (it.hasNext()) {
-                builder.append(Separator.LEVEL_1);
-            }
-        }
-
-        return builder.toString();
     }
 
     private void login(final String uri, final SocketHandler socketHandler, final Message message) {
@@ -319,18 +277,18 @@ public class PlayerController extends MessageHandler implements Controller {
         final String loginMessageLogin = loginMessage.getLogin();
         final String hashedPassword = loginMessage.getHashedPassword();
         if (!this.serverController.getPlayers().containsKey(loginMessageLogin)) {
-            this.connectionManager.send(uri, new NokMessage(this.ownId, "Unknown login", message));
+            this.connectionManager.send(uri, new NokMessage(this.ownId, "Login inconnu", message));
         } else {
             final Player player = this.serverController.getPlayers().get(loginMessageLogin);
             if (player.getPasswordHash().equals(hashedPassword)) {
                 player.setLoggedIn(true);
                 this.connectionManager.learnConnectionPeerIdentity(player, socketHandler);
                 message.setSourceId(player.getId());
-                this.connectionManager.send(uri, new OkMessage(this.ownId, "Login successful", message));
-                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
+                this.connectionManager.send(uri, new OkMessage(this.ownId, "Connexion réussie", message));
+                this.connectionManager.send(uri, new GamesMessage(this.ownId, this.serverController.buildGamesData(player, this.serverController.getGames().getByPlayer(player))));
                 this.serverController.leaderBroadcast(message);
             } else {
-                this.connectionManager.send(uri, new NokMessage(this.ownId, "Invalid password", message));
+                this.connectionManager.send(uri, new NokMessage(this.ownId, "Mot de passe incorrect", message));
             }
         }
     }
@@ -339,7 +297,7 @@ public class PlayerController extends MessageHandler implements Controller {
         final RegisterMessage registerMessage = (RegisterMessage) message;
         final String registerMessageLogin = registerMessage.getLogin();
         if (this.serverController.getPlayers().containsKey(registerMessageLogin)) {
-            this.connectionManager.send(uri, new NokMessage(this.ownId, "Login already taken", message));
+            this.connectionManager.send(uri, new NokMessage(this.ownId, "Login déjà pris", message));
         } else {
             if (this.serverController.isLeader()) {
                 final long id = IdGenerator.nextPlayer();
@@ -358,7 +316,8 @@ public class PlayerController extends MessageHandler implements Controller {
         player.setCurrentGameId(game.getId());
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
         if (opponent.getUri() != null) {
-            this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesB()));
+            final String gameData = this.serverController.buildGamesData(opponent, this.serverController.getGames().getByPlayer(opponent));
+            this.connectionManager.send(opponent, new GamesMessage(this.ownId, gameData));
         }
         this.serverController.leaderBroadcast(new GameMessage(this.ownId, game.toMessageData()));
     }

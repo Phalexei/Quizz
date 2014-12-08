@@ -12,6 +12,7 @@ import imag.quizz.common.tool.SockUri;
 import imag.quizz.server.game.*;
 import imag.quizz.server.game.Game.PlayerStatus;
 import imag.quizz.server.game.QuestionBase.Question;
+import imag.quizz.server.network.PlayerConnectionManager;
 import imag.quizz.server.network.ServerConnectionManager;
 import imag.quizz.server.tool.IdGenerator;
 import org.apache.commons.lang3.Validate;
@@ -21,6 +22,7 @@ import java.util.*;
 public class ServerController extends MessageHandler implements Controller {
 
     private final ServerConnectionManager connectionManager;
+    private       PlayerConnectionManager playerConnectionManager;
 
     private final long   ownId;
     private final Config config;
@@ -54,6 +56,10 @@ public class ServerController extends MessageHandler implements Controller {
         this.pingPongTask = new PingPongTask(this, 3_000);
         this.pingPongTask.start();
         this.connectionManager = new ServerConnectionManager(this, ownId);
+    }
+
+    public void setPlayerConnectionManager(final PlayerConnectionManager playerConnectionManager) {
+        this.playerConnectionManager = playerConnectionManager;
     }
 
     @Override
@@ -93,8 +99,8 @@ public class ServerController extends MessageHandler implements Controller {
             case OK:
                 // Handle Leader switch
                 if (message.getSourceId() < this.currentLeaderId) {
-                    Log.info((this.currentLeaderId == this.ownId ? "We were leader" : "Leader was server " + this.currentLeaderId)
-                                     + ", the leader is now server " + message.getSourceId());
+                    Log.info((this.currentLeaderId == this.ownId ? "Ce serveur était leader" : "Le leader était le serveur " + this.currentLeaderId)
+                                     + ", le leader est maintenant le serveur " + message.getSourceId());
                     this.isLeader = false;
                     this.currentLeaderId = message.getSourceId();
                     this.currentLeaderUri = uri;
@@ -105,15 +111,15 @@ public class ServerController extends MessageHandler implements Controller {
                 break;
             case INIT:
                 if (this.initialized) {
-                    Log.warn("Received INIT message from server " + message.getSourceId() + " while already being initialized");
+                    Log.warn("Reçu un message INIT du serveur " + message.getSourceId() + " alors qu'on est déjà initializé");
                     this.connectionManager.send(uri, new NokMessage(this.ownId, message));
                 } else {
-                    Log.info("Received INIT from current leader with ID " + message.getSourceId());
+                    Log.info("Reçu un message INIT du leader actual avec l'ID " + message.getSourceId());
                     this.loadInitData(((InitMessage) message).getData());
                     this.initialized = true;
                     this.connectionManager.broadcast(new OkMessage(this.ownId, message));
                     if (message.getSourceId() > this.getOwnId()) {
-                        Log.info("We are now leader");
+                        Log.info("Nous somme maintenant leader");
                     }
                 }
                 break;
@@ -170,8 +176,8 @@ public class ServerController extends MessageHandler implements Controller {
                 final boolean opponentUnlocked = game.playerSelectTheme(player, themeMessage.getChosenTheme());
                 opponent = game.getOpponent(player);
                 if (opponentUnlocked && opponent.getUri() != null) {
-                    final Question question = game.getCurrentQuestion(opponent);
-                    this.connectionManager.send(opponent, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
+                    final String gamesData = this.buildGamesData(opponent, this.getGames().getByPlayer(opponent));
+                    this.playerConnectionManager.send(opponent, new GamesMessage(this.ownId, gamesData));
                 }
                 final Question question = game.getCurrentQuestion(player);
                 this.connectionManager.send(player, new QuestionMessage(this.ownId, question.getQuestion(), question.getAnswers()));
@@ -236,7 +242,7 @@ public class ServerController extends MessageHandler implements Controller {
                 }
                 break;
             default:
-                this.connectionManager.send(uri, new NokMessage(this.ownId, "Unexpected message", message));
+                this.connectionManager.send(uri, new NokMessage(this.ownId, "Message inattendu", message));
                 break;
         }
     }
@@ -270,6 +276,49 @@ public class ServerController extends MessageHandler implements Controller {
         } else {
             builder.append("null");
         }
+        return builder.toString();
+    }
+
+    /**
+     * Builds a data String representing Games of a Player.
+     *
+     * Each game is represented by:
+     * - Opponent login
+     * - Player has to wait for opponent (true/false)
+     * - Player own score
+     * - Player current question
+     * - Opponent own score
+     * - Opponent current question
+     *
+     * @param player the player
+     * @param games the player's games
+     *
+     * @return a String representation of this player's games dedicated to
+     * this player
+     */
+    public String buildGamesData(final Player player, final Set<Game> games) {
+        if (games == null) {
+            return null;
+        }
+
+        final StringBuilder builder = new StringBuilder();
+
+        final Iterator<Game> it = games.iterator();
+        while (it.hasNext()) {
+            final Game game = it.next();
+            final boolean isPlayerA = game.getPlayerA() == player;
+            builder.append(game.getId()).append(Separator.LEVEL_2);
+            builder.append(game.getOpponent(player).getLogin()).append(Separator.LEVEL_2);
+            builder.append((isPlayerA ? game.getPlayerAStatus() : game.getPlayerBStatus()) == PlayerStatus.WAIT).append(Separator.LEVEL_2);
+            builder.append(isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+            builder.append(isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+            builder.append(!isPlayerA ? game.getPlayerAScore() : game.getPlayerBScore()).append(Separator.LEVEL_2);
+            builder.append(!isPlayerA ? game.getCurrentQuestionA() : game.getCurrentQuestionB()).append(Separator.LEVEL_2);
+            if (it.hasNext()) {
+                builder.append(Separator.LEVEL_1);
+            }
+        }
+
         return builder.toString();
     }
 
