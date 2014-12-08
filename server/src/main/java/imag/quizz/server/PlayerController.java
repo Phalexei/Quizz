@@ -198,6 +198,7 @@ public class PlayerController extends MessageHandler implements Controller {
                     } else if (game.getPlayerA() != player && game.getPlayerB() != player) {
                         this.connectionManager.send(player, new NokMessage(this.ownId, "Player not part of this Game", message));
                     } else {
+                        player.setCurrentGameId(game.getId());
                         final PlayerStatus status;
                         isPlayerA = game.getPlayerA() == player;
                         if (isPlayerA) {
@@ -221,7 +222,6 @@ public class PlayerController extends MessageHandler implements Controller {
                                 }
                                 break;
                         }
-                        player.setCurrentGameId(game.getId());
                         this.serverController.leaderBroadcast(message);
                     }
                     break;
@@ -355,6 +355,7 @@ public class PlayerController extends MessageHandler implements Controller {
 
     private void newGame(final Player player, final Player opponent) {
         final Game game = this.serverController.getGames().newGame(player, opponent);
+        player.setCurrentGameId(game.getId());
         this.connectionManager.send(player, new ThemesMessage(this.ownId, game.getId(), game.getThemesA()));
         if (opponent.getUri() != null) {
             this.connectionManager.send(opponent, new ThemesMessage(this.ownId, game.getId(), game.getThemesB()));
